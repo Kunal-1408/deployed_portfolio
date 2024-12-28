@@ -81,10 +81,31 @@ export default function BrandDashboard() {
     highlighted: false,
     tags: []
   })
+  const fetchBrands = async () => {
+    try {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&search=${encodeURIComponent(searchQuery)}&type=brands`, {
+        method: 'GET',
+      })
+      const data = await response.json()
+      
+      if (Array.isArray(data.items)) {
+        setBrands(data.items)
+        setFilteredBrands(data.items)
+        setTotal(data.total)
+        setHighlightedCount(data.highlightedCount)
+      } else {
+        console.error('Unexpected data structure:', data)
+        addNotification("Unexpected data structure received", "error")
+      }
+    } catch (error) {
+      console.error('Error fetching brands:', error)
+      addNotification("Failed to fetch brands", "error")
+    }
+  }
 
   useEffect(() => {
     fetchBrands()
-  }, [currentPage, searchQuery])
+  }, [currentPage, searchQuery,fetchBrands])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -139,27 +160,7 @@ export default function BrandDashboard() {
     }
   }
 
-  const fetchBrands = async () => {
-    try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&search=${encodeURIComponent(searchQuery)}&type=brands`, {
-        method: 'GET',
-      })
-      const data = await response.json()
-      
-      if (Array.isArray(data.items)) {
-        setBrands(data.items)
-        setFilteredBrands(data.items)
-        setTotal(data.total)
-        setHighlightedCount(data.highlightedCount)
-      } else {
-        console.error('Unexpected data structure:', data)
-        addNotification("Unexpected data structure received", "error")
-      }
-    } catch (error) {
-      console.error('Error fetching brands:', error)
-      addNotification("Failed to fetch brands", "error")
-    }
-  }
+
 
   const totalPages = Math.ceil(total / brandsPerPage)
 

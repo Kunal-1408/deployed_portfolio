@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import {Menu,  useNavbarBackground, activeLogo, Item } from "./ui/navbar-menu"
+import {Menu,  useNavbarBackground, ActiveLogo, Item } from "./ui/navbar-menu"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import Image from "next/image"
@@ -21,7 +21,7 @@ export const Navbarimpli: React.FC = () => {
 function Navbar({ className, isLandingPage, pathname }: { className?: string; isLandingPage: boolean; pathname: string }) {
   const [active, setActive] = useState<string | null>(null)
   const isSolid = useNavbarBackground()
-  const isSecond = activeLogo()
+  const isSecond = ActiveLogo()
 
   const navbarClass = cn(
     "fixed top-0 w-full mx-auto z-50 transition-colors duration-300 flex items-center justify-between px-6",

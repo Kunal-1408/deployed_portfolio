@@ -77,9 +77,30 @@ export default function DesignDashboard() {
     tags: []
   })
 
+  const fetchDesigns = async () => {
+    try {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&search=${encodeURIComponent(searchQuery)}&type=designs`, {
+        method: 'GET',
+      })
+      const data = await response.json()
+      
+      if (Array.isArray(data.items)) {
+        setDesigns(data.items)
+        setFilteredDesigns(data.items)
+        setTotal(data.total)
+        setHighlightedCount(data.highlightedCount)
+      } else {
+        console.error('Unexpected data structure:', data)
+        addNotification("Unexpected data structure received", "error")
+      }
+    } catch (error) {
+      console.error('Error fetching designs:', error)
+      addNotification("Failed to fetch designs", "error")
+    }
+  }
   useEffect(() => {
     fetchDesigns()
-  }, [currentPage, searchQuery])
+  }, [currentPage, searchQuery,fetchDesigns])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -134,27 +155,7 @@ export default function DesignDashboard() {
     }
   }
 
-  const fetchDesigns = async () => {
-    try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&search=${encodeURIComponent(searchQuery)}&type=designs`, {
-        method: 'GET',
-      })
-      const data = await response.json()
-      
-      if (Array.isArray(data.items)) {
-        setDesigns(data.items)
-        setFilteredDesigns(data.items)
-        setTotal(data.total)
-        setHighlightedCount(data.highlightedCount)
-      } else {
-        console.error('Unexpected data structure:', data)
-        addNotification("Unexpected data structure received", "error")
-      }
-    } catch (error) {
-      console.error('Error fetching designs:', error)
-      addNotification("Failed to fetch designs", "error")
-    }
-  }
+
 
   const totalPages = Math.ceil(total / designsPerPage)
 

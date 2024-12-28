@@ -41,7 +41,7 @@ export default function Queries() {
 
   useEffect(() => {
     fetchQueries()
-  }, [currentPage, searchQuery])
+  }, [currentPage, searchQuery,fetchQueries])
 
   const handleDelete = async (id: string) => {
     try {

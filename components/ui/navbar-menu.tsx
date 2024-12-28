@@ -36,7 +36,7 @@ export const useNavbarBackground = () => {
 
   return isSolid;
 };
-export const activeLogo = ()=>{
+export const ActiveLogo = ()=>{
   const [isSecond, setSecond]= useState(false);
 
   useEffect(()=>{

@@ -181,7 +181,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchWebsites()
-  }, [currentPage, searchQuery])
+  }, [currentPage, searchQuery,fetchWebsites])
 
   const totalPages = Math.ceil(total / websitesPerPage)
 
