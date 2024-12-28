@@ -105,7 +105,7 @@ export default function BrandDashboard() {
 
   useEffect(() => {
     fetchBrands()
-  }, [currentPage, searchQuery,fetchBrands])
+  }, [currentPage, searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

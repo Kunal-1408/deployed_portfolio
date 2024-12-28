@@ -100,7 +100,7 @@ export default function DesignDashboard() {
   }
   useEffect(() => {
     fetchDesigns()
-  }, [currentPage, searchQuery,fetchDesigns])
+  }, [currentPage, searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
