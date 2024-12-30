@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PlusCircle, Minus } from 'lucide-react'
@@ -398,6 +398,7 @@ export default function ContentManager() {
   }
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Content Manager</h1>
       <form onSubmit={handleSubmit}>
@@ -666,5 +667,7 @@ export default function ContentManager() {
         </button>
       </form>
     </div>
+    </Suspense>
   )
 }
+

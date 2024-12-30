@@ -137,14 +137,14 @@ model Websites {
   id                  String   @id @default(auto()) @map("_id") @db.ObjectId
   Backup_Date         String?  @map("Backup Date")
   Content_Update_Date String?  @map("Content Update Date")
-  Description         String
-  Images              String
+  Description         String?
+  Images              String?
   Status              String?
   Tags                String[]
-  Title               String
+  Title               String?
   URL                 String?
-  archive             Boolean
-  highlighted         Boolean
+  archive             Boolean?
+  highlighted         Boolean?
 }
 
 model clients {
