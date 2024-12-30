@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState, useCallback, useEffect } from "react"
+import React, { useState, useEffect, Suspense } from "react"
+import { useSearchParams } from 'next/navigation'
 import { MoreHorizontal, Search, Trash2 } from 'lucide-react'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,17 +19,39 @@ type Query = {
   Query: string
 }
 
-export default function QueriesContent() {
+function SearchSection() {
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    // You might want to update the URL here using router.push
+  }
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        placeholder="Search queries..."
+        className="w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        value={searchQuery}
+        onChange={handleSearch}
+      />
+      <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+    </div>
+  )
+}
+
+export default function QueriesClient() {
   const [queries, setQueries] = useState<Query[]>([])
   const [selectedQuery, setSelectedQuery] = useState<Query | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalQueries, setTotalQueries] = useState(0)
   const queriesPerPage = 10
 
-  const fetchQueries = useCallback(async () => {
+  const fetchQueries = async () => {
     try {
-      const response = await fetch(`/api/fetchquery?page=${currentPage}&limit=${queriesPerPage}&search=${searchQuery}`)
+      const response = await fetch(`/api/fetchquery?page=${currentPage}&limit=${queriesPerPage}`)
       if (!response.ok) throw new Error('Failed to fetch queries')
       const data = await response.json()
       setQueries(data.queries)
@@ -37,11 +59,11 @@ export default function QueriesContent() {
     } catch (error) {
       console.error('Error fetching queries:', error)
     }
-  }, [currentPage, searchQuery])
+  }
 
   useEffect(() => {
     fetchQueries()
-  }, [fetchQueries])
+  }, [currentPage])
 
   const handleDelete = async (id: string) => {
     try {
@@ -56,20 +78,15 @@ export default function QueriesContent() {
     }
   }
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
-
   const handleNextPage = () => {
     if (currentPage * queriesPerPage < totalQueries) {
-      setCurrentPage(prev => prev + 1)
+      setCurrentPage(currentPage + 1)
     }
   }
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1)
+      setCurrentPage(currentPage - 1)
     }
   }
 
@@ -81,16 +98,9 @@ export default function QueriesContent() {
           <h1 className="text-xl font-semibold">Queries</h1>
         </div>
         <div className="p-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search queries..."
-              className="w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-          </div>
+          <Suspense fallback={<div>Loading search...</div>}>
+            <SearchSection />
+          </Suspense>
         </div>
         <div className="overflow-auto">
           {queries.map((query) => (
