@@ -118,70 +118,105 @@ export default function Dashboard() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
-  const toggleHighlight = async (websiteId: string) => {
-    const websiteToUpdate = websites.find(w => w.id === websiteId)
+  const toggleHighlight = async (websiteId: string, websites: Website[], setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, addNotification: (message: string, type: string) => void) => {
+    const websiteToUpdate = websites.find(w => w.id === websiteId);
     if (websiteToUpdate) {
       try {
         const updatedWebsites = websites.map(website =>
           website.id === websiteId ? { ...website, highlighted: !website.highlighted } : website
-        )
-        setWebsites(updatedWebsites)
-        setFilteredWebsites(updatedWebsites)
-
-        const response = await fetch('/api/update', {
+        );
+        setWebsites(updatedWebsites);
+        setFilteredWebsites(updatedWebsites);
+  
+        const response = await fetch('/api/data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            type: 'websites',
             id: websiteId,
             highlighted: !websiteToUpdate.highlighted,
           }),
         });
-
+  
         const updatedWebsite = await response.json();
         
         if (updatedWebsite) {
-          addNotification(`The website has been ${updatedWebsite.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success")
+          addNotification(`The website has been ${updatedWebsite.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success");
         } else {
-         
-          setWebsites(websites)
-          setFilteredWebsites(filteredWebsites)
-          throw new Error('Failed to update highlight status')
+          setWebsites(websites);
+          setFilteredWebsites(websites);
+          throw new Error('Failed to update highlight status');
         }
       } catch (error) {
-        console.error('Error updating highlight status:', error)
-        addNotification("There was an error updating the website. Please try again.", "error")
+        console.error('Error updating highlight status:', error);
+        addNotification("There was an error updating the website. Please try again.", "error");
       }
     }
-  }
+  };
 
 
   const fetchWebsites = async () => {
     try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${websitesPerPage}&search=${encodeURIComponent(searchQuery)}`, {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${websitesPerPage}&types=websites&search=${encodeURIComponent(searchQuery)}`, {
         method: 'GET',
-      })
-      const data = await response.json()
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
       
-      if (Array.isArray(data.websites)) {
-        setWebsites(data.websites)
-        setFilteredWebsites(data.websites)
-        setTotal(data.total)
-        setHighlightedCount(data.highlightedCount)
+      if (data.websites && Array.isArray(data.websites.data)) {
+        setWebsites(data.websites.data);
+        setFilteredWebsites(data.websites.data);
+        setTotal(data.websites.total);
       } else {
-        console.error('Unexpected data structure:', data)
-        addNotification("Unexpected data structure received", "error")
+        console.error('Unexpected data structure:', data);
+        addNotification("Unexpected data structure received for websites", "error");
       }
     } catch (error) {
-      console.error('Error fetching websites:', error)
-      addNotification("Failed to fetch websites", "error")
+      console.error('Error fetching websites:', error);
+      addNotification("Failed to fetch websites", "error");
     }
-  }
-
+  };
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const executeSearch = () => {
+    setIsSearching(true);
+    setCurrentPage(1);
+    fetchWebsites();
+  };
+  
+  const clearSearch = () => {
+    setSearchQuery("");
+    setIsSearching(false);
+    setCurrentPage(1);
+    fetchWebsites();
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Website) => {
+    if (editedWebsite) {
+      setEditedWebsite({
+        ...editedWebsite,
+        [field]: e.target.value
+      });
+    } else if (isAddingWebsite) {
+      setNewWebsite({
+        ...newWebsite,
+        [field]: e.target.value
+      });
+    }
+  };
+  
   useEffect(() => {
-    fetchWebsites()
-  }, [currentPage, searchQuery])
+    fetchWebsites();
+  }, [currentPage, websitesPerPage]);
 
   const totalPages = Math.ceil(total / websitesPerPage)
 
@@ -239,127 +274,117 @@ export default function Dashboard() {
     }, 5000)
   }
 
-  const updateWebsite = async () => {
+  const updateWebsite = async (editedWebsite: Website, setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setEditingWebsite: React.Dispatch<React.SetStateAction<string | null>>, setEditedWebsite: React.Dispatch<React.SetStateAction<Website | null>>, setActiveTagManager: React.Dispatch<React.SetStateAction<string | null>>, addNotification: (message: string, type: string) => void) => {
     if (editedWebsite) {
       try {
-        const response = await fetch('/api/update', {
+        const response = await fetch('/api/data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(editedWebsite),
+          body: JSON.stringify({ type: 'websites', ...editedWebsite }),
         });
-
+  
         const updatedWebsite = await response.json();
         
         if (updatedWebsite) {
           setWebsites(prevWebsites => 
             prevWebsites.map(w => w.id === updatedWebsite.id ? updatedWebsite : w)
-          )
+          );
           setFilteredWebsites(prevFiltered => 
             prevFiltered.map(w => w.id === updatedWebsite.id ? updatedWebsite : w)
-          )
-          setEditingWebsite(null)
-          setEditedWebsite(null)
-          setActiveTagManager(null)
-          addNotification("The website has been successfully updated.", "success")
+          );
+          setEditingWebsite(null);
+          setEditedWebsite(null);
+          setActiveTagManager(null);
+          addNotification("The website has been successfully updated.", "success");
         } else {
-          throw new Error('Failed to update website')
+          throw new Error('Failed to update website');
         }
       } catch (error) {
-        console.error('Error updating website:', error)
-        addNotification("There was an error updating the website. Please try again.", "error")
+        console.error('Error updating website:', error);
+        addNotification("There was an error updating the website. Please try again.", "error");
       }
     }
-  }
+  };
+  
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Website) => {
-    if (editedWebsite) {
-      setEditedWebsite({
-        ...editedWebsite,
-        [field]: e.target.value
-      })
-    } else if (isAddingWebsite) {
-      setNewWebsite({
-        ...newWebsite,
-        [field]: e.target.value
-      })
-    }
-  }
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Website) => {
+  //   if (editedWebsite) {
+  //     setEditedWebsite({
+  //       ...editedWebsite,
+  //       [field]: e.target.value
+  //     })
+  //   } else if (isAddingWebsite) {
+  //     setNewWebsite({
+  //       ...newWebsite,
+  //       [field]: e.target.value
+  //     })
+  //   }
+  // }
 
-  const addWebsite = async () => {
+  const addWebsite = async (newWebsite: Website, setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setTotal: React.Dispatch<React.SetStateAction<number>>, setIsAddingWebsite: React.Dispatch<React.SetStateAction<boolean>>, addNotification: (message: string, type: string) => void) => {
     try {
-      const response = await fetch('/api/update', {
+      const response = await fetch('/api/data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newWebsite),
+        body: JSON.stringify({ type: 'websites', ...newWebsite }),
       });
-
+  
       const addedWebsite = await response.json();
       
       if (addedWebsite) {
-        setWebsites(prevWebsites => [...prevWebsites, addedWebsite])
-        setFilteredWebsites(prevFiltered => [...prevFiltered, addedWebsite])
-        setTotal(prevTotal => prevTotal + 1)
-        setIsAddingWebsite(false)
-        setNewWebsite({
-          id: '',
-          backupDate: '',
-          Content_Update_Date: new Date().toISOString().split('T')[0],
-          Description: '',
-          Status: 'Active',
-          Tags: [],
-          Title: '',
-          URL: '',
-          archive: false,
-          highlighted: false
-        })
-        addNotification("The website has been successfully added.", "success")
+        setWebsites(prevWebsites => [...prevWebsites, addedWebsite]);
+        setFilteredWebsites(prevFiltered => [...prevFiltered, addedWebsite]);
+        setTotal(prevTotal => prevTotal + 1);
+        setIsAddingWebsite(false);
+        addNotification("The website has been successfully added.", "success");
       } else {
-        throw new Error('Failed to add website')
+        throw new Error('Failed to add website');
       }
     } catch (error) {
-      console.error('Error adding website:', error)
-      addNotification("There was an error adding the website. Please try again.", "error")
+      console.error('Error adding website:', error);
+      addNotification("There was an error adding the website. Please try again.", "error");
     }
-  }
+  };
 
-  const toggleArchive = async (websiteId: string) => {
-    const websiteToUpdate = websites.find(w => w.id === websiteId)
+  const toggleArchive = async (websiteId: string, websites: Website[], setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, addNotification: (message: string, type: string) => void) => {
+    const websiteToUpdate = websites.find(w => w.id === websiteId);
     if (websiteToUpdate) {
       try {
-        const response = await fetch('/api/update', {
+        const response = await fetch('/api/data', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            type: 'websites',
             id: websiteId,
             archive: !websiteToUpdate.archive,
           }),
         });
-
+  
         const updatedWebsite = await response.json();
         
         if (updatedWebsite) {
           setWebsites(prevWebsites => 
             prevWebsites.map(website => website.id === updatedWebsite.id ? updatedWebsite : website)
-          )
+          );
           setFilteredWebsites(prevFiltered => 
             prevFiltered.map(website => website.id === updatedWebsite.id ? updatedWebsite : website)
-          )
-          addNotification(`The website has been ${updatedWebsite.archive ? 'archived' : 'unarchived'} successfully.`, "success")
+          );
+          addNotification(`The website has been ${updatedWebsite.archive ? 'archived' : 'unarchived'} successfully.`, "success");
         } else {
-          throw new Error('Failed to update archive status')
+          throw new Error('Failed to update archive status');
         }
       } catch (error) {
-        console.error('Error updating archive status:', error)
-        addNotification("There was an error updating the website. Please try again.", "error")
+        console.error('Error updating archive status:', error);
+        addNotification("There was an error updating the website. Please try again.", "error");
       }
     }
-  }
+  };
 
   const exportWebsites = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -382,29 +407,22 @@ export default function Dashboard() {
     return tagGroup ? tagGroup.color : 'hsl(0, 0%, 50%)';
   }
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
-
-  const executeSearch = () => {
-    setIsSearching(true)
-    const lowercasedQuery = searchQuery.toLowerCase()
-    const filtered = websites.filter(website => 
-      (website.Title?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (website.Description?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (website.URL?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (website.Tags?.some(tag => tag.toLowerCase().includes(lowercasedQuery)) ?? false)
-    )
-    setFilteredWebsites(filtered)
-    setCurrentPage(1)
-  }
-
-  const clearSearch = () => {
-    setSearchQuery("")
-    setIsSearching(false)
-    setFilteredWebsites(websites)
-    setCurrentPage(1)
-  }
+  // const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSearchQuery(e.target.value);
+  // };
+  
+  // const executeSearch = () => {
+  //   setIsSearching(true);
+  //   setCurrentPage(1);
+  //   fetchWebsites(1, websitesPerPage, searchQuery);
+  // };
+  
+  // const clearSearch = () => {
+  //   setSearchQuery("");
+  //   setIsSearching(false);
+  //   setCurrentPage(1);
+  //   fetchWebsites(1, websitesPerPage, "");
+  // };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">

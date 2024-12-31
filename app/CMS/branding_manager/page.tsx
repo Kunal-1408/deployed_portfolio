@@ -81,31 +81,46 @@ export default function BrandDashboard() {
     highlighted: false,
     tags: []
   })
-  const fetchBrands = async () => {
+  const fetchBrands = async (currentPage: number, brandsPerPage: number, searchQuery: string) => {
     try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&search=${encodeURIComponent(searchQuery)}&type=brands`, {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&types=brands&search=${encodeURIComponent(searchQuery)}`, {
         method: 'GET',
-      })
-      const data = await response.json()
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Oops, we haven't got JSON!");
+      }
+  
+      const data = await response.json();
       
-      if (Array.isArray(data.items)) {
-        setBrands(data.items)
-        setFilteredBrands(data.items)
-        setTotal(data.total)
-        setHighlightedCount(data.highlightedCount)
+      if (data.brands && Array.isArray(data.brands.data)) {
+        setBrands(data.brands.data);
+        setFilteredBrands(data.brands.data);
+        setTotal(data.brands.total);
       } else {
-        console.error('Unexpected data structure:', data)
-        addNotification("Unexpected data structure received", "error")
+        console.error('Unexpected data structure:', data);
+        addNotification("Unexpected data structure received for brands", "error");
       }
     } catch (error) {
-      console.error('Error fetching brands:', error)
-      addNotification("Failed to fetch brands", "error")
+      console.error('Error fetching brands:', error);
+      if (error instanceof TypeError) {
+        addNotification("The server response was not in JSON format. This might be due to a server error.", "error");
+      } else if (error instanceof Error) {
+        addNotification(`Failed to fetch brands: ${error.message}`, "error");
+      } else {
+        addNotification("An unknown error occurred while fetching brands", "error");
+      }
     }
-  }
+  };
 
   useEffect(() => {
-    fetchBrands()
-  }, [currentPage, searchQuery])
+    fetchBrands(currentPage,brandsPerPage,searchQuery)
+  }, [currentPage,brandsPerPage,searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

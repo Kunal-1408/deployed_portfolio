@@ -13,6 +13,12 @@ type BrandStats {
   reach        String?
 }
 
+type SocialStats{
+  impression    String?
+  interactions  String?
+  reach         String? 
+}
+
 type TextsClients {
   logoUrl String
 }
@@ -182,6 +188,13 @@ model queries {
 
 model social {
   id String @id @default(auto()) @map("_id") @db.ObjectId
+  Brand String
+  Description String
+  Logo        String
+  Stats       SocialStats[]
+  banner      String
+  highlighted Boolean
+  tags        String[]
 }
 
 model texts {

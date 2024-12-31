@@ -77,30 +77,45 @@ export default function DesignDashboard() {
     tags: []
   })
 
-  const fetchDesigns = async () => {
+  const fetchDesigns = async (currentPage: number, designsPerPage: number, searchQuery: string) => {
     try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&search=${encodeURIComponent(searchQuery)}&type=designs`, {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&types=designs&search=${encodeURIComponent(searchQuery)}`, {
         method: 'GET',
-      })
-      const data = await response.json()
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Oops, we haven't got JSON!");
+      }
+  
+      const data = await response.json();
       
-      if (Array.isArray(data.items)) {
-        setDesigns(data.items)
-        setFilteredDesigns(data.items)
-        setTotal(data.total)
-        setHighlightedCount(data.highlightedCount)
+      if (data.designs && Array.isArray(data.designs.data)) {
+        setDesigns(data.designs.data);
+        setFilteredDesigns(data.designs.data);
+        setTotal(data.designs.total);
       } else {
-        console.error('Unexpected data structure:', data)
-        addNotification("Unexpected data structure received", "error")
+        console.error('Unexpected data structure:', data);
+        addNotification("Unexpected data structure received for designs", "error");
       }
     } catch (error) {
-      console.error('Error fetching designs:', error)
-      addNotification("Failed to fetch designs", "error")
+      console.error('Error fetching designs:', error);
+      if (error instanceof TypeError) {
+        addNotification("The server response was not in JSON format. This might be due to a server error.", "error");
+      } else if (error instanceof Error) {
+        addNotification(`Failed to fetch designs: ${error.message}`, "error");
+      } else {
+        addNotification("An unknown error occurred while fetching designs", "error");
+      }
     }
-  }
+  };
   useEffect(() => {
-    fetchDesigns()
-  }, [currentPage, searchQuery])
+    fetchDesigns(currentPage,designsPerPage,searchQuery)
+  }, [currentPage,designsPerPage, searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
