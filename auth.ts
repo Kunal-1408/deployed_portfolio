@@ -8,6 +8,39 @@ const prisma = new PrismaClient()
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  pages: {
+    signIn: "/login",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string
+      }
+      return session
+    },
+    async redirect({ url, baseUrl }) {
+      const deployedBaseUrl = process.env.NEXTAUTH_URL || baseUrl;
+      if (url.startsWith("/")) return `${deployedBaseUrl}${url}`
+      else if (new URL(url).origin === deployedBaseUrl) return url
+      return deployedBaseUrl
+    },
+    async authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user
+      const isCMSRoute = nextUrl.pathname.startsWith('/CMS')
+      
+      if (isCMSRoute) {
+        if (isLoggedIn) return true
+        return false // Redirect unauthenticated users to login page
+      }
+      return true
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -46,30 +79,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     })
   ],
-  pages: {
-    signIn: "/signin",
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
-      }
-      return session
-    },
-    async redirect({ url, baseUrl }) {
-      // Allows relative URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
-    }
-  },
   session: {
     strategy: "jwt"
   }

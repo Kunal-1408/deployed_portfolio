@@ -16,7 +16,8 @@ export async function authenticate(
     })
 
     if (!result?.error) {
-      redirect('/CMS')
+      // Use the deployed URL for redirection
+      redirect(`${process.env.NEXTAUTH_URL}/CMS`)
     }
 
     return 'Invalid credentials.'

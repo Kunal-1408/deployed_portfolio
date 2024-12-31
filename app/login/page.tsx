@@ -3,7 +3,7 @@
 import { useFormStatus } from "react-dom";
 import { authenticate } from "@/lib/actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useActionState,} from "react";
+import { useActionState } from "react";
 
 function SubmitButton() {
   const { pending } = useFormStatus()
