@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState, Suspense } from "react"
-import Link from "next/link"
 import Image from "next/image"
 import { ArrowUpDown, ChevronLeft, ChevronRight, File, MoreHorizontal, PlusCircle, Search, Star, X } from 'lucide-react'
 

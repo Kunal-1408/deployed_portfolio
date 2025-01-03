@@ -133,24 +133,27 @@ model Brand {
   Brand       String
   Description String
   Logo        String
-  Stats       BrandStats[]
+  Stats       BrandStats?
   banner      String
   highlighted Boolean
   tags        String[]
 }
 
+
+
 model Websites {
   id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  Title               String
+  Description         String?
+  Status              String?
+  URL                 String?
+  Tags                String[]
   Backup_Date         String?  @map("Backup Date")
   Content_Update_Date String?  @map("Content Update Date")
-  Description         String?
+  archive             Boolean  @default(false)
+  highlighted         Boolean  @default(false)
   Images              String?
-  Status              String?
-  Tags                String[]
-  Title               String?
-  URL                 String?
-  archive             Boolean?
-  highlighted         Boolean?
+  Logo                String?
 }
 
 model clients {
@@ -191,7 +194,7 @@ model social {
   Brand String
   Description String
   Logo        String
-  Stats       SocialStats[]
+  Stats       SocialStats?
   banner      String
   highlighted Boolean
   tags        String[]

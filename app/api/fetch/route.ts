@@ -1,77 +1,121 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
+
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+}
+
+interface ApiResponse {
+  [key: string]: PaginatedResponse<any>;
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const currentPage = parseInt(searchParams.get('page') || '1');
   const itemsPerPage = parseInt(searchParams.get('limit') || '10');
-  const search = searchParams.get('search');
-  const dataTypes = searchParams.get('types')?.split(',') || ['websites', 'brands', 'designs', 'socials'];
+  const search = searchParams.get('search') || '';
+  const dataTypes = searchParams.get('types')?.split(',') || ['websites'];
 
   console.log('API route hit');
-  console.log('Search params:', searchParams);
-  console.log('Data types:', dataTypes);
+  console.log('Search params:', { currentPage, itemsPerPage, search, dataTypes });
 
   try {
-    if (search) {
-      const queries = {
-        websites: dataTypes.includes('websites') ? prisma.websites.findFirst({ where: { Title: search } }) : null,
-        brands: dataTypes.includes('brands') ? prisma.brand.findFirst({ where: { Brand: search } }) : null,
-        designs: dataTypes.includes('designs') ? prisma.design.findFirst({ where: { Brands: search } }) : null,
-        socials: dataTypes.includes('socials') ? prisma.social.findFirst({ where: { Brand: search } }) : null
-      };
+    const response: ApiResponse = {};
 
-      const results = await Promise.all(Object.values(queries));
-      const [website, brand, design, social] = results;
+    for (const type of dataTypes) {
+      const modelName = type;
+      const model = (prisma as any)[modelName];
 
-      if (!website && !brand && !design && !social) {
-        return NextResponse.json({ error: 'Record not found' }, { status: 404 });
+      if (!model) {
+        console.warn(`Model ${modelName} not found in Prisma client`);
+        continue;
       }
 
-      return NextResponse.json({ website, brand, design, social });
-    }
+      console.log(`Fetching data for model: ${modelName}`);
 
-    const fetchQueries = {
-      websites: dataTypes.includes('websites') ? {
-        data: prisma.websites.findMany({ skip: (currentPage - 1) * itemsPerPage, take: itemsPerPage }),
-        total: prisma.websites.count()
-      } : null,
-      brands: dataTypes.includes('brands') ? {
-        data: prisma.brand.findMany({ skip: (currentPage - 1) * itemsPerPage, take: itemsPerPage }),
-        total: prisma.brand.count()
-      } : null,
-      designs: dataTypes.includes('designs') ? {
-        data: prisma.design.findMany({ skip: (currentPage - 1) * itemsPerPage, take: itemsPerPage }),
-        total: prisma.design.count()
-      } : null,
-      socials: dataTypes.includes('socials') ? {
-        data: prisma.social.findMany({ skip: (currentPage - 1) * itemsPerPage, take: itemsPerPage }),
-        total: prisma.social.count()
-      } : null
-    };
+      const whereClause = search
+        ? {
+            OR: [
+              { Title: { contains: search, mode: 'insensitive' } },
+              { Description: { contains: search, mode: 'insensitive' } },
+              { URL: { contains: search, mode: 'insensitive' } },
+              { Tags: { has: search } },
+            ].filter(clause => 
+              Object.keys(clause)[0] in (model.fields || {})
+            ),
+          }
+        : {};
 
-    const results = await Promise.all(
-      Object.entries(fetchQueries).flatMap(([key, query]) => 
-        query ? [query.data, query.total] : []
-      )
-    );
+      try {
+        console.log('Where clause:', JSON.stringify(whereClause, null, 2));
 
-    const response = {};
-    let index = 0;
-    for (const [key, query] of Object.entries(fetchQueries)) {
-      if (query) {
-        response[key] = {
-          data: results[index],
-          total: results[index + 1]
+        const data = await model.findMany({
+          where: whereClause,
+          skip: (currentPage - 1) * itemsPerPage,
+          take: itemsPerPage,
+        });
+
+        console.log(`Raw data fetched:`, JSON.stringify(data, null, 2));
+
+        // Sort the data to prioritize highlighted items
+        const sortedData = data.sort((a, b) => {
+          if (a.highlighted && !b.highlighted) return -1;
+          if (!a.highlighted && b.highlighted) return 1;
+          return 0;
+        });
+
+        const total = await model.count({ where: whereClause });
+
+        console.log(`Fetched ${data.length} records for ${type}`);
+        console.log(`Total records: ${total}`);
+
+        response[type] = {
+          data: sortedData.map((item: any) => ({
+            ...item,
+            Tags: Array.isArray(item.Tags) ? item.Tags : [],
+            Status: item.Status || 'Unknown', // Provide a default value if Status is null
+          })),
+          total,
         };
-        index += 2;
+      } catch (modelError) {
+        console.error(`Error fetching data for ${type}:`, modelError instanceof Error ? modelError.message : 'Unknown error');
+        if (modelError instanceof Error) {
+          console.error(`Error details:`, modelError.stack);
+        }
+        response[type] = { data: [], total: 0 };
       }
     }
 
+    console.log('API response:', JSON.stringify(response, null, 2));
     return NextResponse.json(response);
+
   } catch (error) {
-    console.error('Error fetching data:', error);
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
+    console.error('Error fetching data:', error instanceof Error ? error.message : 'Unknown error');
+    if (error instanceof Error) {
+      console.error('Error details:', error.stack);
+    }
+    
+    let errorMessage = 'An unexpected error occurred';
+    let errorDetails: Record<string, any> = {};
+    let statusCode = 500;
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      errorMessage = 'Database error';
+      errorDetails = { code: error.code, message: error.message };
+      statusCode = 400;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = { stack: error.stack };
+    }
+
+    console.error('Detailed error:', JSON.stringify({ errorMessage, errorDetails, statusCode }, null, 2));
+
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: errorDetails
+    }, { status: statusCode });
   }
 }
 

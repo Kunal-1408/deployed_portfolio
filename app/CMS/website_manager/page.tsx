@@ -2,18 +2,34 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import {
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  File,
-  Globe,
-  MoreHorizontal,
-  PlusCircle,
-  Search,
-  Star,
-  X,
-} from "lucide-react"
+import Image from "next/image"
+import { ArrowUpDown, ChevronLeft, ChevronRight, File, Globe, MoreHorizontal, PlusCircle, Search, Star, X, Upload } from 'lucide-react'
+interface Website {
+  id: string
+  backupDate: string|null
+  Content_Update_Date: string|null
+  Description: string
+  Status: string
+  Tags: string[]
+  Title: string
+  URL: string|null
+  archive: boolean
+  highlighted: boolean
+  Images: string|null
+  Logo: string|null
+}
+
+interface TagGroup {
+  title: string
+  tags: string[]
+  color: string
+}
+
+interface Notification {
+  id: number
+  message: string
+  type: 'success' | 'error'
+}
 
 import {
   Card,
@@ -40,30 +56,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-interface Website {
-  id: string
-  backupDate: string|null
-  Content_Update_Date: string|null
-  Description: string
-  Status: string
-  Tags: string[]
-  Title: string
-  URL: string|null
-  archive: boolean
-  highlighted: boolean
-}
-
-interface TagGroup {
-  title: string
-  tags: string[]
-  color: string
-}
-
-interface Notification {
-  id: number
-  message: string
-  type: 'success' | 'error'
-}
 
 export default function Dashboard() {
   const [activeTagManager, setActiveTagManager] = useState<string | null>(null)
@@ -79,7 +71,14 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const websitesPerPage = 10
+
+  const [imagesFile, setImagesFile] = useState<File | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [existingImagesUrl, setExistingImagesUrl] = useState<string | null>(null)
+  const [existingLogoUrl, setExistingLogoUrl] = useState<string | null>(null)
 
   const allTags: TagGroup[] = [
     {title:"Site Type", tags:["E-commerce","Dynamic","Micro"], color: "hsl(221, 83%, 53%)"},
@@ -97,12 +96,14 @@ export default function Dashboard() {
     Title: '',
     URL: '',
     archive: false,
-    highlighted: false
+    highlighted: false,
+    Images: null,
+    Logo: null
   })
 
-  // useEffect(() => {
-  //   fetchWebsites()
-  // }, [currentPage])
+  useEffect(() => {
+    fetchWebsites()
+  }, [currentPage, searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -118,7 +119,8 @@ export default function Dashboard() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
-  const toggleHighlight = async (websiteId: string, websites: Website[], setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, addNotification: (message: string, type: string) => void) => {
+
+  const toggleHighlight = async (websiteId: string) => {
     const websiteToUpdate = websites.find(w => w.id === websiteId);
     if (websiteToUpdate) {
       try {
@@ -128,16 +130,14 @@ export default function Dashboard() {
         setWebsites(updatedWebsites);
         setFilteredWebsites(updatedWebsites);
   
-        const response = await fetch('/api/data', {
+        const formData = new FormData();
+        formData.append('type', 'websites');
+        formData.append('id', websiteId);
+        formData.append('highlighted', (!websiteToUpdate.highlighted).toString());
+  
+        const response = await fetch('/api/update', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'websites',
-            id: websiteId,
-            highlighted: !websiteToUpdate.highlighted,
-          }),
+          body: formData,
         });
   
         const updatedWebsite = await response.json();
@@ -156,8 +156,9 @@ export default function Dashboard() {
     }
   };
 
-
   const fetchWebsites = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
       const response = await fetch(`/api/fetch?page=${currentPage}&limit=${websitesPerPage}&types=websites&search=${encodeURIComponent(searchQuery)}`, {
         method: 'GET',
@@ -168,6 +169,7 @@ export default function Dashboard() {
       }
   
       const data = await response.json();
+      console.log('Fetched data:', data)
       
       if (data.websites && Array.isArray(data.websites.data)) {
         setWebsites(data.websites.data);
@@ -175,16 +177,19 @@ export default function Dashboard() {
         setTotal(data.websites.total);
       } else {
         console.error('Unexpected data structure:', data);
-        addNotification("Unexpected data structure received for websites", "error");
+        setError("Unexpected data structure received for websites")
       }
     } catch (error) {
       console.error('Error fetching websites:', error);
-      addNotification("Failed to fetch websites", "error");
+      setError("Failed to fetch websites")
+    } finally {
+      setIsLoading(false)
     }
   };
   
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
   
   const executeSearch = () => {
@@ -213,10 +218,48 @@ export default function Dashboard() {
       });
     }
   };
-  
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'Images' | 'Logo') => {
+    if (e.target.files && e.target.files[0]) {
+      if (field === 'Images') {
+        setImagesFile(e.target.files[0])
+        setExistingImagesUrl(null) // Clear existing image when a new one is selected
+      } else {
+        setLogoFile(e.target.files[0])
+        setExistingLogoUrl(null) // Clear existing logo when a new one is selected
+      }
+    }
+  }
+
+  const fetchExistingImages = async (websiteId: string) => {
+    try {
+      const response = await fetch(`/api/fetch-images?id=${websiteId}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.Images) {
+        setExistingImagesUrl(data.Images);
+      }
+      if (data.Logo) {
+        setExistingLogoUrl(data.Logo);
+      }
+    } catch (error) {
+      console.error('Error fetching existing images:', error);
+      addNotification("Failed to fetch existing images", "error");
+    }
+  };
+
   useEffect(() => {
-    fetchWebsites();
-  }, [currentPage, websitesPerPage]);
+    if (editingWebsite) {
+      fetchExistingImages(editingWebsite);
+    }
+  }, [editingWebsite]);
 
   const totalPages = Math.ceil(total / websitesPerPage)
 
@@ -274,17 +317,37 @@ export default function Dashboard() {
     }, 5000)
   }
 
-  const updateWebsite = async (editedWebsite: Website, setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setEditingWebsite: React.Dispatch<React.SetStateAction<string | null>>, setEditedWebsite: React.Dispatch<React.SetStateAction<Website | null>>, setActiveTagManager: React.Dispatch<React.SetStateAction<string | null>>, addNotification: (message: string, type: string) => void) => {
+  const updateWebsite = async () => {
     if (editedWebsite) {
       try {
-        const response = await fetch('/api/data', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ type: 'websites', ...editedWebsite }),
+        const formData = new FormData();
+        formData.append('type', 'websites');
+        Object.entries(editedWebsite).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item);
+            });
+          } else if (value !== null && value !== undefined) {
+            formData.append(key, value.toString());
+          }
         });
-  
+
+        if (imagesFile) {
+          formData.append('Images', imagesFile);
+        }
+        if (logoFile) {
+          formData.append('Logo', logoFile);
+        }
+
+        const response = await fetch('/api/update', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const updatedWebsite = await response.json();
         
         if (updatedWebsite) {
@@ -297,6 +360,8 @@ export default function Dashboard() {
           setEditingWebsite(null);
           setEditedWebsite(null);
           setActiveTagManager(null);
+          setImagesFile(null);
+          setLogoFile(null);
           addNotification("The website has been successfully updated.", "success");
         } else {
           throw new Error('Failed to update website');
@@ -307,32 +372,37 @@ export default function Dashboard() {
       }
     }
   };
-  
 
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Website) => {
-  //   if (editedWebsite) {
-  //     setEditedWebsite({
-  //       ...editedWebsite,
-  //       [field]: e.target.value
-  //     })
-  //   } else if (isAddingWebsite) {
-  //     setNewWebsite({
-  //       ...newWebsite,
-  //       [field]: e.target.value
-  //     })
-  //   }
-  // }
-
-  const addWebsite = async (newWebsite: Website, setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setTotal: React.Dispatch<React.SetStateAction<number>>, setIsAddingWebsite: React.Dispatch<React.SetStateAction<boolean>>, addNotification: (message: string, type: string) => void) => {
+  const addWebsite = async () => {
     try {
-      const response = await fetch('/api/data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ type: 'websites', ...newWebsite }),
+      const formData = new FormData();
+      formData.append('type', 'websites');
+      Object.entries(newWebsite).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            formData.append(`${key}[${index}]`, item);
+          });
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
       });
-  
+
+      if (imagesFile) {
+        formData.append('Images', imagesFile);
+      }
+      if (logoFile) {
+        formData.append('Logo', logoFile);
+      }
+
+      const response = await fetch('/api/update', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const addedWebsite = await response.json();
       
       if (addedWebsite) {
@@ -340,6 +410,8 @@ export default function Dashboard() {
         setFilteredWebsites(prevFiltered => [...prevFiltered, addedWebsite]);
         setTotal(prevTotal => prevTotal + 1);
         setIsAddingWebsite(false);
+        setImagesFile(null);
+        setLogoFile(null);
         addNotification("The website has been successfully added.", "success");
       } else {
         throw new Error('Failed to add website');
@@ -350,22 +422,24 @@ export default function Dashboard() {
     }
   };
 
-  const toggleArchive = async (websiteId: string, websites: Website[], setWebsites: React.Dispatch<React.SetStateAction<Website[]>>, setFilteredWebsites: React.Dispatch<React.SetStateAction<Website[]>>, addNotification: (message: string, type: string) => void) => {
+  const toggleArchive = async (websiteId: string) => {
     const websiteToUpdate = websites.find(w => w.id === websiteId);
     if (websiteToUpdate) {
       try {
-        const response = await fetch('/api/data', {
+        const formData = new FormData();
+        formData.append('type', 'websites');
+        formData.append('id', websiteId);
+        formData.append('archive', (!websiteToUpdate.archive).toString());
+
+        const response = await fetch('/api/update', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'websites',
-            id: websiteId,
-            archive: !websiteToUpdate.archive,
-          }),
+          body: formData,
         });
   
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const updatedWebsite = await response.json();
         
         if (updatedWebsite) {
@@ -388,9 +462,9 @@ export default function Dashboard() {
 
   const exportWebsites = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "ID,Title,Description,Status,URL,Tags,Last Updated,Archived\n"
+      + "ID,Title,Description,Status,URL,Tags,Last Updated,Archived,Images,Logo\n"
       + filteredWebsites.map(website => 
-          `${website.id},"${website.Title}","${website.Description}",${website.Status},${website.URL},"${website.Tags.join(', ')}",${website.Content_Update_Date},${website.archive}`
+          `${website.id},"${website.Title}","${website.Description}",${website.Status},${website.URL},"${website.Tags.join(', ')}",${website.Content_Update_Date},${website.archive},${website.Images},${website.Logo}`
         ).join("\n")
 
     const encodedUri = encodeURI(csvContent)
@@ -406,23 +480,6 @@ export default function Dashboard() {
     const tagGroup = allTags.find(group => group.tags.includes(tag));
     return tagGroup ? tagGroup.color : 'hsl(0, 0%, 50%)';
   }
-
-  // const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSearchQuery(e.target.value);
-  // };
-  
-  // const executeSearch = () => {
-  //   setIsSearching(true);
-  //   setCurrentPage(1);
-  //   fetchWebsites(1, websitesPerPage, searchQuery);
-  // };
-  
-  // const clearSearch = () => {
-  //   setSearchQuery("");
-  //   setIsSearching(false);
-  //   setCurrentPage(1);
-  //   fetchWebsites(1, websitesPerPage, "");
-  // };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -509,8 +566,8 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredWebsites.length > 0 ? (
-                    filteredWebsites.map((website) => (
+                  {websites.length > 0 ? (
+                    websites.map((website) => (
                       <TableRow key={website.id} className={website.archive ? "opacity-50" : ""}>
                         <TableCell className="font-medium">{website.Title}</TableCell>
                         <TableCell className="max-w-md">
@@ -588,7 +645,7 @@ export default function Dashboard() {
                             >
                               <Star className="h-5 w-5" fill={website.highlighted ? 'currentColor' : 'none'} />
                             </button>
-                      </TableCell>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
@@ -603,7 +660,7 @@ export default function Dashboard() {
             </CardContent>
             <CardFooter className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Showing <strong>{filteredWebsites.length > 0 ? (currentPage - 1) * websitesPerPage + 1 : 0}-{Math.min(currentPage * websitesPerPage, filteredWebsites.length)}</strong> of <strong>{filteredWebsites.length}</strong> websites
+                Showing <strong>{websites.length > 0 ? (currentPage - 1) * websitesPerPage + 1 : 0}-{Math.min(currentPage * websitesPerPage, total)}</strong> of <strong>{total}</strong> websites
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -748,6 +805,58 @@ export default function Dashboard() {
                   className="mt-1"
                 />
               </div>
+              <div>
+                <label htmlFor="images" className="block text-md font-semibold text-gray-700">Images</label>
+                <div className="mt-1 flex items-center">
+                  <input
+                    id="images"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'Images')}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="images"
+                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Images
+                  </label>
+                  {imagesFile && <span className="ml-2">{imagesFile.name}</span>}
+                  {!imagesFile && existingImagesUrl && (
+                    <div className="ml-2 flex items-center">
+                      <Image src={existingImagesUrl} alt="Existing image" width={50} height={50} />
+                      <span className="ml-2">Existing image</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label htmlFor="logo" className="block text-md font-semibold text-gray-700">Logo</label>
+                <div className="mt-1 flex items-center">
+                  <input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'Logo')}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="logo"
+                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Logo
+                  </label>
+                  {logoFile && <span className="ml-2">{logoFile.name}</span>}
+                  {!logoFile && existingLogoUrl && (
+                    <div className="ml-2 flex items-center">
+                      <Image src={existingLogoUrl} alt="Existing logo" width={50} height={50} />
+                      <span className="ml-2">Existing logo</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="mt-6 flex justify-end space-x-3">
               <button
@@ -756,6 +865,10 @@ export default function Dashboard() {
                   setEditedWebsite(null)
                   setActiveTagManager(null)
                   setIsAddingWebsite(false)
+                  setImagesFile(null)
+                  setLogoFile(null)
+                  setExistingImagesUrl(null)
+                  setExistingLogoUrl(null)
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
@@ -783,6 +896,9 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   )
 }
+
