@@ -54,11 +54,8 @@ export async function POST(req: NextRequest) {
 
     switch (type) {
       case 'websites':
-        const existingWebsite = await prisma.websites.findUnique({
-          where: { id: data.id },
-        });
-
-        if (existingWebsite) {
+        if (data.id && data.id !== '') {
+          // Update existing record
           result = await prisma.websites.update({
             where: { id: data.id },
             data: {
@@ -76,6 +73,7 @@ export async function POST(req: NextRequest) {
             },
           });
         } else {
+          // Create new record
           result = await prisma.websites.create({
             data: {
               Title: data.Title,
@@ -94,38 +92,28 @@ export async function POST(req: NextRequest) {
         }
         break;
       case 'brand':
-        const existingBrand = await prisma.brand.findUnique({
-          where: { id: data.id },
-        });
-
-        if (existingBrand) {
+        if (data.id && data.id !== '') {
+          // Update existing record
           result = await prisma.brand.update({
             where: { id: data.id },
             data: {
               Brand: data.Brand,
               Description: data.Description,
               Logo: data.Logo,
-              Stats: data.Stats ? {
-                impression: data.Stats.impression,
-                interactions: data.Stats.interactions,
-                reach: data.Stats.reach,
-              } : undefined,
+              Stats: data.Stats,
               banner: data.banner,
               highlighted: data.highlighted,
               tags: data.tags || [],
             },
           });
         } else {
+          // Create new record
           result = await prisma.brand.create({
             data: {
               Brand: data.Brand,
               Description: data.Description,
               Logo: data.Logo,
-              Stats: data.Stats ? {
-                impression: data.Stats.impression,
-                interactions: data.Stats.interactions,
-                reach: data.Stats.reach,
-              } : undefined,
+              Stats: data.Stats,
               banner: data.banner,
               highlighted: data.highlighted,
               tags: data.tags || [],
@@ -134,38 +122,28 @@ export async function POST(req: NextRequest) {
         }
         break;
       case 'social':
-        const existingSocial = await prisma.social.findUnique({
-          where: { id: data.id },
-        });
-
-        if (existingSocial) {
+        if (data.id && data.id !== '') {
+          // Update existing record
           result = await prisma.social.update({
             where: { id: data.id },
             data: {
               Brand: data.Brand,
               Description: data.Description,
               Logo: data.Logo,
-              Stats: data.Stats ? {
-                impression: data.Stats.impression,
-                interactions: data.Stats.interactions,
-                reach: data.Stats.reach,
-              } : undefined,
+              Stats: data.Stats,
               banner: data.banner,
               highlighted: data.highlighted,
               tags: data.tags || [],
             },
           });
         } else {
+          // Create new record
           result = await prisma.social.create({
             data: {
               Brand: data.Brand,
               Description: data.Description,
               Logo: data.Logo,
-              Stats: data.Stats ? {
-                impression: data.Stats.impression,
-                interactions: data.Stats.interactions,
-                reach: data.Stats.reach,
-              } : undefined,
+              Stats: data.Stats,
               banner: data.banner,
               highlighted: data.highlighted,
               tags: data.tags || [],

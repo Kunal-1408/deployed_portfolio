@@ -4,32 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowUpDown, ChevronLeft, ChevronRight, File, Globe, MoreHorizontal, PlusCircle, Search, Star, X, Upload } from 'lucide-react'
-interface Website {
-  id: string
-  backupDate: string|null
-  Content_Update_Date: string|null
-  Description: string
-  Status: string
-  Tags: string[]
-  Title: string
-  URL: string|null
-  archive: boolean
-  highlighted: boolean
-  Images: string|null
-  Logo: string|null
-}
-
-interface TagGroup {
-  title: string
-  tags: string[]
-  color: string
-}
-
-interface Notification {
-  id: number
-  message: string
-  type: 'success' | 'error'
-}
 
 import {
   Card,
@@ -56,6 +30,32 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+interface Website {
+  id: string
+  backupDate: string|null
+  Content_Update_Date: string|null
+  Description: string
+  Status: string
+  Tags: string[]
+  Title: string
+  URL: string|null
+  archive: boolean
+  highlighted: boolean
+  Images: string|null
+  Logo: string|null
+}
+
+interface TagGroup {
+  title: string
+  tags: string[]
+  color: string
+}
+
+interface Notification {
+  id: number
+  message: string
+  type: 'success' | 'error'
+}
 
 export default function Dashboard() {
   const [activeTagManager, setActiveTagManager] = useState<string | null>(null)
@@ -120,42 +120,6 @@ export default function Dashboard() {
     }
   }, [])
 
-  const toggleHighlight = async (websiteId: string) => {
-    const websiteToUpdate = websites.find(w => w.id === websiteId);
-    if (websiteToUpdate) {
-      try {
-        const updatedWebsites = websites.map(website =>
-          website.id === websiteId ? { ...website, highlighted: !website.highlighted } : website
-        );
-        setWebsites(updatedWebsites);
-        setFilteredWebsites(updatedWebsites);
-  
-        const formData = new FormData();
-        formData.append('type', 'websites');
-        formData.append('id', websiteId);
-        formData.append('highlighted', (!websiteToUpdate.highlighted).toString());
-  
-        const response = await fetch('/api/update', {
-          method: 'POST',
-          body: formData,
-        });
-  
-        const updatedWebsite = await response.json();
-        
-        if (updatedWebsite) {
-          addNotification(`The website has been ${updatedWebsite.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success");
-        } else {
-          setWebsites(websites);
-          setFilteredWebsites(websites);
-          throw new Error('Failed to update highlight status');
-        }
-      } catch (error) {
-        console.error('Error updating highlight status:', error);
-        addNotification("There was an error updating the website. Please try again.", "error");
-      }
-    }
-  };
-
   const fetchWebsites = async () => {
     setIsLoading(true)
     setError(null)
@@ -178,15 +142,21 @@ export default function Dashboard() {
       } else {
         console.error('Unexpected data structure:', data);
         setError("Unexpected data structure received for websites")
+        setWebsites([]);
+        setFilteredWebsites([]);
+        setTotal(0);
       }
     } catch (error) {
       console.error('Error fetching websites:', error);
       setError("Failed to fetch websites")
+      setWebsites([]);
+      setFilteredWebsites([]);
+      setTotal(0);
     } finally {
       setIsLoading(false)
     }
   };
-  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
@@ -223,10 +193,10 @@ export default function Dashboard() {
     if (e.target.files && e.target.files[0]) {
       if (field === 'Images') {
         setImagesFile(e.target.files[0])
-        setExistingImagesUrl(null) // Clear existing image when a new one is selected
+        setExistingImagesUrl(null) 
       } else {
         setLogoFile(e.target.files[0])
-        setExistingLogoUrl(null) // Clear existing logo when a new one is selected
+        setExistingLogoUrl(null) 
       }
     }
   }
@@ -238,20 +208,33 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          // Handle 404 gracefully - website might not have images
+          setExistingImagesUrl(null);
+          setExistingLogoUrl(null);
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      
+    
       if (data.Images) {
         setExistingImagesUrl(data.Images);
+      } else {
+        setExistingImagesUrl(null);
       }
+    
       if (data.Logo) {
         setExistingLogoUrl(data.Logo);
+      } else {
+        setExistingLogoUrl(null);
       }
     } catch (error) {
       console.error('Error fetching existing images:', error);
       addNotification("Failed to fetch existing images", "error");
+      setExistingImagesUrl(null);
+      setExistingLogoUrl(null);
     }
   };
 
@@ -460,26 +443,62 @@ export default function Dashboard() {
     }
   };
 
+  const toggleHighlight = async (websiteId: string) => {
+    const websiteToUpdate = websites.find(w => w.id === websiteId);
+    if (websiteToUpdate) {
+      try {
+        const updatedWebsites = websites.map(website =>
+          website.id === websiteId ? { ...website, highlighted: !website.highlighted } : website
+        );
+        setWebsites(updatedWebsites);
+        setFilteredWebsites(updatedWebsites);
+  
+        const formData = new FormData();
+        formData.append('type', 'websites');
+        formData.append('id', websiteId);
+        formData.append('highlighted', (!websiteToUpdate.highlighted).toString());
+  
+        const response = await fetch('/api/update', {
+          method: 'POST',
+          body: formData,
+        });
+  
+        const updatedWebsite = await response.json();
+        
+        if (updatedWebsite) {
+          addNotification(`The website has been ${updatedWebsite.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success");
+        } else {
+          setWebsites(websites);
+          setFilteredWebsites(websites);
+          throw new Error('Failed to update highlight status');
+        }
+      } catch (error) {
+        console.error('Error updating highlight status:', error);
+        addNotification("There was an error updating the website. Please try again.", "error");
+      }
+    }
+  };
+
   const exportWebsites = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
       + "ID,Title,Description,Status,URL,Tags,Last Updated,Archived,Images,Logo\n"
       + filteredWebsites.map(website => 
           `${website.id},"${website.Title}","${website.Description}",${website.Status},${website.URL},"${website.Tags.join(', ')}",${website.Content_Update_Date},${website.archive},${website.Images},${website.Logo}`
-        ).join("\n")
+        ).join("\n");
 
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", "websites_export.csv")
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "websites_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getTagColor = (tag: string) => {
     const tagGroup = allTags.find(group => group.tags.includes(tag));
     return tagGroup ? tagGroup.color : 'hsl(0, 0%, 50%)';
-  }
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -522,7 +541,7 @@ export default function Dashboard() {
                 onClick={exportWebsites}
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-neutral-300 hover:bg-accent hover:text-accent-foreground h-8 px-3 gap-1"
               >
-                <File  className="h-3.5 w-3.5" />
+                <File className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   Export
                 </span>
@@ -566,15 +585,21 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {websites.length > 0 ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-4">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : websites && websites.length > 0 ? (
                     websites.map((website) => (
                       <TableRow key={website.id} className={website.archive ? "opacity-50" : ""}>
                         <TableCell className="font-medium">{website.Title}</TableCell>
                         <TableCell className="max-w-md">
-                    <div className="line-clamp-3 overflow-hidden text-ellipsis">
-                      {website.Description}
-                    </div>
-                  </TableCell>
+                          <div className="line-clamp-3 overflow-hidden text-ellipsis">
+                            {website.Description}
+                          </div>
+                        </TableCell>
                         <TableCell onSelect={(e) => e.preventDefault()}>
                           <label className="flex items-center cursor-pointer">
                             <div className="relative">
@@ -602,18 +627,22 @@ export default function Dashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {website.Tags.map((tag, index) => (
-                              <span 
-                                key={index} 
-                                className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" 
-                                style={{
-                                  backgroundColor: `color-mix(in srgb, ${getTagColor(tag)} 25%, white)`,
-                                  color: getTagColor(tag),
-                                }}
-                              >
-                                {tag}
-                              </span>
-                            ))}
+                            {website.Tags && website.Tags.length > 0 ? (
+                              website.Tags.map((tag, index) => (
+                                <span 
+                                  key={index} 
+                                  className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" 
+                                  style={{
+                                    backgroundColor: `color-mix(in srgb, ${getTagColor(tag)} 25%, white)`,
+                                    color: getTagColor(tag),
+                                  }}
+                                >
+                                  {tag}
+                                </span>
+                              ))
+                            ) : (
+                              <span>No tags</span>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>{website.Content_Update_Date}</TableCell>
@@ -637,14 +666,14 @@ export default function Dashboard() {
                           </DropdownMenu>
                         </TableCell>
                         <TableCell>
-                            <button
-                              onClick={() => toggleHighlight(website.id)}
-                              className={`p-1 rounded-full ${
-                                website.highlighted ? 'text-yellow-500' : 'text-gray-300'
-                              } hover:text-yellow-500 transition-colors`}
-                            >
-                              <Star className="h-5 w-5" fill={website.highlighted ? 'currentColor' : 'none'} />
-                            </button>
+                          <button
+                            onClick={() => toggleHighlight(website.id)}
+                            className={`p-1 rounded-full ${
+                              website.highlighted ? 'text-yellow-500' : 'text-gray-300'
+                            } hover:text-yellow-500 transition-colors`}
+                          >
+                            <Star className="h-5 w-5" fill={website.highlighted ? 'currentColor' : 'none'} />
+                          </button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -755,14 +784,14 @@ export default function Dashboard() {
                   <div className="mt-2 p-2 ">
                     <div className="flex flex-col space-y-4">
                       {allTags.map((tagGroup, index) => (
-                        <div key={index} className="pb-2 flex flex-col border border-dashed border-gray-200 rounded-md"> 
+                        <div key={tagGroup.title} className="pb-2 flex flex-col border border-dashed border-gray-200 rounded-md"> 
                             <h5 className={`text-${tagGroup.color}-600 text-md font-semibold mb-2`}>
                               {tagGroup.title}
                             </h5>
                           <div className="flex flex-wrap gap-2 "> 
-                            {tagGroup.tags.map((tag, idx) => (
+                            {tagGroup.tags.map((tag) => (
                               <span
-                                key={idx}
+                                key={`${tagGroup.title}-${tag}`}
                                 className="cursor-pointer h-6 max-w-full flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full border hover:shadow-[3px_3px_0px_0px_rgba(0,0,0)] transition duration-200"
                                 style={{
                                   backgroundColor: (isAddingWebsite ? newWebsite.Tags : editedWebsite?.Tags ?? []).includes(tag)
@@ -825,7 +854,18 @@ export default function Dashboard() {
                   {imagesFile && <span className="ml-2">{imagesFile.name}</span>}
                   {!imagesFile && existingImagesUrl && (
                     <div className="ml-2 flex items-center">
-                      <Image src={existingImagesUrl} alt="Existing image" width={50} height={50} />
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={existingImagesUrl} 
+                          alt="Existing image" 
+                          fill
+                          className="object-cover rounded-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg?height=50&width=50';
+                          }}
+                        />
+                      </div>
                       <span className="ml-2">Existing image</span>
                     </div>
                   )}
@@ -851,7 +891,18 @@ export default function Dashboard() {
                   {logoFile && <span className="ml-2">{logoFile.name}</span>}
                   {!logoFile && existingLogoUrl && (
                     <div className="ml-2 flex items-center">
-                      <Image src={existingLogoUrl} alt="Existing logo" width={50} height={50} />
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={existingLogoUrl} 
+                          alt="Existing logo" 
+                          fill
+                          className="object-cover rounded-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg?height=50&width=50';
+                          }}
+                        />
+                      </div>
                       <span className="ml-2">Existing logo</span>
                     </div>
                   )}

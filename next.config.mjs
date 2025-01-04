@@ -6,6 +6,7 @@
  
 const nextConfig = {
     images: {
+    domains: [process.env.NEXT_PUBLIC_IMAGE_DOMAIN || 'localhost'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,7 +32,8 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.ibb.co',
         port: '',
-      }
+      },
+
     ],
   },
   eslint: {
