@@ -1,42 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server'
-import path from 'path'
-import { promises as fs } from 'fs'
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
-  const id = request.nextUrl.searchParams.get('id')
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
 
   if (!id) {
-    return NextResponse.json({ error: 'Invalid website ID' }, { status: 400 })
+    return NextResponse.json({ error: 'ID is required' }, { status: 400 });
   }
 
   try {
-    const websitesPath = path.join(process.cwd(), 'public', 'data', 'websites.json')
-    const websitesData = await fs.readFile(websitesPath, 'utf8')
-    const websites = JSON.parse(websitesData)
-
-    const website = websites.find((site: any) => site.id === id)
+    const website = await prisma.websites.findUnique({
+      where: { id },
+      select: {
+        Images: true,
+        Logo: true,
+      },
+    });
 
     if (!website) {
-      return NextResponse.json({ error: 'Website not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Website not found' }, { status: 404 });
     }
 
-    const getImagePath = (imageName: string | null) => {
-      if (!imageName) return null
-      // Remove any leading slashes and ensure the path starts with '/uploads/'
-      const cleanPath = imageName.replace(/^\/?(uploads\/)?/, '')
-      return cleanPath ? `/uploads/${cleanPath}` : null
-    }
+    // Transform the paths to include the full public URL
+    const response = {
+      Images: website.Images ? `/uploads/${website.Images}` : null,
+      Logo: website.Logo ? `/uploads/${website.Logo}` : null,
+    };
 
-    const imagesPath = getImagePath(website.Images)
-    const logoPath = getImagePath(website.Logo)
-
-    return NextResponse.json({
-      Images: imagesPath,
-      Logo: logoPath
-    })
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching images:', error)
-    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 })
+    console.error('Error fetching images:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch images' },
+      { status: 500 }
+    );
   }
 }
 

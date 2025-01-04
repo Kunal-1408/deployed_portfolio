@@ -208,20 +208,33 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          // Handle 404 gracefully - website might not have images
+          setExistingImagesUrl(null);
+          setExistingLogoUrl(null);
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      
+    
       if (data.Images) {
         setExistingImagesUrl(data.Images);
+      } else {
+        setExistingImagesUrl(null);
       }
+    
       if (data.Logo) {
         setExistingLogoUrl(data.Logo);
+      } else {
+        setExistingLogoUrl(null);
       }
     } catch (error) {
       console.error('Error fetching existing images:', error);
       addNotification("Failed to fetch existing images", "error");
+      setExistingImagesUrl(null);
+      setExistingLogoUrl(null);
     }
   };
 
@@ -841,7 +854,18 @@ export default function Dashboard() {
                   {imagesFile && <span className="ml-2">{imagesFile.name}</span>}
                   {!imagesFile && existingImagesUrl && (
                     <div className="ml-2 flex items-center">
-                      <Image src={existingImagesUrl} alt="Existing image" width={50} height={50} />
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={existingImagesUrl} 
+                          alt="Existing image" 
+                          fill
+                          className="object-cover rounded-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg?height=50&width=50';
+                          }}
+                        />
+                      </div>
                       <span className="ml-2">Existing image</span>
                     </div>
                   )}
@@ -867,7 +891,18 @@ export default function Dashboard() {
                   {logoFile && <span className="ml-2">{logoFile.name}</span>}
                   {!logoFile && existingLogoUrl && (
                     <div className="ml-2 flex items-center">
-                      <Image src={existingLogoUrl} alt="Existing logo" width={50} height={50} />
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={existingLogoUrl} 
+                          alt="Existing logo" 
+                          fill
+                          className="object-cover rounded-md"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg?height=50&width=50';
+                          }}
+                        />
+                      </div>
                       <span className="ml-2">Existing logo</span>
                     </div>
                   )}
