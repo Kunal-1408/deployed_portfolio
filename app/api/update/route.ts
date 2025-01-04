@@ -175,3 +175,56 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  console.log('Delete route hit');
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const type = searchParams.get('type');
+
+    if (!id || !type) {
+      throw new Error('ID and type are required');
+    }
+
+    let result;
+
+    switch (type) {
+      case 'websites':
+        result = await prisma.websites.delete({
+          where: { id },
+        });
+        break;
+      case 'brand':
+        result = await prisma.brand.delete({
+          where: { id },
+        });
+        break;
+      case 'social':
+        result = await prisma.social.delete({
+          where: { id },
+        });
+        break;
+      default:
+        return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    }
+
+    console.log('Delete operation result:', result);
+    return NextResponse.json({ success: true, data: result });
+
+  } catch (error) {
+    console.error('Error in DELETE /api/update:', error instanceof Error ? error.message : 'Unknown error');
+    if (error instanceof Error && error.stack) {
+      console.error('Error stack:', error.stack);
+    }
+    
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        stack: error instanceof Error && error.stack ? error.stack : undefined
+      },
+      { status: 500 }
+    );
+  }
+}
+

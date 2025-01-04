@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowUpDown, ChevronLeft, ChevronRight, File, Globe, MoreHorizontal, PlusCircle, Search, Star, X, Upload } from 'lucide-react'
+import { ArrowUpDown, ChevronLeft, ChevronRight, File, Globe, MoreHorizontal, PlusCircle, Search, Star, X, Upload, Trash2 } from 'lucide-react'
 
 import {
   Card,
@@ -29,6 +29,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
+const getImageUrl = (path: string | null) => {
+  if (!path) return '/placeholder.svg?height=50&width=50';
+  return path.startsWith('http') || path.startsWith('/') ? path : `/uploads/${path}`;
+};
 
 interface Website {
   id: string
@@ -201,48 +206,6 @@ export default function Dashboard() {
     }
   }
 
-  const fetchExistingImages = async (websiteId: string) => {
-    try {
-      const response = await fetch(`/api/fetch-images?id=${websiteId}`, {
-        method: 'GET',
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          // Handle 404 gracefully - website might not have images
-          setExistingImagesUrl(null);
-          setExistingLogoUrl(null);
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-    
-      if (data.Images) {
-        setExistingImagesUrl(data.Images);
-      } else {
-        setExistingImagesUrl(null);
-      }
-    
-      if (data.Logo) {
-        setExistingLogoUrl(data.Logo);
-      } else {
-        setExistingLogoUrl(null);
-      }
-    } catch (error) {
-      console.error('Error fetching existing images:', error);
-      addNotification("Failed to fetch existing images", "error");
-      setExistingImagesUrl(null);
-      setExistingLogoUrl(null);
-    }
-  };
-
-  useEffect(() => {
-    if (editingWebsite) {
-      fetchExistingImages(editingWebsite);
-    }
-  }, [editingWebsite]);
 
   const totalPages = Math.ceil(total / websitesPerPage)
 
@@ -286,9 +249,13 @@ export default function Dashboard() {
       setEditingWebsite(null)
       setEditedWebsite(null)
       setActiveTagManager(null)
+      setExistingImagesUrl(null)
+      setExistingLogoUrl(null)
     } else {
       setEditingWebsite(website.id)
       setEditedWebsite(website)
+      setExistingImagesUrl(getImageUrl(website.Images))
+      setExistingLogoUrl(getImageUrl(website.Logo))
     }
   }
 
@@ -479,6 +446,32 @@ export default function Dashboard() {
     }
   };
 
+  const deleteWebsite = async (websiteId: string) => {
+    try {
+      const response = await fetch(`/api/update?id=${websiteId}&type=websites`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setWebsites(prevWebsites => prevWebsites.filter(w => w.id !== websiteId));
+        setFilteredWebsites(prevFiltered => prevFiltered.filter(w => w.id !== websiteId));
+        setTotal(prevTotal => prevTotal - 1);
+        addNotification("The website has been successfully deleted.", "success");
+      } else {
+        throw new Error('Failed to delete website');
+      }
+    } catch (error) {
+      console.error('Error deleting website:', error);
+      addNotification("There was an error deleting the website. Please try again.", "error");
+    }
+  };
+
   const exportWebsites = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
       + "ID,Title,Description,Status,URL,Tags,Last Updated,Archived,Images,Logo\n"
@@ -661,6 +654,10 @@ export default function Dashboard() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem onClick={() => toggleEdit(website)} className="items-center">
                                 Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => deleteWebsite(website.id)} className="items-center text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -849,21 +846,18 @@ export default function Dashboard() {
                     className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Upload Images
+                    UploadImages
                   </label>
                   {imagesFile && <span className="ml-2">{imagesFile.name}</span>}
                   {!imagesFile && existingImagesUrl && (
                     <div className="ml-2 flex items-center">
                       <div className="relative w-12 h-12">
                         <Image 
-                          src={existingImagesUrl} 
+                          src={getImageUrl(existingImagesUrl)}
                           alt="Existing image" 
-                          fill
+                          width={48}
+                          height={48}
                           className="object-cover rounded-md"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder.svg?height=50&width=50';
-                          }}
                         />
                       </div>
                       <span className="ml-2">Existing image</span>
@@ -893,14 +887,11 @@ export default function Dashboard() {
                     <div className="ml-2 flex items-center">
                       <div className="relative w-12 h-12">
                         <Image 
-                          src={existingLogoUrl} 
+                          src={getImageUrl(existingLogoUrl)}
                           alt="Existing logo" 
-                          fill
+                          width={48}
+                          height={48}
                           className="object-cover rounded-md"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder.svg?height=50&width=50';
-                          }}
                         />
                       </div>
                       <span className="ml-2">Existing logo</span>
@@ -952,4 +943,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

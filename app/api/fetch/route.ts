@@ -75,7 +75,9 @@ export async function GET(request: Request) {
           data: sortedData.map((item: any) => ({
             ...item,
             Tags: Array.isArray(item.Tags) ? item.Tags : [],
-            Status: item.Status || 'Unknown', // Provide a default value if Status is null
+            Status: item.Status || 'Unknown',
+            Images: item.Images ? (item.Images.startsWith('/uploads/') ? item.Images : `/uploads/${item.Images}`) : null,
+            Logo: item.Logo ? (item.Logo.startsWith('/uploads/') ? item.Logo : `/uploads/${item.Logo}`) : null,
           })),
           total,
         };
