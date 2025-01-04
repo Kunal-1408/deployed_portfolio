@@ -1,47 +1,42 @@
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { NextRequest, NextResponse } from 'next/server'
+import path from 'path'
+import { promises as fs } from 'fs'
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    const { logo, images } = req.query;
-    
-    let logoPath = null;
-    let imagePaths = [];
+export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get('id')
 
-    if (logo) {
-      logoPath = getImageUrl(logo);
-    }
-
-    if (images) {
-      try {
-        const parsedImages = JSON.parse(images);
-        imagePaths = parsedImages.map(getImageUrl).filter(Boolean);
-      } catch (error) {
-        console.error('Error parsing images:', error);
-      }
-    }
-
-    res.status(200).json({ logo: logoPath, images: imagePaths });
-  } else {
-    res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid website ID' }, { status: 400 })
   }
-}
 
-function getImageUrl(filename) {
-  if (!filename) return null;
-  
-  // Remove any leading slash and 'uploads/' if present
-  const cleanFilename = filename.replace(/^\/?(uploads\/)?/, '');
-  const fullPath = join(process.cwd(), 'public', 'uploads', cleanFilename);
-  
-  // Check if the file exists
-  if (existsSync(fullPath)) {
-    // Return the URL path, not the file system path
-    return `/uploads/${cleanFilename}`;
-  } else {
-    console.warn(`File not found: ${fullPath}`);
-    return null;
+  try {
+    const websitesPath = path.join(process.cwd(), 'public', 'data', 'websites.json')
+    const websitesData = await fs.readFile(websitesPath, 'utf8')
+    const websites = JSON.parse(websitesData)
+
+    const website = websites.find((site: any) => site.id === id)
+
+    if (!website) {
+      return NextResponse.json({ error: 'Website not found' }, { status: 404 })
+    }
+
+    const getImagePath = (imageName: string | null) => {
+      if (!imageName) return null
+      // Remove any leading slashes and ensure the path starts with '/uploads/'
+      const cleanPath = imageName.replace(/^\/?(uploads\/)?/, '')
+      return cleanPath ? `/uploads/${cleanPath}` : null
+    }
+
+    const imagesPath = getImagePath(website.Images)
+    const logoPath = getImagePath(website.Logo)
+
+    return NextResponse.json({
+      Images: imagesPath,
+      Logo: logoPath
+    })
+  } catch (error) {
+    console.error('Error fetching images:', error)
+    return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 })
   }
 }
 
