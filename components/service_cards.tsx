@@ -3,41 +3,46 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { TextsServices } from "@prisma/client";
 
-const services = [
-  {
-    title: "Web Development",
-    description: "Custom websites tailored to your unique business needs, built with cutting-edge technologies for optimal performance and user experience.",
-    image: "/web.jpg",
-    src: "/services/web"
-  },
-  {
-    title: "SEO",
-    description: "Boost your online visibility and rankings with our data-driven SEO strategies, helping you reach your target audience effectively.",
-    image: "/SEO.jpg",
-    src: "/"
-  },
-  {
-    title: "Advertising",
-    description: "Create impactful ad campaigns that resonate with your audience, leveraging multiple channels for maximum reach and conversion.",
-    image: "/social.jfif",
-    src: "/"
-  },
-  {
-    title: "Digital Marketing",
-    description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
-    image: "/Digital.jpg",
-    src: "/"
-  },
-  {
-    title: "Branding",
-    description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
-    image: "/Digital.jpg",
-    src: "/"
-  }
-]
+interface ServicesProps {
+  services: TextsServices[];
+}
 
-export default function Component() {
+// const services = [
+//   {
+//     title: "Web Development",
+//     description: "Custom websites tailored to your unique business needs, built with cutting-edge technologies for optimal performance and user experience.",
+//     image: "/web.jpg",
+//     src: "/services/web"
+//   },
+//   {
+//     title: "SEO",
+//     description: "Boost your online visibility and rankings with our data-driven SEO strategies, helping you reach your target audience effectively.",
+//     image: "/SEO.jpg",
+//     src: "/"
+//   },
+//   {
+//     title: "Advertising",
+//     description: "Create impactful ad campaigns that resonate with your audience, leveraging multiple channels for maximum reach and conversion.",
+//     image: "/social.jfif",
+//     src: "/"
+//   },
+//   {
+//     title: "Digital Marketing",
+//     description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
+//     image: "/Digital.jpg",
+//     src: "/"
+//   },
+//   {
+//     title: "Branding",
+//     description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
+//     image: "/Digital.jpg",
+//     src: "/"
+//   }
+// ]
+
+export default function Component({ services }: ServicesProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   return (
@@ -57,7 +62,7 @@ export default function Component() {
             >
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-all duration-300"
-                style={{ backgroundImage: `url(${service.image})` }}
+                style={{ backgroundImage: `url(${service.imageUrl})` }}
               ></div>
               <div className="relative z-10 bg-black bg-opacity-50 h-full transition-all duration-300 group-hover:bg-opacity-30">
                 <CardHeader className="p-8">
@@ -92,7 +97,7 @@ export default function Component() {
               >
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-all duration-300 filter "
-                  style={{ backgroundImage: `url(${service.image})` }}
+                  style={{ backgroundImage: `url(${service.imageUrl})` }}
                 ></div>
                 <div className="relative z-10 bg-black bg-opacity-50 h-full transition-all duration-300 group-hover:bg-opacity-30">
                   <CardHeader className="p-8">

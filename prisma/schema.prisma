@@ -120,6 +120,7 @@ type TextsServices {
   description String
   imageUrl    String
   title       String
+  src         String
 }
 
 type TextsWhyChooseUs {

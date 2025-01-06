@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
+import { TextsHero } from "@prisma/client"
 
 interface AnimatedCounterProps {
   end: number
@@ -9,6 +10,9 @@ interface AnimatedCounterProps {
   startAnimation: boolean
 }
 
+interface HeroProps {
+  hero: TextsHero;
+}
 const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ end, duration = 2000, startAnimation }) => {
   const [count, setCount] = useState(0)
   const startTimeRef = useRef<number | null>(null)
@@ -42,7 +46,7 @@ interface Stat {
   text: string
 }
 
-export default function Component() {
+export default function Component({ hero }: HeroProps) {
   const [startAnimation, setStartAnimation] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -79,15 +83,13 @@ export default function Component() {
         <div className="flex flex-col items-center space-y-8 md:space-y-12">
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent mb-4">
-              We are Quite Good
+              {hero.title}
             </h2>
             <p className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-600 mb-4">
-              The Ultimate Marketing Agency
+              {hero.subtitle}
             </p>
             <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto">
-              We build beautiful products with the latest technologies and frameworks.
-              We are a team of passionate developers and designers that love to build
-              amazing products.
+              {hero.description}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-[1500px] ">
