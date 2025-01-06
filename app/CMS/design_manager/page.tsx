@@ -335,13 +335,8 @@ export default function Dashboard() {
       const formData = new FormData();
       formData.append('type', 'design');
       Object.entries(newDesign).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((item, index) => {
-            formData.append(`tags[${index}]`, item);
-          });
-        } else if (key === 'tags') {
-          const tags = value as string[];
-          tags.forEach((tag, index) => {
+        if (key === 'tags' && Array.isArray(value)) {
+          value.forEach((tag, index) => {
             formData.append(`tags[${index}]`, tag);
           });
         } else if (value !== null && value !== undefined) {
@@ -365,11 +360,11 @@ export default function Dashboard() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const addedDesign = await response.json();
+      const result = await response.json();
       
-      if (addedDesign) {
-        setDesigns(prevDesigns => [...prevDesigns, addedDesign]);
-        setFilteredDesigns(prevFiltered => [...prevFiltered, addedDesign]);
+      if (result.success && result.data) {
+        setDesigns(prevDesigns => [...prevDesigns, result.data]);
+        setFilteredDesigns(prevFiltered => [...prevFiltered, result.data]);
         setTotal(prevTotal => prevTotal + 1);
         setIsAddingDesign(false);
         setBannerFile(null);
@@ -380,7 +375,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error adding design:', error);
-      addNotification("There was an error adding the design. Please try again.", "error");
+      addNotification(`Error adding design: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
     }
   };
 
@@ -418,8 +413,8 @@ export default function Dashboard() {
 
         const updatedDesign = await response.json();
         
-        if (updatedDesign) {
-          addNotification(`The design has been ${updatedDesign.archive ? 'archived' : 'unarchived'} successfully.`, "success");
+        if (updatedDesign.success && updatedDesign.data) {
+          addNotification(`The design has been ${updatedDesign.data.archive ? 'archived' : 'unarchived'} successfully.`, "success");
         } else {
           throw new Error('Failed to update archive status');
         }
@@ -485,7 +480,8 @@ export default function Dashboard() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
       }
 
       const result = await response.json();
@@ -500,7 +496,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error deleting design:', error);
-      addNotification("There was an error deleting the design. Please try again.", "error");
+      addNotification(`Error deleting design: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
     }
   };
 
@@ -827,7 +823,7 @@ export default function Dashboard() {
                             {tagGroup.tags.map((tag) => (
                               <span
                                 key={`${tagGroup.title}-${tag}`}
-                                className="cursor-pointer h-6 max-w-full flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full border hover:shadow-[3px_3px_0px_0px_rgba(0,0,0)] transition duration-200"
+                                className="cursor-pointer h-6 max-w-full flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full border hover:shadow-[3px_3px_3px_0px_0px_rgba(0,0,0)] transition duration-200"
                                 style={{
                                   backgroundColor: (isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag)
                                     ? `color-mix(in srgb, ${tagGroup.color} 25%, white)`

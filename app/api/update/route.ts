@@ -151,38 +151,45 @@ export async function POST(req: NextRequest) {
           });
         }
         break;
-        case 'design':
-          if (data.id && data.id !== '') {
-            // Update existing record
-            result = await prisma.design.update({
-              where: { id: data.id },
-              data: {
-                Banner: data.Banner,
-                Brands: data.Brands,
-                Description: data.Description,
-                Logo: data.Logo,
-                Type: data.Type,
-                highlighted: data.highlighted || false,
-                archive: data.archive || false,
-                tags: data.tags || [],
-              },
-            });
-          } else {
-            // Create new record
-            result = await prisma.design.create({
-              data: {
-                Banner: data.Banner,
-                Brands: data.Brands,
-                Description: data.Description,
-                Logo: data.Logo,
-                Type: data.Type,
-                highlighted: data.highlighted || false,
-                archive: data.archive || false,
-                tags: data.tags || [],
-              },
-            });
-          }
-          break;
+      case 'design':
+        // Collect all tags from form data
+        const tags = Array.from(formData.entries())
+          .filter(([key]) => key.startsWith('tags['))
+          .map(([, value]) => value as string);
+
+        console.log('Collected tags:', tags);
+
+        if (data.id && data.id !== '') {
+          // Update existing record
+          result = await prisma.design.update({
+            where: { id: data.id },
+            data: {
+              Banner: data.Banner,
+              Brands: data.Brands,
+              Description: data.Description,
+              Logo: data.Logo,
+              Type: data.Type,
+              highlighted: data.highlighted === 'true',
+              archive: data.archive === 'true',
+              tags: tags,
+            },
+          });
+        } else {
+          // Create new record
+          result = await prisma.design.create({
+            data: {
+              Banner: data.Banner,
+              Brands: data.Brands,
+              Description: data.Description,
+              Logo: data.Logo,
+              Type: data.Type,
+              highlighted: data.highlighted === 'true',
+              archive: data.archive === 'true',
+              tags: tags,
+            },
+          });
+        }
+        break;
       default:
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
@@ -195,7 +202,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.stack) {
       console.error('Error stack:', error.stack);
     }
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -215,7 +222,7 @@ export async function DELETE(req: NextRequest) {
     const type = searchParams.get('type');
 
     if (!id || !type) {
-      throw new Error('ID and type are required');
+      return NextResponse.json({ success: false, error: 'ID and type are required' }, { status: 400 });
     }
 
     let result;
@@ -236,8 +243,13 @@ export async function DELETE(req: NextRequest) {
           where: { id },
         });
         break;
+      case 'design':
+        result = await prisma.design.delete({
+          where: { id },
+        });
+        break;
       default:
-        return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+        return NextResponse.json({ success: false, error: 'Invalid type' }, { status: 400 });
     }
 
     console.log('Delete operation result:', result);
@@ -248,7 +260,7 @@ export async function DELETE(req: NextRequest) {
     if (error instanceof Error && error.stack) {
       console.error('Error stack:', error.stack);
     }
-    
+
     return NextResponse.json(
       {
         success: false,
