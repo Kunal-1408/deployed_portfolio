@@ -119,7 +119,7 @@ export const Marquee = ({
             >
               <Image 
                 src={item.src} 
-                alt={item.alt} 
+                alt="" 
                 fill={true} 
                 className=" transition-all duration-300 object-cover"
               />
@@ -151,7 +151,7 @@ export const Marquee = ({
             >
               <Image 
                 src={item.src} 
-                alt={item.alt} 
+                alt=""
                 fill={true} 
                 className=" transition-all duration-300 object-cover"
               />

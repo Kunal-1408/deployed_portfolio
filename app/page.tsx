@@ -1,11 +1,8 @@
 'use client'
 import Hero  from "../components/hero";
-
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { cn } from "@/lib/utils";
-
-
 import  {Marquee}  from "@/components/ui/marquee";
 import Cards from "@/components/service_cards";
 import Infor from "@/components/info";
@@ -13,19 +10,20 @@ import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Choose from "@/components/choose";
 import { FormEvent, useState } from "react";
+import { fetchContent } from "@/lib/content-fetch";
 
 
 
 
   
-const BottomGradient = () => {
-  return (
-    <>
-      <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
-      <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-    </>
-  );
-};
+// const BottomGradient = () => {
+//   return (
+//     <>
+//       <span className="group-hover/btn:opacity-100 block transition duration-500 opacity-0 absolute h-px w-full -bottom-px inset-x-0 bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
+//       <span className="group-hover/btn:opacity-100 blur-sm block transition duration-500 opacity-0 absolute h-px w-1/2 mx-auto -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+//     </>
+//   );
+// };
 
 const LabelInputContainer = ({
   children,
@@ -43,7 +41,10 @@ const LabelInputContainer = ({
 
 
 
-export default function Home() {
+export default  function Home() {
+  // const content = await fetchContent();
+
+  console.log(content)
   
   const [formData, setFormData] = useState({
     First_Name: '',
@@ -222,7 +223,7 @@ export default function Home() {
         type="submit"
       >
         Submit &rarr;
-        <BottomGradient />
+        {/* <BottomGradient /> */}
       </button>
     </form>
     <div className="bg-gradient-to-r from-transparent via-orange-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
