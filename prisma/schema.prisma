@@ -135,7 +135,8 @@ model Brand {
   Logo        String
   Stats       BrandStats?
   banner      String
-  highlighted Boolean
+  archive             Boolean  @default(false)
+  highlighted         Boolean  @default(false)
   tags        String[]
 }
 
@@ -176,7 +177,9 @@ model design {
   Description String
   Logo        String
   Type        String
-  highlighted Boolean
+  URL                 String?
+  archive             Boolean  @default(false)
+  highlighted         Boolean  @default(false)
   tags        String[]
 }
 
@@ -196,7 +199,8 @@ model social {
   Logo        String
   Stats       SocialStats?
   banner      String
-  highlighted Boolean
+  archive             Boolean  @default(false)
+  highlighted         Boolean  @default(false)
   tags        String[]
 }
 

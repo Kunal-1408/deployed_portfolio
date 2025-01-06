@@ -3,7 +3,16 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowUpDown, ChevronLeft, ChevronRight, File, MoreHorizontal, PlusCircle, Search, Star, X } from 'lucide-react'
+import { ArrowUpDown, ChevronLeft, ChevronRight, File, Globe, MoreHorizontal, PlusCircle, Search, Star, X, Upload, Trash2 } from 'lucide-react'
+
+const togglerStyles = {
+  button: `relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`,
+  activeTrack: `bg-indigo-600`,
+  inactiveTrack: `bg-gray-200`,
+  knob: `inline-block h-4 w-4 transform rounded-full bg-white transition-transform`,
+  activeKnob: `translate-x-6`,
+  inactiveKnob: `translate-x-1`,
+};
 
 import {
   Card,
@@ -30,6 +39,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+const getImageUrl = (path: string | null) => {
+  if (!path) return '/placeholder.svg?height=50&width=50';
+  return path.startsWith('http') || path.startsWith('/') ? path : `/uploads/${path}`;
+};
+
 interface Design {
   id: string
   Banner: string
@@ -38,7 +52,14 @@ interface Design {
   Logo: string
   Type: string
   highlighted: boolean
+  archive: boolean
   tags: string[]
+}
+
+interface TagGroup {
+  title: string
+  tags: string[]
+  color: string
 }
 
 interface Notification {
@@ -47,7 +68,7 @@ interface Notification {
   type: 'success' | 'error'
 }
 
-export default function DesignDashboard() {
+export default function Dashboard() {
   const [activeTagManager, setActiveTagManager] = useState<string | null>(null)
   const [editingDesign, setEditingDesign] = useState<string | null>(null)
   const [editedDesign, setEditedDesign] = useState<Design | null>(null)
@@ -61,10 +82,20 @@ export default function DesignDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const designsPerPage = 10
 
-  const allTags: string[] = ["Logo", "Branding", "Web Design", "Print", "Packaging", "UI/UX"]
-  const designTypes: string[] = ["Logo Design", "Brand Identity", "Web Design", "Print Design", "Packaging Design", "UI/UX Design"]
+  const [bannerFile, setBannerFile] = useState<File | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [existingBannerUrl, setExistingBannerUrl] = useState<string | null>(null)
+  const [existingLogoUrl, setExistingLogoUrl] = useState<string | null>(null)
+
+  const allTags: TagGroup[] = [
+    {title:"Design Type", tags:["Logo", "Website", "Branding"], color: "hsl(221, 83%, 53%)"},
+    {title:"Industry", tags:["Technology", "Fashion", "Food", "Healthcare"], color: "hsl(140, 71%, 45%)"},
+    {title:"Style", tags:["Minimalist", "Modern", "Vintage", "Abstract"], color: "hsl(291, 64%, 42%)"}
+  ]
 
   const [newDesign, setNewDesign] = useState<Design>({
     id: '',
@@ -74,48 +105,13 @@ export default function DesignDashboard() {
     Logo: '',
     Type: '',
     highlighted: false,
+    archive: false,
     tags: []
   })
 
-  const fetchDesigns = async (currentPage: number, designsPerPage: number, searchQuery: string) => {
-    try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&types=designs&search=${encodeURIComponent(searchQuery)}`, {
-        method: 'GET',
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Oops, we haven't got JSON!");
-      }
-  
-      const data = await response.json();
-      
-      if (data.designs && Array.isArray(data.designs.data)) {
-        setDesigns(data.designs.data);
-        setFilteredDesigns(data.designs.data);
-        setTotal(data.designs.total);
-      } else {
-        console.error('Unexpected data structure:', data);
-        addNotification("Unexpected data structure received for designs", "error");
-      }
-    } catch (error) {
-      console.error('Error fetching designs:', error);
-      if (error instanceof TypeError) {
-        addNotification("The server response was not in JSON format. This might be due to a server error.", "error");
-      } else if (error instanceof Error) {
-        addNotification(`Failed to fetch designs: ${error.message}`, "error");
-      } else {
-        addNotification("An unknown error occurred while fetching designs", "error");
-      }
-    }
-  };
   useEffect(() => {
-    fetchDesigns(currentPage,designsPerPage,searchQuery)
-  }, [currentPage,designsPerPage, searchQuery])
+    fetchDesigns()
+  }, [currentPage, searchQuery])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -132,45 +128,86 @@ export default function DesignDashboard() {
     }
   }, [])
 
-  const toggleHighlight = async (designId: string) => {
-    const designToUpdate = designs.find(d => d.id === designId)
-    if (designToUpdate) {
-      try {
-        const updatedDesigns = designs.map(design =>
-          design.id === designId ? { ...design, highlighted: !design.highlighted } : design
-        )
-        setDesigns(updatedDesigns)
-        setFilteredDesigns(updatedDesigns)
+  const fetchDesigns = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${designsPerPage}&types=design&search=${encodeURIComponent(searchQuery)}`, {
+        method: 'GET',
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('Fetched data:', data)
+      
+      if (data.design && Array.isArray(data.design.data)) {
+        setDesigns(data.design.data);
+        setFilteredDesigns(data.design.data);
+        setTotal(data.design.total);
+      } else {
+        console.error('Unexpected data structure:', data);
+        setError("Unexpected data structure received for designs")
+        setDesigns([]);
+        setFilteredDesigns([]);
+        setTotal(0);
+      }
+    } catch (error) {
+      console.error('Error fetching designs:', error);
+      setError("Failed to fetch designs")
+      setDesigns([]);
+      setFilteredDesigns([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false)
+    }
+  };
 
-        const response = await fetch('/api/update', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: designId,
-            highlighted: !designToUpdate.highlighted,
-            type: 'designs'
-          }),
-        });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+  
+  const executeSearch = () => {
+    setIsSearching(true);
+    setCurrentPage(1);
+    fetchDesigns();
+  };
+  
+  const clearSearch = () => {
+    setSearchQuery("");
+    setIsSearching(false);
+    setCurrentPage(1);
+    fetchDesigns();
+  };
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, field: keyof Design) => {
+    if (editedDesign) {
+      setEditedDesign({
+        ...editedDesign,
+        [field]: e.target.value
+      });
+    } else if (isAddingDesign) {
+      setNewDesign({
+        ...newDesign,
+        [field]: e.target.value
+      });
+    }
+  };
 
-        const updatedDesign = await response.json();
-        
-        if (updatedDesign) {
-          addNotification(`The design has been ${updatedDesign.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success")
-        } else {
-          setDesigns(designs)
-          setFilteredDesigns(filteredDesigns)
-          throw new Error('Failed to update highlight status')
-        }
-      } catch (error) {
-        console.error('Error updating highlight status:', error)
-        addNotification("There was an error updating the design. Please try again.", "error")
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'Banner' | 'Logo') => {
+    if (e.target.files && e.target.files[0]) {
+      if (field === 'Banner') {
+        setBannerFile(e.target.files[0])
+        setExistingBannerUrl(null) 
+      } else {
+        setLogoFile(e.target.files[0])
+        setExistingLogoUrl(null) 
       }
     }
   }
-
-
 
   const totalPages = Math.ceil(total / designsPerPage)
 
@@ -214,9 +251,13 @@ export default function DesignDashboard() {
       setEditingDesign(null)
       setEditedDesign(null)
       setActiveTagManager(null)
+      setExistingBannerUrl(null)
+      setExistingLogoUrl(null)
     } else {
       setEditingDesign(design.id)
       setEditedDesign(design)
+      setExistingBannerUrl(getImageUrl(design.Banner))
+      setExistingLogoUrl(getImageUrl(design.Logo))
     }
   }
 
@@ -231,127 +272,258 @@ export default function DesignDashboard() {
   const updateDesign = async () => {
     if (editedDesign) {
       try {
+        const formData = new FormData();
+        formData.append('type', 'design');
+        Object.entries(editedDesign).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+              formData.append(`tags[${index}]`, item);
+            });
+          } else if (key === 'tags') {
+            const tags = value as string[];
+            tags.forEach((tag, index) => {
+              formData.append(`tags[${index}]`, tag);
+            });
+          } else if (value !== null && value !== undefined) {
+            formData.append(key, value.toString());
+          }
+        });
+
+        if (bannerFile) {
+          formData.append('Banner', bannerFile);
+        }
+        if (logoFile) {
+          formData.append('Logo', logoFile);
+        }
+
         const response = await fetch('/api/update', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...editedDesign, type: 'designs' }),
+          body: formData,
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const updatedDesign = await response.json();
         
         if (updatedDesign) {
           setDesigns(prevDesigns => 
             prevDesigns.map(d => d.id === updatedDesign.id ? updatedDesign : d)
-          )
+          );
           setFilteredDesigns(prevFiltered => 
             prevFiltered.map(d => d.id === updatedDesign.id ? updatedDesign : d)
-          )
-          setEditingDesign(null)
-          setEditedDesign(null)
-          setActiveTagManager(null)
-          addNotification("The design has been successfully updated.", "success")
+          );
+          setEditingDesign(null);
+          setEditedDesign(null);
+          setActiveTagManager(null);
+          setBannerFile(null);
+          setLogoFile(null);
+          addNotification("The design has been successfully updated.", "success");
         } else {
-          throw new Error('Failed to update design')
+          throw new Error('Failed to update design');
         }
       } catch (error) {
-        console.error('Error updating design:', error)
-        addNotification("There was an error updating the design. Please try again.", "error")
+        console.error('Error updating design:', error);
+        addNotification("There was an error updating the design. Please try again.", "error");
       }
     }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>, field: keyof Design) => {
-    if (editedDesign) {
-      setEditedDesign({
-        ...editedDesign,
-        [field]: e.target.value
-      })
-    } else if (isAddingDesign) {
-      setNewDesign({
-        ...newDesign,
-        [field]: e.target.value
-      })
-    }
-  }
+  };
 
   const addDesign = async () => {
     try {
+      const formData = new FormData();
+      formData.append('type', 'design');
+      Object.entries(newDesign).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            formData.append(`tags[${index}]`, item);
+          });
+        } else if (key === 'tags') {
+          const tags = value as string[];
+          tags.forEach((tag, index) => {
+            formData.append(`tags[${index}]`, tag);
+          });
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      if (bannerFile) {
+        formData.append('Banner', bannerFile);
+      }
+      if (logoFile) {
+        formData.append('Logo', logoFile);
+      }
+
       const response = await fetch('/api/update', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...newDesign, type: 'designs' }),
+        body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const addedDesign = await response.json();
       
       if (addedDesign) {
-        setDesigns(prevDesigns => [...prevDesigns, addedDesign])
-        setFilteredDesigns(prevFiltered => [...prevFiltered, addedDesign])
-        setTotal(prevTotal => prevTotal + 1)
-        setIsAddingDesign(false)
-        setNewDesign({
-          id: '',
-          Banner: '',
-          Brands: '',
-          Description: '',
-          Logo: '',
-          Type: '',
-          highlighted: false,
-          tags: []
-        })
-        addNotification("The design has been successfully added.", "success")
+        setDesigns(prevDesigns => [...prevDesigns, addedDesign]);
+        setFilteredDesigns(prevFiltered => [...prevFiltered, addedDesign]);
+        setTotal(prevTotal => prevTotal + 1);
+        setIsAddingDesign(false);
+        setBannerFile(null);
+        setLogoFile(null);
+        addNotification("The design has been successfully added.", "success");
       } else {
-        throw new Error('Failed to add design')
+        throw new Error('Failed to add design');
       }
     } catch (error) {
-      console.error('Error adding design:', error)
-      addNotification("There was an error adding the design. Please try again.", "error")
+      console.error('Error adding design:', error);
+      addNotification("There was an error adding the design. Please try again.", "error");
     }
-  }
+  };
+
+  const toggleArchive = async (designId: string) => {
+    const designToUpdate = designs.find(d => d.id === designId);
+    if (designToUpdate) {
+      try {
+        const newArchiveStatus = !designToUpdate.archive;
+        
+        // Optimistically update the UI
+        setDesigns(prevDesigns => 
+          prevDesigns.map(design => 
+            design.id === designId ? { ...design, archive: newArchiveStatus } : design
+          )
+        );
+        setFilteredDesigns(prevFiltered => 
+          prevFiltered.map(design => 
+            design.id === designId ? { ...design, archive: newArchiveStatus } : design
+          )
+        );
+
+        const formData = new FormData();
+        formData.append('type', 'design');
+        formData.append('id', designId);
+        formData.append('archive', newArchiveStatus.toString());
+
+        const response = await fetch('/api/update', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const updatedDesign = await response.json();
+        
+        if (updatedDesign) {
+          addNotification(`The design has been ${updatedDesign.archive ? 'archived' : 'unarchived'} successfully.`, "success");
+        } else {
+          throw new Error('Failed to update archive status');
+        }
+      } catch (error) {
+        console.error('Error updating archive status:', error);
+        addNotification("There was an error updating the design. Please try again.", "error");
+        
+        // Revert the optimistic update if there was an error
+        setDesigns(prevDesigns => 
+          prevDesigns.map(design => 
+            design.id === designId ? { ...design, archive: designToUpdate.archive } : design
+          )
+        );
+        setFilteredDesigns(prevFiltered => 
+          prevFiltered.map(design => 
+            design.id === designId ? { ...design, archive: designToUpdate.archive } : design
+          )
+        );
+      }
+    }
+  };
+
+  const toggleHighlight = async (designId: string) => {
+    const designToUpdate = designs.find(d => d.id === designId);
+    if (designToUpdate) {
+      try {
+        const updatedDesigns = designs.map(design =>
+          design.id === designId ? { ...design, highlighted: !design.highlighted } : design
+        );
+        setDesigns(updatedDesigns);
+        setFilteredDesigns(updatedDesigns);
+  
+        const formData = new FormData();
+        formData.append('type', 'design');
+        formData.append('id', designId);
+        formData.append('highlighted', (!designToUpdate.highlighted).toString());
+  
+        const response = await fetch('/api/update', {
+          method: 'POST',
+          body: formData,
+        });
+  
+        const updatedDesign = await response.json();
+        
+        if (updatedDesign) {
+          addNotification(`The design has been ${updatedDesign.highlighted ? 'highlighted' : 'unhighlighted'} successfully.`, "success");
+        } else {
+          setDesigns(designs);
+          setFilteredDesigns(designs);
+          throw new Error('Failed to update highlight status');
+        }
+      } catch (error) {
+        console.error('Error updating highlight status:', error);
+        addNotification("There was an error updating the design. Please try again.", "error");
+      }
+    }
+  };
+
+  const deleteDesign = async (designId: string) => {
+    try {
+      const response = await fetch(`/api/update?id=${designId}&type=design`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setDesigns(prevDesigns => prevDesigns.filter(d => d.id !== designId));
+        setFilteredDesigns(prevFiltered => prevFiltered.filter(d => d.id !== designId));
+        setTotal(prevTotal => prevTotal - 1);
+        addNotification("The design has been successfully deleted.", "success");
+      } else {
+        throw new Error('Failed to delete design');
+      }
+    } catch (error) {
+      console.error('Error deleting design:', error);
+      addNotification("There was an error deleting the design. Please try again.", "error");
+    }
+  };
 
   const exportDesigns = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "ID,Brands,Description,Type,Logo,Banner,Tags,Highlighted\n"
+      + "ID,Banner,Brands,Description,Logo,Type,Highlighted,Archived,Tags\n"
       + filteredDesigns.map(design => 
-          `${design.id},"${design.Brands}","${design.Description}",${design.Type},${design.Logo},${design.Banner},"${design.tags.join(', ')}",${design.highlighted}`
-        ).join("\n")
+          `${design.id},"${design.Banner}","${design.Brands}","${design.Description}","${design.Logo}","${design.Type}",${design.highlighted},${design.archive},"${design.tags.join(', ')}"`
+        ).join("\n");
 
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", "designs_export.csv")
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "designs_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
-
-  const executeSearch = () => {
-    setIsSearching(true)
-    const lowercasedQuery = searchQuery.toLowerCase()
-    const filtered = designs.filter(design => 
-      (design.Brands?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (design.Description?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (design.Type?.toLowerCase().includes(lowercasedQuery) ?? false) ||
-      (design.tags?.some(tag => tag.toLowerCase().includes(lowercasedQuery)) ?? false)
-    )
-    setFilteredDesigns(filtered)
-    setCurrentPage(1)
-  }
-
-  const clearSearch = () => {
-    setSearchQuery("")
-    setIsSearching(false)
-    setFilteredDesigns(designs)
-    setCurrentPage(1)
-  }
+  const getTagColor = (tag: string) => {
+    const tagGroup = allTags.find(group => group.tags.includes(tag));
+    return tagGroup ? tagGroup.color : 'hsl(0, 0%, 50%)';
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -414,7 +586,7 @@ export default function DesignDashboard() {
             <CardHeader>
               <CardTitle>Designs</CardTitle>
               <CardDescription>
-                Manage your design projects and view their status.
+                Manage your designs and view their status.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -423,46 +595,100 @@ export default function DesignDashboard() {
                   <TableRow>
                     <TableHead className="w-[100px]">
                       <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 p-0">
-                        Brands
+                        Type
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </button>
                     </TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Type</TableHead>
+                    <TableHead>Brands</TableHead>
+                    <TableHead>Banner</TableHead>
                     <TableHead>Logo</TableHead>
                     <TableHead>Tags</TableHead>
+                    <TableHead>Active</TableHead>
                     <TableHead>
                       <span className="sr-only">Actions</span>
+                    </TableHead>
+                    <TableHead>
+                      <span className="sr-only">Highlight</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDesigns.length > 0 ? (
-                    filteredDesigns.map((design) => (
-                      <TableRow key={design.id}>
-                        <TableCell className="font-medium">{design.Brands}</TableCell>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-4">
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : designs && designs.length > 0 ? (
+                    designs.map((design) => (
+                      <TableRow key={design.id} className={design.archive ? "opacity-50" : ""}>
+                        <TableCell className="font-medium">{design.Type}</TableCell>
                         <TableCell className="max-w-md">
                           <div className="line-clamp-3 overflow-hidden text-ellipsis">
                             {design.Description}
                           </div>
                         </TableCell>
-                        <TableCell>{design.Type}</TableCell>
+                        <TableCell>{design.Brands}</TableCell>
                         <TableCell>
-                          {design.Logo && (
-                            <Image src={design.Logo} alt={`${design.Brands} logo`} width={50} height={50} />
-                          )}
+                          <div className="relative w-12 h-12">
+                            <Image 
+                              src={getImageUrl(design.Banner)}
+                              alt="Banner" 
+                              width={48}
+                              height={48}
+                              className="object-cover rounded-md"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="relative w-12 h-12">
+                            <Image 
+                              src={getImageUrl(design.Logo)}
+                              alt="Logo" 
+                              width={48}
+                              height={48}
+                              className="object-cover rounded-md"
+                            />
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {design.tags.map((tag, index) => (
-                              <span 
-                                key={index} 
-                                className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800"
-                              >
-                                {tag}
-                              </span>
-                            ))}
+                            {design.tags && design.tags.length > 0 ? (
+                              design.tags.map((tag, index) => (
+                                <span 
+                                  key={index} 
+                                  className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" 
+                                  style={{
+                                    backgroundColor: `color-mix(in srgb, ${getTagColor(tag)} 25%, white)`,
+                                    color: getTagColor(tag),
+                                  }}
+                                >
+                                  {tag}
+                                </span>
+                              ))
+                            ) : (
+                              <span>No tags</span>
+                            )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <button
+                            type="button"
+                            onClick={() => toggleArchive(design.id)}
+                            className={`${togglerStyles.button} ${
+                              !design.archive ? togglerStyles.activeTrack : togglerStyles.inactiveTrack
+                            }`}
+                            role="switch"
+                            aria-checked={!design.archive}
+                          >
+                            <span className="sr-only">{design.archive ? "Unarchive design" : "Archive design"}</span>
+                            <span
+                              className={`${togglerStyles.knob} ${
+                                !design.archive ? togglerStyles.activeKnob : togglerStyles.inactiveKnob
+                              }`}
+                            />
+                          </button>
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
@@ -479,6 +705,10 @@ export default function DesignDashboard() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuItem onClick={() => toggleEdit(design)} className="items-center">
                                 Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => deleteDesign(design.id)} className="items-center text-red-600">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -497,7 +727,7 @@ export default function DesignDashboard() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4">
+                      <TableCell colSpan={8} className="text-center py-4">
                         No designs found.
                       </TableCell>
                     </TableRow>
@@ -507,7 +737,7 @@ export default function DesignDashboard() {
             </CardContent>
             <CardFooter className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Showing <strong>{filteredDesigns.length > 0 ? (currentPage - 1) * designsPerPage + 1 : 0}-{Math.min(currentPage * designsPerPage, filteredDesigns.length)}</strong> of <strong>{filteredDesigns.length}</strong> designs
+                Showing <strong>{designs.length > 0 ? (currentPage - 1) * designsPerPage + 1 : 0}-{Math.min(currentPage * designsPerPage, total)}</strong> of <strong>{total}</strong> designs
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -537,6 +767,30 @@ export default function DesignDashboard() {
             <h2 className="text-xl font-bold mb-4">{isAddingDesign ? "Add Design" : "Edit Design"}</h2>
             <div className="space-y-4">
               <div>
+                <label htmlFor="type" className="block text-md font-semibold text-gray-700">Type</label>
+                <Input
+                  id="type"
+                  value={isAddingDesign ? newDesign.Type : editedDesign?.Type ?? ''}
+                  onChange={(e) => handleInputChange(e, 'Type')}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label htmlFor="description" className="block text-md font-semibold text-gray-700">Description</label>
+                <Input
+                  id="description"
+                  value={isAddingDesign ? newDesign.Description : editedDesign?.Description ?? ''}
+                  onChange={(e) => handleInputChange(e, 'Description')}
+                  className="mt-1"
+                  style={{
+                    minHeight: '100px',
+                    height: 'auto',
+                    overflow: 'hidden',
+                    resize: 'none',
+                  }}
+                />
+              </div>
+              <div>
                 <label htmlFor="brands" className="block text-md font-semibold text-gray-700">Brands</label>
                 <Input
                   id="brands"
@@ -546,67 +800,131 @@ export default function DesignDashboard() {
                 />
               </div>
               <div>
-                <label htmlFor="description" className="block text-md font-semibold text-gray-700">Description</label>
-                <textarea
-                  id="description"
-                  value={isAddingDesign ? newDesign.Description : editedDesign?.Description ?? ''}
-                  onChange={(e) => handleInputChange(e, 'Description')}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label htmlFor="type" className="block text-md font-semibold text-gray-700">Type</label>
-                <select
-                  id="type"
-                  value={isAddingDesign ? newDesign.Type : editedDesign?.Type ?? ''}
-                  onChange={(e) => handleInputChange(e, 'Type')}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                >
-                  <option value="">Select a type</option>
-                  {designTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="logo" className="block text-md font-semibold text-gray-700">Logo URL</label>
-                <Input
-                  id="logo"
-                  value={isAddingDesign ? newDesign.Logo : editedDesign?.Logo ?? ''}
-                  onChange={(e) => handleInputChange(e, 'Logo')}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label htmlFor="banner" className="block text-md font-semibold text-gray-700">Banner URL</label>
-                <Input
-                  id="banner"
-                  value={isAddingDesign ? newDesign.Banner : editedDesign?.Banner ?? ''}
-                  onChange={(e) => handleInputChange(e, 'Banner')}
-                  className="mt-1"
-                />
-              </div>
-              <div>
                 <label htmlFor="tags" className="block text-md font-semibold text-gray-700">Tags</label>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {allTags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className={`cursor-pointer inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        (isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag)
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                      onClick={() =>
-                        (isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag)
-                          ? removeTag(tag)
-                          : addTag(tag)
-                      }
-                    >
-                      {tag}
-                    </span>
+                <div className="mt-1 flex flex-wrap gap-2 cursor-pointer" onClick={toggleTagManager}>
+                  {(isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).map((tag, index) => (
+                    <span 
+                        key={index} 
+                        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" 
+                        style={{
+                          backgroundColor: `color-mix(in srgb, ${getTagColor(tag)} 25%, white)`,
+                          color: getTagColor(tag),
+                        }}
+                      >
+                        {tag}
+                      </span>
                   ))}
+                </div>
+                {(activeTagManager === editingDesign || (isAddingDesign && activeTagManager === 'new')) && (
+                  <div className="mt-2 p-2 ">
+                    <div className="flex flex-col space-y-4">
+                      {allTags.map((tagGroup, index) => (
+                        <div key={tagGroup.title} className="pb-2 flex flex-col border border-dashed border-gray-200 rounded-md"> 
+                            <h5 className={`text-${tagGroup.color}-600 text-md font-semibold mb-2`}>
+                              {tagGroup.title}
+                            </h5>
+                          <div className="flex flex-wrap gap-2 "> 
+                            {tagGroup.tags.map((tag) => (
+                              <span
+                                key={`${tagGroup.title}-${tag}`}
+                                className="cursor-pointer h-6 max-w-full flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full border hover:shadow-[3px_3px_0px_0px_rgba(0,0,0)] transition duration-200"
+                                style={{
+                                  backgroundColor: (isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag)
+                                    ? `color-mix(in srgb, ${tagGroup.color} 25%, white)`
+                                    : 'white',
+                                  color: tagGroup.color,
+                                  borderColor: tagGroup.color,
+                                }}
+                                
+                                onClick={() =>
+                                  (isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag) ? removeTag(tag) : addTag(tag)
+                                }
+                              >
+                                {tag}
+                                {(isAddingDesign ? newDesign.tags : editedDesign?.tags ?? []).includes(tag) && (
+                                  <X
+                                    className="ml-1 h-3 w-3"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeTag(tag);
+                                    }}
+                                  />
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label htmlFor="banner" className="block text-md font-semibold text-gray-700">Banner</label>
+                <div className="mt-1 flex items-center">
+                  <input
+                    id="banner"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'Banner')}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="banner"
+                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Banner
+                  </label>
+                  {bannerFile && <span className="ml-2">{bannerFile.name}</span>}
+                  {!bannerFile && existingBannerUrl && (
+                    <div className="ml-2 flex items-center">
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={getImageUrl(existingBannerUrl)}
+                          alt="Existing banner" 
+                          width={48}
+                          height={48}
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                      <span className="ml-2">Existing banner</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label htmlFor="logo" className="block text-md font-semibold text-gray-700">Logo</label>
+                <div className="mt-1 flex items-center">
+                  <input
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'Logo')}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="logo"
+                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Logo
+                  </label>
+                  {logoFile && <span className="ml-2">{logoFile.name}</span>}
+                  {!logoFile && existingLogoUrl && (
+                    <div className="ml-2 flex items-center">
+                      <div className="relative w-12 h-12">
+                        <Image 
+                          src={getImageUrl(existingLogoUrl)}
+                          alt="Existing logo" 
+                          width={48}
+                          height={48}
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                      <span className="ml-2">Existing logo</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -615,7 +933,12 @@ export default function DesignDashboard() {
                 onClick={() => {
                   setEditingDesign(null)
                   setEditedDesign(null)
+                  setActiveTagManager(null)
                   setIsAddingDesign(false)
+                  setBannerFile(null)
+                  setLogoFile(null)
+                  setExistingBannerUrl(null)
+                  setExistingLogoUrl(null)
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
@@ -634,7 +957,7 @@ export default function DesignDashboard() {
       <div className="fixed bottom-4 right-4 z-50">
         {notifications.map((notification) => (
           <div
-            key={notification.id}
+            key={`notification-${notification.id}`}
             className={`mb-2 p-4 rounded-md ${
               notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
             } text-white`}
@@ -643,6 +966,9 @@ export default function DesignDashboard() {
           </div>
         ))}
       </div>
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   )
 }
+

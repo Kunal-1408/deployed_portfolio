@@ -151,6 +151,38 @@ export async function POST(req: NextRequest) {
           });
         }
         break;
+        case 'design':
+          if (data.id && data.id !== '') {
+            // Update existing record
+            result = await prisma.design.update({
+              where: { id: data.id },
+              data: {
+                Banner: data.Banner,
+                Brands: data.Brands,
+                Description: data.Description,
+                Logo: data.Logo,
+                Type: data.Type,
+                highlighted: data.highlighted || false,
+                archive: data.archive || false,
+                tags: data.tags || [],
+              },
+            });
+          } else {
+            // Create new record
+            result = await prisma.design.create({
+              data: {
+                Banner: data.Banner,
+                Brands: data.Brands,
+                Description: data.Description,
+                Logo: data.Logo,
+                Type: data.Type,
+                highlighted: data.highlighted || false,
+                archive: data.archive || false,
+                tags: data.tags || [],
+              },
+            });
+          }
+          break;
       default:
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
     }
