@@ -292,14 +292,13 @@ export default function ContentManager() {
       const formData = new FormData();
       formData.append('data', JSON.stringify(content));
 
-      // Append all images to formData
       const appendImages = async (items: any[], prefix: string) => {
         for (let index = 0; index < items.length; index++) {
           const item = items[index];
           if (item.imageUrl && (item.imageUrl.startsWith('blob:') || item.imageUrl.startsWith('data:'))) {
             const file = await fetchAndCreateFile(item.imageUrl, `${prefix}_${index}`);
             if (file) {
-              formData.append('images', file);
+              formData.append('images', file, file.name);
             }
           }
         }
@@ -313,7 +312,7 @@ export default function ContentManager() {
         if (client.logoUrl && (client.logoUrl.startsWith('blob:') || client.logoUrl.startsWith('data:'))) {
           const file = await fetchAndCreateFile(client.logoUrl, `client_${index}`);
           if (file) {
-            formData.append('images', file);
+            formData.append('images', file, file.name);
           }
         }
       }
@@ -346,7 +345,8 @@ export default function ContentManager() {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      return new File([blob], filename, { type: blob.type });
+      const extension = blob.type.split('/')[1];
+      return new File([blob], `${filename}.${extension}`, { type: blob.type });
     } catch (error) {
       console.error('Error fetching file:', error);
       return null;

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       files.map(async (file) => {
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
-        const filename = `${Date.now()}-${file.name}`
+        const filename = file.name // Use the original filename which includes the extension
         const path = join(uploadDir, filename)
         await writeFile(path, buffer)
         return `/uploads/content/${filename}`
