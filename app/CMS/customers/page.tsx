@@ -33,6 +33,28 @@ interface ServicePageContent {
   };
 }
 
+interface ContactUsContent {
+  banner: {
+    imageUrl: string;
+  };
+  contactInfoCards: {
+    heading: string;
+    description: string;
+  }[];
+  faqs: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+interface AboutUsSection {
+  title: string;
+  content: {
+    description: string;
+    images: string[];
+  };
+}
+
 interface Content {
   hero: {
     title: string;
@@ -47,6 +69,8 @@ interface Content {
   servicePages: {
     [key: string]: ServicePageContent;
   };
+  contactUs: ContactUsContent;
+  aboutUs: AboutUsSection[];
 }
 
 const initialContent: Content = {
@@ -92,6 +116,14 @@ const initialContent: Content = {
       },
     },
   },
+  contactUs: {
+    banner: {
+      imageUrl: '',
+    },
+    contactInfoCards: [],
+    faqs: [],
+  },
+  aboutUs: [],
 }
 
 export default function ContentManager() {
@@ -135,6 +167,11 @@ export default function ContentManager() {
               ])
             )
           },
+          contactUs: {
+            ...prevContent.contactUs,
+            ...data.contactUs,
+          },
+          aboutUs: data.aboutUs || [],
         }));
       } else {
         console.error('Failed to fetch content');
@@ -284,6 +321,137 @@ export default function ContentManager() {
     }))
   }
 
+  const handleContactUsChange = (field: keyof ContactUsContent, value: any) => {
+    setContent(prev => ({
+      ...prev,
+      contactUs: { ...prev.contactUs, [field]: value }
+    }))
+  }
+
+  const handleContactInfoCardChange = (index: number, field: 'heading' | 'description', value: string) => {
+    setContent(prev => ({
+      ...prev,
+      contactUs: {
+        ...prev.contactUs,
+        contactInfoCards: prev.contactUs.contactInfoCards.map((card, i) => 
+          i === index ? { ...card, [field]: value } : card
+        )
+      }
+    }))
+  }
+
+  const handleAddContactInfoCard = () => {
+    setContent(prev => ({
+      ...prev,
+      contactUs: {
+        ...prev.contactUs,
+        contactInfoCards: [...prev.contactUs.contactInfoCards, { heading: '', description: '' }]
+      }
+    }))
+  }
+
+  const handleFaqChange = (index: number, field: 'question' | 'answer', value: string) => {
+    setContent(prev => ({
+      ...prev,
+      contactUs: {
+        ...prev.contactUs,
+        faqs: prev.contactUs.faqs.map((faq, i) => 
+          i === index ? { ...faq, [field]: value } : faq
+        )
+      }
+    }))
+  }
+
+  const handleAddFaq = () => {
+    setContent(prev => ({
+      ...prev,
+      contactUs: {
+        ...prev.contactUs,
+        faqs: [...prev.contactUs.faqs, { question: '', answer: '' }]
+      }
+    }))
+  }
+
+  const handleAboutUsChange = (index: number, field: 'title' | 'description', value: string) => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: prev.aboutUs.map((section, i) => 
+        i === index
+          ? field === 'title'
+            ? { ...section, title: value }
+            : { ...section, content: { ...section.content, description: value } }
+          : section
+      )
+    }))
+  }
+
+  const handleAboutUsImageChange = (sectionIndex: number, imageIndex: number, file: File) => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: prev.aboutUs.map((section, i) => 
+        i === sectionIndex
+          ? {
+              ...section,
+              content: {
+                ...section.content,
+                images: section.content.images.map((img, j) => 
+                  j === imageIndex ? URL.createObjectURL(file) : img
+                )
+              }
+            }
+          : section
+      )
+    }))
+  }
+
+  const handleAddAboutUsImage = (sectionIndex: number) => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: prev.aboutUs.map((section, i) => 
+        i === sectionIndex
+          ? {
+              ...section,
+              content: {
+                ...section.content,
+                images: [...section.content.images, '']
+              }
+            }
+          : section
+      )
+    }))
+  }
+
+  const handleRemoveAboutUsImage = (sectionIndex: number, imageIndex: number) => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: prev.aboutUs.map((section, i) => 
+        i === sectionIndex
+          ? {
+              ...section,
+              content: {
+                ...section.content,
+                images: section.content.images.filter((_, j) => j !== imageIndex)
+              }
+            }
+          : section
+      )
+    }))
+  }
+
+  const handleAddAboutUsSection = () => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: [...prev.aboutUs, { title: '', content: { description: '', images: [] } }]
+    }))
+  }
+
+  const handleRemoveAboutUsSection = (index: number) => {
+    setContent(prev => ({
+      ...prev,
+      aboutUs: prev.aboutUs.filter((_, i) => i !== index)
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -319,6 +487,28 @@ export default function ContentManager() {
 
       for (const service of Object.keys(content.servicePages)) {
         await appendImages(content.servicePages[service].carouselImages, `${service}_carousel`);
+      }
+
+      // Handle Contact Us banner image
+      if (content.contactUs.banner.imageUrl && (content.contactUs.banner.imageUrl.startsWith('blob:') || content.contactUs.banner.imageUrl.startsWith('data:'))) {
+        const file = await fetchAndCreateFile(content.contactUs.banner.imageUrl, 'contact_us_banner');
+        if (file) {
+          formData.append('images', file, file.name);
+        }
+      }
+
+      // Handle About Us section images
+      for (let sectionIndex = 0; sectionIndex < content.aboutUs.length; sectionIndex++) {
+        const section = content.aboutUs[sectionIndex];
+        for (let imageIndex = 0; imageIndex < section.content.images.length; imageIndex++) {
+          const imageUrl = section.content.images[imageIndex];
+          if (imageUrl && (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:'))) {
+            const file = await fetchAndCreateFile(imageUrl, `about_us_${sectionIndex}_${imageIndex}`);
+            if (file) {
+              formData.append('images', file, file.name);
+            }
+          }
+        }
       }
 
       const response = await fetch('/api/content', {
@@ -415,6 +605,12 @@ export default function ContentManager() {
             </TabButton>
             <TabButton id="servicePages" active={activeMainTab === 'servicePages'} onClick={() => setActiveMainTab('servicePages')}>
               Service Pages
+            </TabButton>
+            <TabButton id="contactUs" active={activeMainTab === 'contactUs'} onClick={() => setActiveMainTab('contactUs')}>
+              Contact Us
+            </TabButton>
+            <TabButton id="aboutUs" active={activeMainTab === 'aboutUs'} onClick={() => setActiveMainTab('aboutUs')}>
+              About Us
             </TabButton>
           </div>
 
@@ -662,6 +858,138 @@ export default function ContentManager() {
                 </CardContent>
               </Card>
             </div>
+          )}
+
+          {activeMainTab === 'contactUs' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Contact Us Page</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Banner</h3>
+                  <Input
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files ? e.target.files[0] : null;
+                      if (file) handleContactUsChange('banner', { imageUrl: URL.createObjectURL(file) });
+                    }}
+                    accept="image/*"
+                  />
+                  {content.contactUs.banner.imageUrl && (
+                    <img src={content.contactUs.banner.imageUrl} alt="Contact Us Banner" className="mt-2 w-full max-h-48 object-cover" />
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Contact Info Cards</h3>
+                  {content.contactUs.contactInfoCards.map((card, index) => (
+                    <div key={index} className="mb-2 p-2 border rounded">
+                      <Input
+                        placeholder="Heading"
+                        value={card.heading}
+                        onChange={(e) => handleContactInfoCardChange(index, 'heading', e.target.value)}
+                        className="mb-2"
+                      />
+                      <textarea
+                        placeholder="Description"
+                        value={card.description}
+                        onChange={(e) => handleContactInfoCardChange(index, 'description', e.target.value)}
+                        rows={2}
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </div>
+                  ))}
+                  <button type="button" onClick={handleAddContactInfoCard} className="mt-2">
+                    <PlusCircle className="w-4 h-4 mr-2" /> Add Contact Info Card
+                  </button>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">FAQs</h3>
+                  {content.contactUs.faqs.map((faq, index) => (
+                    <div key={index} className="mb-2 p-2 border rounded">
+                      <Input
+                        placeholder="Question"
+                        value={faq.question}
+                        onChange={(e) => handleFaqChange(index, 'question', e.target.value)}
+                        className="mb-2"
+                      />
+                      <textarea
+                        placeholder="Answer"
+                        value={faq.answer}
+                        onChange={(e) => handleFaqChange(index, 'answer', e.target.value)}
+                        rows={2}
+                        className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </div>
+                  ))}
+                  <button type="button" onClick={handleAddFaq} className="mt-2">
+                    <PlusCircle className="w-4 h-4 mr-2" /> Add FAQ
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeMainTab === 'aboutUs' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>About Us Page</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {content.aboutUs.map((section, sectionIndex) => (
+                  <div key={sectionIndex} className="mb-4 p-4 border rounded">
+                    <Input
+                      placeholder="Section Title"
+                      value={section.title}
+                      onChange={(e) => handleAboutUsChange(sectionIndex, 'title', e.target.value)}
+                      className="mb-2"
+                    />
+                    <textarea
+                      placeholder="Section Description"
+                      value={section.content.description}
+                      onChange={(e) => handleAboutUsChange(sectionIndex, 'description', e.target.value)}
+                      rows={3}
+                      className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                    <div>
+                      <h4 className="text-md font-semibold mb-2">Images</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        {section.content.images.map((imageUrl, imageIndex) => (
+                          <div key={imageIndex} className="flex flex-col items-center">
+                            <Input
+                              type="file"
+                              onChange={(e) => {
+                                const file = e.target.files ? e.target.files[0] : null;
+                                if (file) handleAboutUsImageChange(sectionIndex, imageIndex, file);
+                              }}
+                              accept="image/*"
+                              className="mb-2"
+                            />
+                            {imageUrl && (
+                              <img src={imageUrl} alt={`About Us image ${imageIndex + 1}`} className="w-24 h-24 object-cover mb-2" />
+                            )}
+                            <button type="button" onClick={() => handleRemoveAboutUsImage(sectionIndex, imageIndex)}>
+                              <Minus className="w-4 h-4 bg-destructive text-destructive-foreground hover:bg-destructive/90" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button type="button" onClick={() => handleAddAboutUsImage(sectionIndex)} className="mt-2">
+                        <PlusCircle className="w-4 h-4 mr-2" /> Add Image
+                      </button>
+                    </div>
+                    <button type="button" onClick={() => handleRemoveAboutUsSection(sectionIndex)} className="mt-4">
+                      <Minus className="w-4 h-4 mr-2" /> Remove Section
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={handleAddAboutUsSection} className="mt-4">
+                  <PlusCircle className="w-4 h-4 mr-2" /> Add About Us Section
+                </button>
+              </CardContent>
+            </Card>
           )}
         </div>
 
