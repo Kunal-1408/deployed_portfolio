@@ -3,23 +3,26 @@
 import Image from "next/image"
 import React, { useEffect, useId, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { X } from "lucide-react"
+import { X } from 'lucide-react'
 
 interface Website {
-  id: string
-  Description: string
-  Status?: string
-  Tags: string[]
-  Title: string
-  URL?: string
-  Image: string
-  highlighted: boolean
-  logo: string
+  id: string;
+  Title: string;
+  Description: string;
+  Status: string;
+  URL: string | null;
+  Tags: string[];
+  Backup_Date: string | null;
+  Content_Update_Date: string | null;
+  archive: boolean;
+  highlighted: boolean;
+  Images: string | null;
+  Logo: string | null;
 }
 
 interface ExpandableCardDemoProps {
-  websites: Website[]
-  filterTags?: string[]
+  websites: Website[];
+  filterTags?: string[];
 }
 
 export default function ExpandableCardDemo({ websites, filterTags = [] }: ExpandableCardDemoProps) {
@@ -32,11 +35,11 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
     ? websites.filter((website) => filterTags.every((tag) => website.Tags.includes(tag)))
     : websites
 
-    const sortedWebsites = [...filteredWebsites].sort((a, b) => {
-      if (a.highlighted && !b.highlighted) return -1
-      if (!a.highlighted && b.highlighted) return 1
-      return 0 
-    })
+  const sortedWebsites = [...filteredWebsites].sort((a, b) => {
+    if (a.highlighted && !b.highlighted) return -1
+    if (!a.highlighted && b.highlighted) return 1
+    return 0 
+  })
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -116,7 +119,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                     <Image
                       priority
                       fill
-                      src={active.Image}
+                      src={active.Images || "/placeholder.svg"}
                       alt={`${active.Title} - Full Image`}
                       className="object-cover object-top"
                     />
@@ -181,7 +184,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
         )}
       </AnimatePresence>
       <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-10">
-      {sortedWebsites.map((website) => (
+        {sortedWebsites.map((website) => (
           <motion.div
             key={website.id}
             onMouseEnter={() => handleMouseEnter(website)}
@@ -215,7 +218,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               >
                 <Image
                   fill
-                  src={website.Image}
+                  src={website.Images || "/placeholder.svg"}
                   alt={website.Title}
                   className="object-cover object-top"
                 />
@@ -233,7 +236,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                 className="relative w-16 h-16 ml-4 flex-shrink-0"
               >
                 <Image 
-                  src={website.logo} 
+                  src={website.Logo || "/placeholder.svg"} 
                   alt={`${website.Title} logo`} 
                   className="object-contain"
                   width={64}
@@ -267,7 +270,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               )}
             </div>
             <div className="mt-4 items-start">
-            <button
+              <button
                 onClick={() => handleClick(website)}
                 className="px-4 py-2 mr-3 text-sm rounded-full font-bold text-white bg-black hover:bg-gray-800 transition-colors duration-200"
               >
@@ -294,3 +297,4 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
     </>
   )
 }
+

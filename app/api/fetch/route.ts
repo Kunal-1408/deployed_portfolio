@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
         console.log(`Raw data fetched:`, JSON.stringify(data, null, 2));
 
-        // Sort the data to prioritize highlighted items
+        
         const sortedData = data.sort((a, b) => {
           if (a.highlighted && !b.highlighted) return -1;
           if (!a.highlighted && b.highlighted) return 1;

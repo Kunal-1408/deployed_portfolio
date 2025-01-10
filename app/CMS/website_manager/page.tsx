@@ -206,7 +206,6 @@ export default function Dashboard() {
     }
   }
 
-
   const totalPages = Math.ceil(total / websitesPerPage)
 
   const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -567,6 +566,7 @@ export default function Dashboard() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </button>
                     </TableHead>
+                    <TableHead>Image</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>URL</TableHead>
@@ -580,7 +580,7 @@ export default function Dashboard() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4">
+                      <TableCell colSpan={8} className="text-center py-4">
                         Loading...
                       </TableCell>
                     </TableRow>
@@ -588,6 +588,17 @@ export default function Dashboard() {
                     websites.map((website) => (
                       <TableRow key={website.id} className={website.archive ? "opacity-50" : ""}>
                         <TableCell className="font-medium">{website.Title}</TableCell>
+                        <TableCell>
+                          {website.Images && (
+                            <Image
+                              src={getImageUrl(website.Images)}
+                              alt={`${website.Title} thumbnail`}
+                              width={50}
+                              height={50}
+                              className="object-cover rounded-md"
+                            />
+                          )}
+                        </TableCell>
                         <TableCell className="max-w-md">
                           <div className="line-clamp-3 overflow-hidden text-ellipsis">
                             {website.Description}
@@ -676,7 +687,7 @@ export default function Dashboard() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4">
+                      <TableCell colSpan={8} className="text-center py-4">
                         No websites found.
                       </TableCell>
                     </TableRow>
@@ -846,7 +857,7 @@ export default function Dashboard() {
                     className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    UploadImages
+                    Upload Images
                   </label>
                   {imagesFile && <span className="ml-2">{imagesFile.name}</span>}
                   {!imagesFile && existingImagesUrl && (
@@ -943,3 +954,4 @@ export default function Dashboard() {
     </div>
   )
 }
+

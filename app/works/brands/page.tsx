@@ -5,7 +5,7 @@ import BrandingProjects from "@/components/blocks/Branding";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import DynamicCheckbox from "@/components/ui/checkbox-test";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BrandStats {
   impression?: string
@@ -18,11 +18,7 @@ interface Brand {
   Brand: string
   Description: string
   Logo: string
-  Stats: {
-    impression?: string
-    interactions?: string
-    reach?: string
-  }
+  Stats: BrandStats
   banner: string
   highlighted: boolean
   tags: string[]
@@ -49,30 +45,45 @@ export default function Works() {
   const [highlightedCount, setHighlightedCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState("")
 
-  const websitesPerPage = 9;
+  const brandsPerPage = 9;
 
-  const fetchWebsites = async (page: number, search: string) => {
-    const response = await fetch(`/api/brand?page=${page}&limit=${websitesPerPage}&search=${encodeURIComponent(search)}`, {
-      method: 'GET',
-    });
-    const { brands, total, highlightedCount } = await response.json();
-    setBrands(brands);
-    setTotal(total);
-    setHighlightedCount(highlightedCount);
+  const fetchBrands = async (page: number, search: string) => {
+    try {
+      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&types=brand&search=${encodeURIComponent(searchTerm)}`, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      console.log('API Response:', data); // Add this line for debugging
+      if (data.brands && Array.isArray(data.brands)) {
+        setBrands(data.brands);
+        setTotal(data.total || data.brands.length);
+        setHighlightedCount(data.brands.filter((brand: Brand) => brand.highlighted).length);
+      } else {
+        console.error('Unexpected API response structure:', data);
+        setBrands([]);
+        setTotal(0);
+        setHighlightedCount(0);
+      }
+    } catch (error) {
+      console.error('Error fetching brands:', error);
+      setBrands([]);
+      setTotal(0);
+      setHighlightedCount(0);
+    }
   };
 
   useEffect(() => {
-    fetchWebsites(currentPage, searchTerm);
+    fetchBrands(currentPage, searchTerm);
   }, [currentPage, searchTerm]);
 
-  const totalPages = Math.ceil((total - highlightedCount) / websitesPerPage);
-  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages)) 
+  const totalPages = Math.ceil((total - highlightedCount) / brandsPerPage);
+  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
   const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
 
-  const [active, Isactive] = useState<string[]>([]);
+  const [active, setActive] = useState<string[]>([]);
 
   const handleIsactive = (items: string[]) => {
-    Isactive(items)
+    setActive(items)
   }
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,11 +92,11 @@ export default function Works() {
   };
 
   return (
-    <div className="bg-white min-h-screen  relative pb-20">
+    <div className="bg-white min-h-screen relative pb-20">
       <div className="mx-16 md:mx-4">
         <div className="max-w-7xl pt-20 md:pt-40 pb-10 px-4 w-full top-0 border-b-2 border-orange-100">
           <h1 className="text-xl md:text-7xl font-bold dark:text-white">
-            Here s a peek at our <span className="text-orange-400">works</span>
+            Here's a peek at our <span className="text-orange-400">works</span>
           </h1>
         </div>
         <div className="grid grid-cols-5">
@@ -105,7 +116,7 @@ export default function Works() {
           <div className="col-span-4 flex flex-col">
             <div className="flex flex-1 col-span-4">
               <div className="inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
-              <BrandingProjects projects={brands} filterTags={active}  />
+              <BrandingProjects projects={brands} filterTags={active} />
             </div>
           </div>
         </div>
@@ -127,7 +138,7 @@ export default function Works() {
             </button>
           </div>
           <div className="text-sm text-muted-foreground">
-            Showing <strong>{highlightedCount + (currentPage - 1) * websitesPerPage + 1}-{Math.min(highlightedCount + currentPage * websitesPerPage, total)}</strong> of <strong>{total}</strong> websites
+            Showing <strong>{highlightedCount + (currentPage - 1) * brandsPerPage + 1}-{Math.min(highlightedCount + currentPage * brandsPerPage, total)}</strong> of <strong>{total}</strong> brands
           </div>
         </div>
       </div>
@@ -140,3 +151,4 @@ const allTags = [
   { title: "Industry", tags: ["Agriculture", "Healthcare", "Manufacturing", "Fashion", "Cosmetic"], color: "hsl(140, 71%, 45%)" },
   { title: "Country", tags: ["India", "Dubai", "Sri-Lanka"], color: "hsl(291, 64%, 42%)" }
 ]
+
