@@ -416,8 +416,9 @@ export default function () {
     },
   ];
 
+  
   return (
-    <div className="flex flex-row items-center justify-center py-20 max-h-full md:h-auto bg-gradient-to-b from-black from-0% via-neutral-600 w-full">
+    <div className="flex flex-col md:flex-row items-center justify-center py-10 md:py-20 min-h-screen md:h-auto bg-gradient-to-b from-black from-0% via-neutral-600 w-full">
       <div className="max-w-7xl mx-auto w-full relative overflow-hidden h-full md:h-[50rem] px-4">
         <motion.div
           initial={{
@@ -431,26 +432,21 @@ export default function () {
           transition={{
             duration: 1,
           }}
-          className="div pt-10 h-full"
+          className="div pt-10 h-full z-20 relative"
         >
-          <h2 className="text-center text-xl md:text-4xl font-bold text-neutral-50 dark:text-white">
+          <h2 className="text-center text-2xl md:text-4xl font-bold text-neutral-50 dark:text-white">
             The Ultimate Marketing Agency
           </h2>
           <p className="text-center text-base md:text-lg font-normal text-neutral-50 dark:text-neutral-200 max-w-md mt-2 mx-auto">
-            Reach New Horizons with <span className="text-orange-400"> Quite Good!</span>
+            Reach New Horizons with <span className="text-orange-400">Quite Good!</span>
           </p>
-          
         </motion.div>
-        {/* <div className="absolute w-full bottom-0 inset-x-0 h-28 bg-gradient-to-b pointer-events-none select-none from-transparent dark:to-black to-white z-40" /> */}
-        <StarsBackground/>
-        <ShootingStars maxDelay={1000} minDelay={500} maxSpeed={15}/>
+        <StarsBackground />
+        <ShootingStars maxDelay={1000} minDelay={500} maxSpeed={15} />
 
-        <div className="absolute w-full -bottom-20 h-72 md:h-full z-10 ">
+        <div className="mt-10 md:mt-0 md:absolute w-full md:-bottom-20 h-[300px] md:h-72 lg:h-full z-10">
           <World data={sampleArcs} globeConfig={globeConfig} />
-
         </div>
-        
-
       </div>
     </div>
   );

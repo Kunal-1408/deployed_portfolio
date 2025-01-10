@@ -79,14 +79,14 @@ export default function Works() {
 
   return (
     <div className="bg-white min-h-screen relative pb-20">
-      <div className="mx-16 md:mx-4">
-        <div className="max-w-7xl pt-20 md:pt-40 pb-10 px-4 w-full top-0 border-b-2 border-orange-100">
-          <h1 className="text-xl md:text-7xl font-bold dark:text-white">
+      <div className="mx-4 md:mx-16">
+        <div className="max-w-7xl pt-10 md:pt-20 lg:pt-40 pb-6 md:pb-10 px-4 w-full top-0 border-b-2 border-orange-100">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold dark:text-white">
             Here's a peek at our <span className="text-orange-400">works</span>
           </h1>
         </div>
-        <div className="grid grid-cols-5">
-          <div className="col-span-1 py-10 mx-5 flex flex-col">
+        <div className="flex flex-col md:flex-row">
+          <div className="w-full md:w-1/5 py-4 md:py-10 md:mx-5 flex flex-col">
             <LabelInputContainer>
               <Input 
                 id="Search" 
@@ -99,14 +99,14 @@ export default function Works() {
             </LabelInputContainer>
             <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
           </div>
-          <div className="col-span-4 flex flex-col">
-            <div className="flex flex-1 col-span-4">
-              <div className="inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
+          <div className="w-full md:w-4/5 flex flex-col">
+            <div className="flex flex-1">
+              <div className="hidden md:inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
               <ExpandableCardDemo websites={websites} filterTags={active} />
             </div>
           </div>
         </div>
-        <div className="absolute bottom-4 right-4 flex flex-col items-end space-y-2">
+        <div className="mt-8 md:absolute md:bottom-4 md:right-4 flex flex-col items-center md:items-end space-y-2">
           <div className="flex items-center space-x-2">
             <button
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-orange-400 text-neutral-200 hover:bg-accent hover:text-accent-foreground h-8 px-4"
@@ -123,7 +123,7 @@ export default function Works() {
               <ChevronRight className="h-4 w-4 ml-2" />
             </button>
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground text-center md:text-right">
             Showing <strong>{(currentPage - 1) * websitesPerPage + 1}-{Math.min(currentPage * websitesPerPage, total)}</strong> of <strong>{total}</strong> websites
           </div>
         </div>

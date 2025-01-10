@@ -42,7 +42,7 @@ export default function Works() {
   const websitesPerPage = 9;
 
   const fetchWebsites = async (page: number, search: string) => {
-    const response = await fetch(`/api/fetch?page=${page}&limit=${websitesPerPage}&search=${encodeURIComponent(search)}`, {
+    const response = await fetch(`/api/fetch?page=${page}&limit=${websitesPerPage}&types=design&search=${encodeURIComponent(search)}`, {
       method: 'GET',
     });
     const { brands, total, highlightedCount } = await response.json();

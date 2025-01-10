@@ -17,11 +17,14 @@ interface Brand {
   id: string
   Brand: string
   Description: string
-  Logo: string
+  Logo: string | null
   Stats: BrandStats
   banner: string
   highlighted: boolean
   tags: string[]
+  Tags: string[]
+  Status: string
+  Images: string | null
 }
 
 const LabelInputContainer = ({
@@ -49,15 +52,15 @@ export default function Works() {
 
   const fetchBrands = async (page: number, search: string) => {
     try {
-      const response = await fetch(`/api/fetch?page=${currentPage}&limit=${brandsPerPage}&types=brand&search=${encodeURIComponent(searchTerm)}`, {
+      const response = await fetch(`/api/fetch?page=${page}&limit=${brandsPerPage}&types=brand&search=${encodeURIComponent(search)}`, {
         method: 'GET',
       });
       const data = await response.json();
-      console.log('API Response:', data); // Add this line for debugging
-      if (data.brands && Array.isArray(data.brands)) {
-        setBrands(data.brands);
-        setTotal(data.total || data.brands.length);
-        setHighlightedCount(data.brands.filter((brand: Brand) => brand.highlighted).length);
+      console.log('API Response:', data);
+      if (data.brand && Array.isArray(data.brand.data)) {
+        setBrands(data.brand.data);
+        setTotal(data.brand.total || data.brand.data.length);
+        setHighlightedCount(data.brand.data.filter((brand: Brand) => brand.highlighted).length);
       } else {
         console.error('Unexpected API response structure:', data);
         setBrands([]);

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -36,25 +36,25 @@ export const useNavbarBackground = () => {
 
   return isSolid;
 };
-export const ActiveLogo = ()=>{
-  const [isSecond, setSecond]= useState(false);
 
-  useEffect(()=>{
+export const ActiveLogo = () => {
+  const [isSecond, setSecond] = useState(false);
 
-    const handleLogo = () =>{
+  useEffect(() => {
+    const handleLogo = () => {
       const height = window.innerHeight;
-      if(window.scrollY > height){
+      if (window.scrollY > height) {
         setSecond(true);
-      }else{
+      } else {
         setSecond(false);
       }
     };
 
     window.addEventListener('scroll', handleLogo);
-    return ()=>{
+    return () => {
       window.removeEventListener('scroll', handleLogo);
     };
-  },[]);
+  }, []);
   return isSecond;
 }
 
@@ -79,40 +79,40 @@ export const MenuItem = ({
       : 'text-neutral-300'
     : 'text-black';
 
-    return (
-      <div onMouseEnter={() => setActive(item)} className="relative ">
-        <motion.p
-          transition={{ duration: 0.3 }}
-          className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColorClass}`} 
-        >
-          {item}
-        </motion.p>
-        {active !== null && (
+  return (
+    <div onMouseEnter={() => setActive(item)} className="relative ">
+      <motion.p
+        transition={{ duration: 0.3 }}
+        className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColorClass}`} 
+      >
+        {item}
+      </motion.p>
+      <AnimatePresence>
+        {active === item && (
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 10 }}
             transition={transition}
+            className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4"
           >
-            {active === item && (
-              <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 transform -translate-x-1/2 pt-4">
-                <motion.div
-                  transition={transition}
-                  layoutId="active" // layoutId ensures smooth animation
-                  className="bg-white dark:bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-black/[0.2] dark:border-white/[0.2] shadow-xl"
-                >
-                  <motion.div
-                    layout // layout ensures smooth animation
-                    className="w-max h-full p-4"
-                  >
-                    {children}
-                  </motion.div>
-                </motion.div>
-              </div>
-            )}
+            <motion.div
+              transition={transition}
+              layoutId="active"
+              className="bg-white dark:bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-black/[0.2] dark:border-white/[0.2] shadow-xl"
+            >
+              <motion.div
+                layout
+                className="w-max h-full p-4"
+              >
+                {children}
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
-      </div>
-    );
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export const Menu = ({
@@ -174,7 +174,7 @@ export const HoveredLink = ({ children, ...rest }: any) => {
   return (
     <Link
       {...rest}
-      className="text-neutral-700 dark:text-neutral-200 hover:text-black  "
+      className="text-neutral-700 dark:text-neutral-200 hover:text-black"
     >
       {children}
     </Link>
@@ -192,19 +192,43 @@ export const Item = ({
   isLandingPage: boolean;
   isSolid: boolean;
 }) => {
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const textColor = isLandingPage
     ? isSolid
       ? 'text-black'
       : 'text-neutral-300'
     : 'text-black';
 
+  if (!isMounted) {
+    return (
+      <Link
+        href={href}
+        scroll={false}
+        className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColor}`}
+      >
+        {title}
+      </Link>
+    )
+  }
+
   return (
-    <Link
-      href={href}
-      scroll={false}
-      className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColor}`}
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
-      {title}
-    </Link>
+      <Link
+        href={href}
+        scroll={false}
+        className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColor}`}
+      >
+        {title}
+      </Link>
+    </motion.div>
   );
 };
+

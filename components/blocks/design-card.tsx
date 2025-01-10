@@ -3,7 +3,7 @@
 import Image from "next/image"
 import React, { useEffect, useId, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { X } from "lucide-react"
+import { X } from 'lucide-react'
 
 interface DesignProject {
   id: string
@@ -17,19 +17,22 @@ interface DesignProject {
 }
 
 interface DesignProjectsProps {
-  projects: DesignProject[]
+  projects?: DesignProject[]
   filterTags?: string[]
 }
 
-export default function DesignProjects({ projects, filterTags = [] }: DesignProjectsProps) {
+export default function DesignProjects({ projects = [], filterTags = [] }: DesignProjectsProps) {
   const [active, setActive] = useState<DesignProject | null>(null)
   const [hoveredProject, setHoveredProject] = useState<DesignProject | null>(null)
   const id = useId()
   const ref = useRef<HTMLDivElement>(null)
 
+  // Ensure projects is an array
+  const safeProjects = Array.isArray(projects) ? projects : []
+
   const filteredProjects = filterTags.length
-    ? projects.filter((project) => filterTags.every((tag) => project.tags.includes(tag)))
-    : projects
+    ? safeProjects.filter((project) => filterTags.every((tag) => project.tags.includes(tag)))
+    : safeProjects
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (a.highlighted && !b.highlighted) return -1
@@ -267,3 +270,4 @@ export default function DesignProjects({ projects, filterTags = [] }: DesignProj
     </>
   )
 }
+

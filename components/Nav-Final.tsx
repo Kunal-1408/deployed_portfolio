@@ -1,11 +1,16 @@
 "use client"
 
-import React, { useState } from "react"
-import {Menu,  useNavbarBackground, ActiveLogo, Item } from "./ui/navbar-menu"
+import React, { useState, useEffect } from "react"
+import { Menu, useNavbarBackground, ActiveLogo, Item } from "./ui/navbar-menu"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from 'next/navigation'
+import { MenuIcon, X } from 'lucide-react'
+import { AnimatePresence } from "framer-motion"
+import dynamic from 'next/dynamic'
+
+const ClientSideMenu = dynamic(() => import('./ClientSideMenu'), { ssr: false })
 
 export const Navbarimpli: React.FC = () => {
   const pathname = usePathname()
@@ -20,6 +25,7 @@ export const Navbarimpli: React.FC = () => {
 
 function Navbar({ className, isLandingPage, pathname }: { className?: string; isLandingPage: boolean; pathname: string }) {
   const [active, setActive] = useState<string | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const isSolid = useNavbarBackground()
   const isSecond = ActiveLogo()
 
@@ -51,6 +57,17 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
     }
   )
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
     <div className={navbarClass}>
       <div className="flex-shrink-0 w-48 h-24 flex items-center ml-12">
@@ -65,7 +82,7 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
         </Link>
       </div>
 
-      <div className="flex items-center space-x-2 mr-8">
+      <div className="hidden md:flex items-center space-x-2 mr-8">
         <Menu setActive={setActive} isLandingPage={isLandingPage} isSolid={isSolid}>
           <div className="flex space-x-8">
             <Item title="Website works" href="/works/web" isLandingPage={isLandingPage} isSolid={isSolid} />
@@ -82,8 +99,24 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
         </Link>
       </div>
 
+      <div className="md:hidden">
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={`p-2 ${textColorClass}`}>
+          {isMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {isMenuOpen && (
+          <ClientSideMenu
+            isLandingPage={isLandingPage}
+            isSolid={isSolid}
+            buttonClass={buttonClass}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-export default Navbarimpli 
+export default Navbarimpli
+

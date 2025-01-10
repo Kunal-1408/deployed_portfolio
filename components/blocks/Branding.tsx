@@ -10,7 +10,7 @@ interface BrandingProject {
   id: string
   Brand: string
   Description: string
-  Logo: string
+  Logo: string | null
   Stats: {
     impression?: string
     interactions?: string
@@ -19,6 +19,9 @@ interface BrandingProject {
   banner: string
   highlighted: boolean
   tags: string[]
+  Tags: string[]
+  Status: string
+  Images: string | null
 }
 
 interface BrandingProjectsProps {
@@ -33,7 +36,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
   const ref = useRef<HTMLDivElement>(null)
 
   const filteredProjects = filterTags.length
-    ? projects.filter((project) => filterTags.every((tag) => project.tags.includes(tag)))
+    ? projects.filter((project) => filterTags.every((tag) => [...project.tags, ...project.Tags].includes(tag)))
     : projects
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -105,7 +108,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
                 <motion.div layoutId={`image-${activeProject.id}-${id}`} className="relative h-[400px] overflow-hidden rounded-xl">
                   <Image
                     fill
-                    src={activeProject.banner || "/placeholder.svg"}
+                    src={activeProject.banner || activeProject.Images || "/placeholder.svg"}
                     alt={`${activeProject.Brand} - Full Image`}
                     className="object-cover object-top"
                   />
@@ -137,7 +140,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
                 
                 <div className="mt-6 flex-grow flex flex-col">
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {activeProject.tags.map((tag, index) => (
+                    {[...activeProject.tags, ...activeProject.Tags].map((tag, index) => (
                       <motion.span
                         key={`${tag}-${index}-${id}`}
                         className="bg-white/0.2 text-gray-800 text-sm font-medium px-3 py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
@@ -225,7 +228,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
               >
                 <Image
                   fill
-                  src={project.banner || "/placeholder.svg"}
+                  src={project.banner || project.Images || "/placeholder.svg"}
                   alt={project.Brand}
                   className="object-cover object-top"
                 />
@@ -258,7 +261,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
               {project.Description}
             </motion.p>
             <div className="mt-3 flex flex-wrap gap-1">
-              {project.tags.slice(0, 3).map((tag, index) => (
+              {[...project.tags, ...project.Tags].slice(0, 3).map((tag, index) => (
                 <motion.span
                   key={`${tag}-${index}-${id}`}
                   className="bg-white/0.2 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
@@ -272,8 +275,8 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
                   {tag}
                 </motion.span>
               ))}
-              {project.tags.length > 3 && (
-                <span className="text-muted-foreground text-xs">+{project.tags.length - 3} more</span>
+              {[...project.tags, ...project.Tags].length > 3 && (
+                <span className="text-muted-foreground text-xs">+{[...project.tags, ...project.Tags].length - 3} more</span>
               )}
             </div>
             <div className="mt-4 items-start">
