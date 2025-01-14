@@ -95,43 +95,18 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Update contactUs
-    if (data.contactUs && data.contactUs.banner) {
-      data.contactUs.banner.imageUrl = data.contactUs.banner.imageUrl && 
-        (data.contactUs.banner.imageUrl.startsWith('blob:') || data.contactUs.banner.imageUrl.startsWith('data:'))
-        ? uploadedFiles[fileIndex++]
-        : data.contactUs.banner.imageUrl
-    }
-
-    // Update aboutUs
-    if (Array.isArray(data.aboutUs)) {
-      data.aboutUs = data.aboutUs.map((section: any) => ({
-        ...section,
-        content: {
-          ...section.content,
-          images: section.content.images.map((imageUrl: string) => 
-            imageUrl && (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:'))
-              ? uploadedFiles[fileIndex++]
-              : imageUrl
-          )
-        }
-      }))
-    }
-
     console.log('Data to be upserted:', JSON.stringify(data, null, 2))
 
     let updatedContent
     try {
       updatedContent = await prisma.texts.upsert({
-        where: { id: data.id || '' },
+        where: { id: data.id },
         update: {
           hero: data.hero,
           whyChooseUs: data.whyChooseUs,
           services: data.services,
           clients: data.clients,
           servicePages: data.servicePages,
-          contactUs: data.contactUs,
-          aboutUs: data.aboutUs,
         },
         create: {
           hero: data.hero,
@@ -139,8 +114,6 @@ export async function POST(request: NextRequest) {
           services: data.services,
           clients: data.clients,
           servicePages: data.servicePages,
-          contactUs: data.contactUs,
-          aboutUs: data.aboutUs,
         },
       })
       console.log('Updated content:', JSON.stringify(updatedContent, null, 2))
@@ -177,4 +150,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
-

@@ -5,6 +5,7 @@ import { fetchContent } from "@/lib/content-fetch";
 
 export default async function Timelined() {
   const content = await fetchContent();
+  console.log(content.aboutUs)
   // const data = [
   //   {
   //     title: "2024",

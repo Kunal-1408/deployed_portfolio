@@ -9,7 +9,10 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface TimelineEntry {
   title: string;
-  content: React.ReactNode;
+  content: {
+    description: string;
+    images: string[];
+  };
 }
 
 export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
@@ -68,7 +71,16 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500 dark:text-neutral-500">
                 {item.title}
               </h3>
-             <p className="text-gray-500 font-medium text-lg">{item.content}{" "}</p> 
+             <div>
+  <p className="text-gray-500 font-medium text-lg">{item.content.description}</p>
+  {item.content.images && item.content.images.length > 0 && (
+    <div className="mt-4 flex flex-wrap gap-4">
+      {item.content.images.map((image, imgIndex) => (
+        <img key={imgIndex} src={image} alt={`Image ${imgIndex + 1}`} className="w-24 h-24 object-cover rounded-md" />
+      ))}
+    </div>
+  )}
+</div> 
             </div>
           </div>
         ))}
@@ -90,3 +102,4 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     </div>
   );
 };
+

@@ -129,25 +129,25 @@ type TextsWhyChooseUs {
   title       String
 }
 
-type TextsContactUs { 
-  banner              TextsContactUsBanner 
-  contactInfoCards    TextsContactUsContactInfoCards[] 
-  faqs                TextsContactUsFaqs[] 
-  }
+type TextsContactUs {
+  banner           TextsContactUsBanner
+  contactInfoCards TextsContactUsContactInfoCards[]
+  faqs             TextsContactUsFaqs[]
+}
 
-type TextsContactUsBanner {  
-  imageUrl String 
-  }
+type TextsContactUsBanner {
+  imageUrl String
+}
 
 type TextsContactUsContactInfoCards {
-   heading        String 
-   description    String 
-   }
+  heading     String
+  description String
+}
 
 type TextsContactUsFaqs {
-   question     String
-   answer       String 
-   }
+  question String
+  answer   String
+}
 
 // New types for About Us page
 type TextsAboutUs {
@@ -247,7 +247,7 @@ model texts {
   servicePages TextsServicePages?
   services     TextsServices[]
   whyChooseUs  TextsWhyChooseUs[]
-  contactUs    TextsContactUs?    // Updated field for Contact Us page
+  contactUs    TextsContactUs?    // New field for Contact Us page
   aboutUs      TextsAboutUs[]     // New field for About Us page
 }
 model User {
