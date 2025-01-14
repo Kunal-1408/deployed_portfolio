@@ -5,7 +5,7 @@ import DesignProjects from "@/components/blocks/design-card";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import DynamicCheckbox from "@/components/ui/checkbox-test";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DesignProject {
     id: string
@@ -16,7 +16,7 @@ interface DesignProject {
     Type: string
     highlighted: boolean
     tags: string[]
-  }
+}
 
 const LabelInputContainer = ({
   children,
@@ -45,10 +45,17 @@ export default function Works() {
     const response = await fetch(`/api/fetch?page=${page}&limit=${websitesPerPage}&types=design&search=${encodeURIComponent(search)}`, {
       method: 'GET',
     });
-    const { brands, total, highlightedCount } = await response.json();
-    setBrands(brands);
-    setTotal(total);
-    setHighlightedCount(highlightedCount);
+    const data = await response.json();
+    if (data.design && Array.isArray(data.design.data)) {
+      setBrands(data.design.data);
+      setTotal(data.design.total);
+      setHighlightedCount(data.design.data.filter((item: DesignProject) => item.highlighted).length);
+    } else {
+      console.error('Unexpected data structure:', data);
+      setBrands([]);
+      setTotal(0);
+      setHighlightedCount(0);
+    }
   };
 
   useEffect(() => {
@@ -95,7 +102,7 @@ export default function Works() {
           <div className="col-span-4 flex flex-col">
             <div className="flex flex-1 col-span-4">
               <div className="inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
-              <DesignProjects projects={brands} filterTags={active}  />
+              <DesignProjects projects={brands} filterTags={active} />
             </div>
           </div>
         </div>
@@ -130,3 +137,4 @@ const allTags = [
   { title: "Industry", tags: ["Agriculture", "Healthcare", "Manufacturing", "Fashion", "Cosmetic"], color: "hsl(140, 71%, 45%)" },
   { title: "Country", tags: ["India", "Dubai", "Sri-Lanka"], color: "hsl(291, 64%, 42%)" }
 ]
+

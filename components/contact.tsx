@@ -37,7 +37,6 @@ interface ContactUsProps {
         content: string;
       };
     };
-    mapEmbedUrl: string;
   };
 }
 
@@ -70,7 +69,7 @@ export default function ContactUs({ content }: ContactUsProps) {
         />
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end justify-start p-8">
           <div className="text-white">
-            <h1 className="text-5xl font-bold mb-2">{content.banner.title}</h1>
+            <h1 className="text-5xl font-bold mb-2">Contact Us</h1>
             <p className="max-w-md text-lg opacity-70">
               {content.banner.description}
             </p>
@@ -158,9 +157,9 @@ export default function ContactUs({ content }: ContactUsProps) {
       </section>
 
       {/* Map Section */}
-      <section className="h-[400px] relative overflow-hidden">
-        <iframe src={content.mapEmbedUrl} width="1920" height="450" loading="lazy"></iframe>
-      </section>
+     <section className="h-[400px] relative overflow-hidden">
+  <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13997.190483309128!2d77.178936!3d28.7106503!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0354091c469d%3A0x6f369bf3f44dcee0!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1729075828599!5m2!1sen!2sin" width="1920" height="450"  loading="lazy" ></iframe>
+  </section>
     </div>
   )
 }

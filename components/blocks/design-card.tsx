@@ -10,7 +10,7 @@ interface DesignProject {
   Banner: string
   Brands: string
   Description: string
-  Logo: string
+  Logo: string | null
   Type: string
   highlighted: boolean
   tags: string[]
@@ -27,7 +27,6 @@ export default function DesignProjects({ projects = [], filterTags = [] }: Desig
   const id = useId()
   const ref = useRef<HTMLDivElement>(null)
 
-  // Ensure projects is an array
   const safeProjects = Array.isArray(projects) ? projects : []
 
   const filteredProjects = filterTags.length
@@ -118,7 +117,7 @@ export default function DesignProjects({ projects = [], filterTags = [] }: Desig
                     <Image
                       priority
                       fill
-                      src={active.Banner}
+                      src={active.Banner || '/placeholder.svg'}
                       alt={`${active.Brands} - Full Image`}
                       className="object-cover object-top"
                     />
@@ -205,7 +204,7 @@ export default function DesignProjects({ projects = [], filterTags = [] }: Desig
               >
                 <Image
                   fill
-                  src={project.Banner}
+                  src={project.Banner || '/placeholder.svg'}
                   alt={project.Brands}
                   className="object-cover object-top"
                 />
@@ -223,7 +222,7 @@ export default function DesignProjects({ projects = [], filterTags = [] }: Desig
                 className="relative w-16 h-16 ml-4 flex-shrink-0"
               >
                 <Image 
-                  src={project.Logo} 
+                  src={project.Logo || '/placeholder.svg'} 
                   alt={`${project.Brands} logo`} 
                   className="object-contain"
                   width={64}
