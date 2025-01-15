@@ -23,7 +23,7 @@ export default function LoginForm() {
   const [state, dispatch] = useActionState(authenticate, undefined)
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50">
       <Card className="w-full max-w-sm mx-4">
         <CardHeader>
           <CardTitle>Login to CMS</CardTitle>
