@@ -3,13 +3,13 @@
 import Image from "next/image"
 import React, { useEffect, useId, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { X } from "lucide-react"
+import { X } from 'lucide-react'
 
 interface SocialProject {
   id: string
   Brand: string
   Description: string
-  Logo: string
+  Logo: string | null
   Stats: {
     impression?: string
     interactions?: string
@@ -18,6 +18,7 @@ interface SocialProject {
   banner: string
   highlighted: boolean
   tags: string[]
+  Tags: string[]
 }
 
 interface SocialProjectsProps {
@@ -31,9 +32,12 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
   const id = useId()
   const ref = useRef<HTMLDivElement>(null)
 
-  const filteredProjects = filterTags.length
-    ? projects.filter((project) => filterTags.every((tag) => project.tags.includes(tag)))
-    : projects
+  const filteredProjects = projects && filterTags.length
+    ? projects.filter((project) => filterTags.every((tag) => 
+        (project.tags && project.tags.includes(tag)) || 
+        (project.Tags && project.Tags.includes(tag))
+      ))
+    : projects || []
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (a.highlighted && !b.highlighted) return -1
@@ -102,28 +106,34 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
             >
               <div className="m-4">
                 <motion.div layoutId={`image-${active.id}-${id}`} className="relative h-[400px] overflow-hidden rounded-xl">
-                  <motion.div
-                    animate={{
-                      y: ["0%", "-62.5%", "-62.5%", "0%"],
-                    }}
-                    transition={{
-                      y: {
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear",
-                      },
-                    }}
-                    className="absolute inset-0 w-full"
-                    style={{ height: "268.75%" }}  
-                  >
-                    <Image
-                      priority
-                      fill
-                      src={active.banner}
-                      alt={`${active.Brand} - Full Image`}
-                      className="object-cover object-top"
-                    />
-                  </motion.div>
+                  {active.banner ? (
+                    <motion.div
+                      animate={{
+                        y: ["0%", "-62.5%", "-62.5%", "0%"],
+                      }}
+                      transition={{
+                        y: {
+                          duration: 20,
+                          repeat: Infinity,
+                          ease: "linear",
+                        },
+                      }}
+                      className="absolute inset-0 w-full"
+                      style={{ height: "268.75%" }}  
+                    >
+                      <Image
+                        priority
+                        fill
+                        src={active.banner || "/placeholder.svg"}
+                        alt={`${active.Brand} - Full Image`}
+                        className="object-cover object-top"
+                      />
+                    </motion.div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400">No Image</span>
+                    </div>
+                  )}
                 </motion.div>
               </div>
 
@@ -139,7 +149,7 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
                 
                 <div className="mt-6 flex-grow flex flex-col">
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {active.tags.map((tag, index) => (
+                    {[...(active.tags || []), ...(active.Tags || [])].map((tag, index) => (
                       <motion.span
                         key={`${tag}-${index}-${id}`}
                         className="bg-white/0.2 text-gray-800 text-sm font-medium px-3 py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
@@ -207,27 +217,33 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div
-                animate={{
-                  y: hoveredProject === project ? ["0%", "-62.5%", "-62.5%", "0%"] : "0%",
-                }}
-                transition={{
-                  y: {
-                    duration: hoveredProject === project ? 20 : 0,
-                    repeat: Infinity,
-                    ease: "linear",
-                  },
-                }}
-                className="absolute inset-0 w-full"
-                style={{ height: "268.75%" }}
-              >
-                <Image
-                  fill
-                  src={project.banner}
-                  alt={project.Brand}
-                  className="object-cover object-top"
-                />
-              </motion.div>
+              {project.banner ? (
+                <motion.div
+                  animate={{
+                    y: hoveredProject === project ? ["0%", "-62.5%", "-62.5%", "0%"] : "0%",
+                  }}
+                  transition={{
+                    y: {
+                      duration: hoveredProject === project ? 20 : 0,
+                      repeat: Infinity,
+                      ease: "linear",
+                    },
+                  }}
+                  className="absolute inset-0 w-full"
+                  style={{ height: "268.75%" }}
+                >
+                  <Image
+                    fill
+                    src={project.banner || "/placeholder.svg"}
+                    alt={project.Brand}
+                    className="object-cover object-top"
+                  />
+                </motion.div>
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-400">No Image</span>
+                </div>
+              )}
             </motion.div>
             <div className="mt-4 flex justify-between items-center">
               <motion.h3
@@ -236,18 +252,20 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               >
                 {project.Brand}
               </motion.h3>
-              <motion.div 
-                layoutId={`logo-${project.id}-${id}`} 
-                className="relative w-16 h-16 ml-4 flex-shrink-0"
-              >
-                <Image 
-                  src={project.Logo} 
-                  alt={`${project.Brand} logo`} 
-                  className="object-contain"
-                  width={64}
-                  height={64}
-                />
-              </motion.div>
+              {project.Logo && (
+                <motion.div 
+                  layoutId={`logo-${project.id}-${id}`} 
+                  className="relative w-16 h-16 ml-4 flex-shrink-0"
+                >
+                  <Image 
+                    src={project.Logo || "/placeholder.svg"} 
+                    alt={`${project.Brand} logo`} 
+                    className="object-contain"
+                    width={64}
+                    height={64}
+                  />
+                </motion.div>
+              )}
             </div>
             <motion.p
               layoutId={`description-${project.id}-${id}`}
@@ -256,7 +274,7 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               {project.Description}
             </motion.p>
             <div className="mt-3 flex flex-wrap gap-1">
-              {project.tags.slice(0, 3).map((tag, index) => (
+              {[...(project.tags || []), ...(project.Tags || [])].slice(0, 3).map((tag, index) => (
                 <motion.span
                   key={`${tag}-${index}-${id}`}
                   className="bg-white/0.2 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
@@ -270,8 +288,8 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
                   {tag}
                 </motion.span>
               ))}
-              {project.tags.length > 3 && (
-                <span className="text-muted-foreground text-xs">+{project.tags.length - 3} more</span>
+              {(project.tags?.length || 0) + (project.Tags?.length || 0) > 3 && (
+                <span className="text-muted-foreground text-xs">+{(project.tags?.length || 0) + (project.Tags?.length || 0) - 3} more</span>
               )}
             </div>
             <div className="mt-4 items-start">
@@ -288,3 +306,4 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
     </>
   )
 }
+

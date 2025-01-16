@@ -5,13 +5,13 @@ import SocialProjects from "@/components/blocks/social";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import DynamicCheckbox from "@/components/ui/checkbox-test";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SocialProject {
   id: string
   Brand: string
   Description: string
-  Logo: string
+  Logo: string | null
   Stats: {
     impression?: string
     interactions?: string
@@ -20,7 +20,9 @@ interface SocialProject {
   banner: string
   highlighted: boolean
   tags: string[]
+  Tags: string[]
 }
+
 const LabelInputContainer = ({
   children,
   className,
@@ -45,13 +47,21 @@ export default function Works() {
   const websitesPerPage = 9;
 
   const fetchWebsites = async (page: number, search: string) => {
-    const response = await fetch(`/api/fetch?page=${currentPage}&limit=${websitesPerPage}&types=social&search=${encodeURIComponent(searchTerm)}`, {
-      method: 'GET',
-    });
-    const { brands, total, highlightedCount } = await response.json();
-    setBrands(brands);
-    setTotal(total);
-    setHighlightedCount(highlightedCount);
+    try {
+      const response = await fetch(`/api/fetch?page=${page}&limit=${websitesPerPage}&types=social&search=${encodeURIComponent(search)}`, {
+        method: 'GET',
+      });
+      const data = await response.json();
+      if (data && data.social && data.social.data) {
+        setBrands(data.social.data);
+        setTotal(data.social.total || 0);
+        setHighlightedCount(data.social.data.filter((project: SocialProject) => project.highlighted).length);
+      } else {
+        console.error('Unexpected API response structure:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching websites:', error);
+    }
   };
 
   useEffect(() => {
@@ -133,3 +143,4 @@ const allTags = [
   { title: "Industry", tags: ["Agriculture", "Healthcare", "Manufacturing", "Fashion", "Cosmetic"], color: "hsl(140, 71%, 45%)" },
   { title: "Country", tags: ["India", "Dubai", "Sri-Lanka"], color: "hsl(291, 64%, 42%)" }
 ]
+
