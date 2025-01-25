@@ -9,38 +9,7 @@ interface ServicesProps {
   services: TextsServices[];
 }
 
-// const services = [
-//   {
-//     title: "Web Development",
-//     description: "Custom websites tailored to your unique business needs, built with cutting-edge technologies for optimal performance and user experience.",
-//     image: "/web.jpg",
-//     src: "/services/web"
-//   },
-//   {
-//     title: "SEO",
-//     description: "Boost your online visibility and rankings with our data-driven SEO strategies, helping you reach your target audience effectively.",
-//     image: "/SEO.jpg",
-//     src: "/"
-//   },
-//   {
-//     title: "Advertising",
-//     description: "Create impactful ad campaigns that resonate with your audience, leveraging multiple channels for maximum reach and conversion.",
-//     image: "/social.jfif",
-//     src: "/"
-//   },
-//   {
-//     title: "Digital Marketing",
-//     description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
-//     image: "/Digital.jpg",
-//     src: "/"
-//   },
-//   {
-//     title: "Branding",
-//     description: "Comprehensive online marketing strategies to grow your brand, engage customers, and drive measurable results across all digital platforms.",
-//     image: "/Digital.jpg",
-//     src: "/"
-//   }
-// ]
+
 
 export default function Component({ services }: ServicesProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
