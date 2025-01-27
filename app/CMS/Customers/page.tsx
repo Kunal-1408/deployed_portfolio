@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense } from "react"
 import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { PlusCircle, Minus } from "lucide-react"
+import { RichTextEditor } from "../../../components/RichtextEditor"
 
 interface ContentItem {
   title: string
@@ -90,37 +91,7 @@ interface Content {
   servicePages: {
     [key: string]: ServicePageContent
   }
-  contactUs: {
-    banner: {
-      imageUrl: string
-      title: string
-      description: string
-    }
-    contactForm: {
-      title: string
-      description: string
-      imageSrc: string
-    }
-    contactInfo: {
-      title: string
-      cards: {
-        icon: string
-        title: string
-        content: string
-      }[]
-    }
-    faqs: {
-      title: string
-      items: {
-        question: string
-        answer: string
-      }[]
-      sidebar: {
-        title: string
-        content: string
-      }
-    }
-  }
+  contactUs: ContactUsProps["content"]
   aboutUs: AboutUsSection[]
 }
 
@@ -690,7 +661,9 @@ export default function ContentManager() {
   }) => (
     <button
       id={id}
-      className={`px-4 py-2 font-medium text-sm rounded-md ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+      className={`px-4 py-2 font-medium text-sm rounded-md ${
+        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+      }`}
       onClick={onClick}
     >
       {children}
@@ -773,22 +746,17 @@ export default function ContentManager() {
                       <CardTitle>Hero Section</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Input
-                        placeholder="Title"
-                        value={content.hero.title}
-                        onChange={(e) => handleHeroChange("title", e.target.value)}
+                      <RichTextEditor
+                        content={content.hero.title || ""}
+                        onChange={(value) => handleHeroChange("title", value)}
                       />
-                      <Input
-                        placeholder="Subtitle"
-                        value={content.hero.subtitle}
-                        onChange={(e) => handleHeroChange("subtitle", e.target.value)}
+                      <RichTextEditor
+                        content={content.hero.subtitle || ""}
+                        onChange={(value) => handleHeroChange("subtitle", value)}
                       />
-                      <textarea
-                        placeholder="Description"
-                        value={content.hero.description}
-                        onChange={(e) => handleHeroChange("description", e.target.value)}
-                        rows={3}
-                        className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      <RichTextEditor
+                        content={content.hero.description || ""}
+                        onChange={(value) => handleHeroChange("description", value)}
                       />
                     </CardContent>
                   </Card>
@@ -802,20 +770,15 @@ export default function ContentManager() {
                     <CardContent>
                       {content.whyChooseUs.map((item, index) => (
                         <div key={index} className="mb-4 p-4 border rounded">
-                          <Input
-                            placeholder="Title"
-                            value={item.title}
-                            onChange={(e) => handleWhyChooseUsChange(index, "title", e.target.value)}
-                            className="mb-2"
+                          <RichTextEditor
+                            content={item.title || ""}
+                            onChange={(value) => handleWhyChooseUsChange(index, "title", value)}
                           />
-                          <textarea
-                            placeholder="Description"
-                            value={item.description}
-                            onChange={(e) => handleWhyChooseUsChange(index, "description", e.target.value)}
-                            rows={3}
-                            className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <RichTextEditor
+                            content={item.description || ""}
+                            onChange={(value) => handleWhyChooseUsChange(index, "description", value)}
                           />
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-4 mt-2">
                             <Input
                               type="file"
                               onChange={(e) => {
@@ -846,20 +809,15 @@ export default function ContentManager() {
                     <CardContent>
                       {content.services.map((service, index) => (
                         <div key={index} className="mb-4 p-4 border rounded">
-                          <Input
-                            placeholder="Service Title"
-                            value={service.title}
-                            onChange={(e) => handleServicesChange(index, "title", e.target.value)}
-                            className="mb-2"
+                          <RichTextEditor
+                            content={service.title || ""}
+                            onChange={(value) => handleServicesChange(index, "title", value)}
                           />
-                          <textarea
-                            placeholder="Service Description"
-                            value={service.description}
-                            onChange={(e) => handleServicesChange(index, "description", e.target.value)}
-                            rows={3}
-                            className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <RichTextEditor
+                            content={service.description || ""}
+                            onChange={(value) => handleServicesChange(index, "description", value)}
                           />
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-4 mt-2">
                             <Input
                               type="file"
                               onChange={(e) => {
@@ -944,12 +902,9 @@ export default function ContentManager() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <textarea
-                      placeholder="Description"
-                      value={content.servicePages[activeServicePageTab]?.description || ""}
-                      onChange={(e) => handleServicePageChange(activeServicePageTab, "description", e.target.value)}
-                      rows={3}
-                      className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    <RichTextEditor
+                      content={content.servicePages[activeServicePageTab]?.description || ""}
+                      onChange={(value) => handleServicePageChange(activeServicePageTab, "description", value)}
                     />
                     <div>
                       <h3 className="text-lg font-semibold mb-2">Image Carousel</h3>
@@ -985,42 +940,28 @@ export default function ContentManager() {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold mb-2">What We Do</h3>
-                      <textarea
-                        placeholder="Section Description"
-                        value={content.servicePages[activeServicePageTab]?.whatWeDo?.description || ""}
-                        onChange={(e) => handleWhatWeDoChange(activeServicePageTab, "description", e.target.value)}
-                        rows={3}
-                        className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      <RichTextEditor
+                        content={content.servicePages[activeServicePageTab]?.whatWeDo?.description || ""}
+                        onChange={(value) => handleWhatWeDoChange(activeServicePageTab, "description", value)}
                       />
                       {content.servicePages[activeServicePageTab]?.whatWeDo?.cards.map((card, index) => (
-                        <div key={index} className="mb-2 p2 border rounded">
-                          {" "}
-                          <Input
-                            placeholder="Card Title"
-                            value={card.title}
-                            onChange={(e) =>
-                              handleWhatWeDoChange(
-                                activeServicePageTab,
-                                "cards",
-                                { ...card, title: e.target.value },
-                                index,
-                              )
+                        <div key={index} className="mb-2 p-2 border rounded">
+                          <RichTextEditor
+                            content={card.title || ""}
+                            onChange={(value) =>
+                              handleWhatWeDoChange(activeServicePageTab, "cards", { ...card, title: value }, index)
                             }
-                            className="mb-2"
                           />
-                          <textarea
-                            placeholder="Card Description"
-                            value={card.description}
-                            onChange={(e) =>
+                          <RichTextEditor
+                            content={card.description || ""}
+                            onChange={(value) =>
                               handleWhatWeDoChange(
                                 activeServicePageTab,
                                 "cards",
-                                { ...card, description: e.target.value },
+                                { ...card, description: value },
                                 index,
                               )
                             }
-                            rows={2}
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </div>
                       ))}
@@ -1064,49 +1005,39 @@ export default function ContentManager() {
                         className="mt-2 w-full max-h-48 object-cover"
                       />
                     )}
-                    <Input
-                      placeholder="Banner Title"
-                      value={content.contactUs.banner.title}
-                      onChange={(e) =>
-                        handleContactUsChange("banner", { ...content.contactUs.banner, title: e.target.value })
+                    <RichTextEditor
+                      content={content.contactUs.banner.title || ""}
+                      onChange={(value) =>
+                        handleContactUsChange("banner", { ...content.contactUs.banner, title: value })
                       }
-                      className="mt-2"
                     />
-                    <textarea
-                      placeholder="Banner Description"
-                      value={content.contactUs.banner.description}
-                      onChange={(e) =>
-                        handleContactUsChange("banner", { ...content.contactUs.banner, description: e.target.value })
+                    <RichTextEditor
+                      content={content.contactUs.banner.description || ""}
+                      onChange={(value) =>
+                        handleContactUsChange("banner", { ...content.contactUs.banner, description: value })
                       }
-                      rows={3}
-                      className="mt-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Contact Form</h3>
-                    <Input
-                      placeholder="Form Title"
-                      value={content.contactUs.contactForm.title}
-                      onChange={(e) =>
+                    <RichTextEditor
+                      content={content.contactUs.contactForm.title || ""}
+                      onChange={(value) =>
                         handleContactUsChange("contactForm", {
                           ...content.contactUs.contactForm,
-                          title: e.target.value,
+                          title: value,
                         })
                       }
-                      className="mb-2"
                     />
-                    <textarea
-                      placeholder="Form Description"
-                      value={content.contactUs.contactForm.description}
-                      onChange={(e) =>
+                    <RichTextEditor
+                      content={content.contactUs.contactForm.description || ""}
+                      onChange={(value) =>
                         handleContactUsChange("contactForm", {
                           ...content.contactUs.contactForm,
-                          description: e.target.value,
+                          description: value,
                         })
                       }
-                      rows={3}
-                      className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <Input
                       type="file"
@@ -1131,37 +1062,30 @@ export default function ContentManager() {
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Contact Info</h3>
-                    <Input
-                      placeholder="Contact Info Title"
-                      value={content.contactUs.contactInfo.title}
-                      onChange={(e) =>
+                    <RichTextEditor
+                      content={content.contactUs.contactInfo.title || ""}
+                      onChange={(value) =>
                         handleContactUsChange("contactInfo", {
                           ...content.contactUs.contactInfo,
-                          title: e.target.value,
+                          title: value,
                         })
                       }
-                      className="mb-2"
                     />
                     {content.contactUs.contactInfo.cards.map((card, index) => (
                       <div key={index} className="mb-2 p-2 border rounded">
                         <Input
                           placeholder="Icon"
-                          value={card.icon}
+                          value={card.icon || ""}
                           onChange={(e) => handleContactInfoCardChange(index, "icon", e.target.value)}
                           className="mb-2"
                         />
-                        <Input
-                          placeholder="Title"
-                          value={card.title}
-                          onChange={(e) => handleContactInfoCardChange(index, "title", e.target.value)}
-                          className="mb-2"
+                        <RichTextEditor
+                          content={card.title || ""}
+                          onChange={(value) => handleContactInfoCardChange(index, "title", value)}
                         />
-                        <textarea
-                          placeholder="Content"
-                          value={card.content}
-                          onChange={(e) => handleContactInfoCardChange(index, "content", e.target.value)}
-                          rows={2}
-                          className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <RichTextEditor
+                          content={card.content || ""}
+                          onChange={(value) => handleContactInfoCardChange(index, "content", value)}
                         />
                       </div>
                     ))}
@@ -1172,29 +1096,20 @@ export default function ContentManager() {
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">FAQs</h3>
-                    <Input
-                      placeholder="FAQs Title"
-                      value={content.contactUs.faqs.title}
-                      onChange={(e) =>
-                        handleContactUsChange("faqs", { ...content.contactUs.faqs, title: e.target.value })
-                      }
-                      className="mb-2"
+                    <RichTextEditor
+                      content={content.contactUs.faqs.title || ""}
+                      onChange={(value) => handleContactUsChange("faqs", { ...content.contactUs.faqs, title: value })}
                     />
                     {content.contactUs.faqs.items &&
                       content.contactUs.faqs.items.map((faq, index) => (
                         <div key={index} className="mb-2 p-2 border rounded">
-                          <Input
-                            placeholder="Question"
-                            value={faq.question}
-                            onChange={(e) => handleFaqChange(index, "question", e.target.value)}
-                            className="mb-2"
+                          <RichTextEditor
+                            content={faq.question || ""}
+                            onChange={(value) => handleFaqChange(index, "question", value)}
                           />
-                          <textarea
-                            placeholder="Answer"
-                            value={faq.answer}
-                            onChange={(e) => handleFaqChange(index, "answer", e.target.value)}
-                            rows={2}
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <RichTextEditor
+                            content={faq.answer || ""}
+                            onChange={(value) => handleFaqChange(index, "answer", value)}
                           />
                         </div>
                       ))}
@@ -1205,28 +1120,23 @@ export default function ContentManager() {
 
                   <div>
                     <h3 className="text-lg font-semibold mb-2">FAQ Sidebar</h3>
-                    <Input
-                      placeholder="Sidebar Title"
-                      value={content.contactUs.faqs.sidebar?.title || ""}
-                      onChange={(e) =>
+                    <RichTextEditor
+                      content={content.contactUs.faqs.sidebar?.title || ""}
+                      onChange={(value) =>
                         handleContactUsChange("faqs", {
                           ...content.contactUs.faqs,
-                          sidebar: { ...content.contactUs.faqs.sidebar, title: e.target.value },
+                          sidebar: { ...content.contactUs.faqs.sidebar, title: value },
                         })
                       }
-                      className="mb-2"
                     />
-                    <textarea
-                      placeholder="Sidebar Content"
-                      value={content.contactUs.faqs.sidebar?.content || ""}
-                      onChange={(e) =>
+                    <RichTextEditor
+                      content={content.contactUs.faqs.sidebar?.content || ""}
+                      onChange={(value) =>
                         handleContactUsChange("faqs", {
                           ...content.contactUs.faqs,
-                          sidebar: { ...content.contactUs.faqs.sidebar, content: e.target.value },
+                          sidebar: { ...content.contactUs.faqs.sidebar, content: value },
                         })
                       }
-                      rows={3}
-                      className="flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                 </CardContent>
@@ -1241,18 +1151,13 @@ export default function ContentManager() {
                 <CardContent className="space-y-4">
                   {content.aboutUs.map((section, sectionIndex) => (
                     <div key={sectionIndex} className="mb-4 p-4 border rounded">
-                      <Input
-                        placeholder="Section Title"
-                        value={section.title}
-                        onChange={(e) => handleAboutUsChange(sectionIndex, "title", e.target.value)}
-                        className="mb-2"
+                      <RichTextEditor
+                        content={section.title || ""}
+                        onChange={(value) => handleAboutUsChange(sectionIndex, "title", value)}
                       />
-                      <textarea
-                        placeholder="Section Description"
-                        value={section.content.description}
-                        onChange={(e) => handleAboutUsChange(sectionIndex, "description", e.target.value)}
-                        rows={3}
-                        className="mb-2 flex min-h-[80px] w-full rounded-md border border-input bg-slate-50 dark:bg-zinc-500 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      <RichTextEditor
+                        content={section.content.description || ""}
+                        onChange={(value) => handleAboutUsChange(sectionIndex, "description", value)}
                       />
                       <div>
                         <h4 className="text-md font-semibold mb-2">Images</h4>
