@@ -44,12 +44,11 @@ export const Footerimpli: React.FC = () => {
 
         <div className="text-center md:text-left">
           <h3 className="text-neutral-500 mb-3 mt-2">Locate Us</h3>
-          <p className="text-sm text-neutral-400">
-            416, Laxmi Tower, Commercial Complex, <br />
-            Gopal Nagar, Azadpur,
-            <br />
-            Delhi, 110033
-          </p>
+          <div className="text-sm text-neutral-400 flex flex-col md:flex-row md:items-center">
+            <span className="md:after:content-['|'] md:after:mx-2">Delhi</span>
+            <span className="md:after:content-['|'] md:after:mx-2">Gurugram</span>
+            <span>Canada</span>
+          </div>
         </div>
 
         <div className="text-center md:text-left">
@@ -83,7 +82,7 @@ export const Footerimpli: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-center py-4 px-4 text-center">
-        <span className="text-sm text-slate-400">© 2024 Quite Good</span>
+        <span className="text-sm text-slate-400">© 2025 Quite Good</span>
       </div>
     </div>
   )
