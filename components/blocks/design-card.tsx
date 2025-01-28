@@ -175,7 +175,7 @@ export default function DesignProjects({ projects = [], filterTags = [] }: Desig
             key={project.id}
             onMouseEnter={() => handleMouseEnter(project)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-[450px] w-[400px] md:h-[400px] md:w[250px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col  h-[400px] w-[350px] md:h-[350px] md:w[200px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
             style={{
               zIndex: hoveredProject === project ? 20 : 1,
             }}

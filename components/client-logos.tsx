@@ -1,12 +1,22 @@
-'use client'
+"use client"
 
-import { Marquee } from "@/components/ui/marquee";
+import { Marquee } from "@/components/ui/marquee"
 
 interface ClientLogosProps {
-  content: Array<{ src: string; alt: string }>;
+  content: Array<{ src: string; alt: string }> | null
+  error?: string
 }
 
-export default function ClientLogos({ content }: ClientLogosProps) {
-  return <Marquee logos={content} />;
+export default function ClientLogos({ content, error }: ClientLogosProps) {
+  console.log("ClientLogos content:", content) // Add this line for debugging
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>
+  }
+
+  if (!content || content.length === 0) {
+    return null
+  }
+
+  return <Marquee logos={content} />
 }
 

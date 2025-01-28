@@ -419,7 +419,7 @@ export default function () {
   
   return (
     <div className="flex flex-col md:flex-row items-center justify-center py-10 md:py-20 min-h-screen md:h-auto bg-gradient-to-b from-black from-0% via-neutral-600 w-full">
-      <div className="max-w-7xl mx-auto w-full relative overflow-hidden h-full md:h-[50rem] px-4">
+      <div className="max-w-7xl mx-auto w-full relative overflow-hidden h-full md:h-[42rem] px-4">
         <motion.div
           initial={{
             opacity: 0,

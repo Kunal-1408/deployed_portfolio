@@ -1,63 +1,52 @@
-"use client";
-import {
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-  motion,
-} from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+"use client"
+import { useMotionValueEvent, useScroll, useTransform, motion } from "framer-motion"
+import React, { useEffect, useRef, useState } from "react"
 
 interface TimelineEntry {
-  title: string;
+  title: string
   content: {
-    description: string;
-    images: string[];
-  };
+    description: string
+    images: { imageUrl: string }[]
+  }
 }
 
 export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+  const ref = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState(0)
 
   useEffect(() => {
     if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setHeight(rect.height);
+      const rect = ref.current.getBoundingClientRect()
+      setHeight(rect.height)
     }
-  }, [ref]);
+  }, [ref])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start 10%", "end 50%"],
-  });
+  })
 
-  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
-  const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height])
+  const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1])
 
   return (
-    <div
-      className="w-full bg-white dark:bg-neutral-950 font-sans md:px-10"
-      ref={containerRef}
-    >
+    <div className="w-full bg-white dark:bg-neutral-950 font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl  pt-20 px-4 md:px-8 lg:px-10">
         <h2 className="text-slate-700 font-extrabold text-5xl pt-10 ">
           Becoming <span className="text-orange-400 ">Quite Good</span>
         </h2>
         <p className="text-md font-semibold sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-3xl pt-5">
-          We&apos;ve been a leading pioneer in the industry for the past 8+ years. 
+          We&apos;ve been a leading pioneer in the industry for the past 8+ years.
         </p>
         <p className="text-md font-semibold sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
-        Here&apos;s a timeline of our journey.
+          Here&apos;s a timeline of our journey.
         </p>
       </div>
 
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
-          <div
-            key={index}
-            className="flex justify-start pt-10 md:pt-40 md:gap-10"
-          >
+          <div key={index} className="flex justify-start pt-10 md:pt-40 md:gap-10">
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-white dark:bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 p-2" />
@@ -71,16 +60,21 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500 dark:text-neutral-500">
                 {item.title}
               </h3>
-             <div>
-  <p className="text-gray-500 font-medium text-lg">{item.content.description}</p>
-  {item.content.images && item.content.images.length > 0 && (
-    <div className="mt-4 flex flex-wrap gap-4">
-      {item.content.images.map((image, imgIndex) => (
-        <img key={imgIndex} src={image} alt={`Image ${imgIndex + 1}`} className="w-24 h-24 object-cover rounded-md" />
-      ))}
-    </div>
-  )}
-</div> 
+              <div>
+                <p className="text-gray-500 font-medium text-lg">{item.content.description}</p>
+                {item.content.images && item.content.images.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    {item.content.images.map((image, imgIndex) => (
+                      <img
+                        key={imgIndex}
+                        src={image.imageUrl || "/placeholder.svg"}
+                        alt={`Timeline image ${imgIndex + 1}`}
+                        className="w-24 h-24 object-cover rounded-md"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}
@@ -100,6 +94,6 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

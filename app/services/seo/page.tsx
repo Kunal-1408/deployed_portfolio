@@ -10,7 +10,7 @@ export default async function Social() {
     notFound();
   }
 
-  const socialData = content.servicePages?.social;
+  const socialData = content.servicePages?.seo;
 
   if (!socialData) {
     console.error('Social media data not found in the content');

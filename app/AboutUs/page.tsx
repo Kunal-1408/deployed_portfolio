@@ -14,6 +14,8 @@ export default async function Timelined() {
     );
   }
 
+  console.log(content.aboutUs)
+
   if (!content.aboutUs || !Array.isArray(content.aboutUs) || content.aboutUs.length === 0) {
     return (
       <div className="w-full p-4">

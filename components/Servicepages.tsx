@@ -1,43 +1,43 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react";
-import { ArrowRight } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from 'next/image';
+import { useState, useEffect, useMemo } from "react"
+import { ArrowRight } from "lucide-react"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "next/image"
 
 interface ServicePageProps {
-  serviceType: 'branding' | 'design' | 'seo' | 'webDevelopment';
+  serviceType: "branding" | "design" | "seo" | "webDevelopment"
   data: {
-    carouselImages: { imageUrl: string }[];
-    description: string;
+    carouselImages: { imageUrl: string }[]
+    description: string
     whatWeDo: {
-      cards: { title: string; description: string }[];
-      description: string;
-    };
-  };
+      cards: { title: string; description: string }[]
+      description: string
+    }
+  }
 }
 
 export default function ServicePage({ serviceType, data }: ServicePageProps) {
-  const [currentImage, setCurrentImage] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [currentImage, setCurrentImage] = useState(0)
+  const [isLoaded, setIsLoaded] = useState(false)
 
-  const images = useMemo(() => data.carouselImages.map(img => img.imageUrl), [data.carouselImages]);
-  const services = useMemo(() => data.whatWeDo.cards, [data.whatWeDo.cards]);
+  const images = useMemo(() => data.carouselImages.map((img) => img.imageUrl), [data.carouselImages])
+  const services = useMemo(() => data.whatWeDo.cards, [data.whatWeDo.cards])
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentImage((prevImage) => (prevImage + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [images.length]);
+      setCurrentImage((prevImage) => (prevImage + 1) % images.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [images.length])
 
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    setIsLoaded(true)
+  }, [])
 
   const capitalizeFirstLetter = (string: string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  };
+    return string.charAt(0).toUpperCase() + string.slice(1)
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -47,7 +47,7 @@ export default function ServicePage({ serviceType, data }: ServicePageProps) {
             <h1 className="text-4xl md:text-5xl font-bold mb-4 mt-16">
               {capitalizeFirstLetter(serviceType)} <span className="text-orange-400">SERVICES</span>
             </h1>
-            <p className="text-lg text-gray-600">{data.description}</p>
+            <p className="text-lg text-gray-600" dangerouslySetInnerHTML={{ __html: data.description }} />
           </div>
           <div className="w-1/2 relative overflow-hidden rounded-lg mx-10 py-12">
             <div
@@ -71,21 +71,30 @@ export default function ServicePage({ serviceType, data }: ServicePageProps) {
       <section className="py-12 px-4 md:px-6 lg:px-8 ">
         <div className="w-full">
           <h2 className="text-4xl md:text-5xl font-bold mb-5 ml-20 text-left">WHAT WE DO</h2>
-          <p className="text-left ml-20 mb-12 max-w-3xl">{data.whatWeDo.description}</p>
+          <p
+            className="text-left ml-20 mb-12 max-w-3xl"
+            dangerouslySetInnerHTML={{ __html: data.whatWeDo.description }}
+          />
           <div className="grid grid-cols-3 lg:grid-cols-3 mx-auto mb-8 max-w-[1200px]">
             {services.slice(0, 3).map((service, index) => (
               <Card
                 key={index}
                 className={`transition-all duration-500 hover:bg-orange-400 group h-[450px] w-[350px] ${
-                  isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <CardHeader>
-                  <CardTitle className="text-xl font-semibold group-hover:text-white">{service.title}</CardTitle>
+                  <CardTitle
+                    className="text-xl font-semibold group-hover:text-white"
+                    dangerouslySetInnerHTML={{ __html: service.title }}
+                  />
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm group-hover:text-white">{service.description}</p>
+                  <p
+                    className="text-sm group-hover:text-white"
+                    dangerouslySetInnerHTML={{ __html: service.description }}
+                  />
                 </CardContent>
                 <CardFooter>
                   <ArrowRight className="w-6 h-6 text-orange-400 group-hover:text-white" />
@@ -99,15 +108,21 @@ export default function ServicePage({ serviceType, data }: ServicePageProps) {
                 <Card
                   key={index + 3}
                   className={`transition-all duration-500 hover:bg-orange-400 group h-[450px] w-[350px] ${
-                    isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                   }`}
                   style={{ transitionDelay: `${(index + 3) * 100}ms` }}
                 >
                   <CardHeader>
-                    <CardTitle className="text-xl font-semibold group-hover:text-white">{service.title}</CardTitle>
+                    <CardTitle
+                      className="text-xl font-semibold group-hover:text-white"
+                      dangerouslySetInnerHTML={{ __html: service.title }}
+                    />
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm group-hover:text-white">{service.description}</p>
+                    <p
+                      className="text-sm group-hover:text-white"
+                      dangerouslySetInnerHTML={{ __html: service.description }}
+                    />
                   </CardContent>
                   <CardFooter>
                     <ArrowRight className="w-6 h-6 text-orange-400 group-hover:text-white" />
@@ -119,6 +134,6 @@ export default function ServicePage({ serviceType, data }: ServicePageProps) {
         </div>
       </section>
     </div>
-  );
+  )
 }
 

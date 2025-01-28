@@ -73,7 +73,7 @@ interface AboutUsSection {
   title: string
   content: {
     description: string
-    images: string[]
+    images: Array<string | { imageUrl: string }>
   }
 }
 
@@ -1162,7 +1162,7 @@ export default function ContentManager() {
                       <div>
                         <h4 className="text-md font-semibold mb-2">Images</h4>
                         <div className="grid grid-cols-3 gap-4">
-                          {section.content.images.map((imageUrl, imageIndex) => (
+                          {section.content.images.map((image, imageIndex) => (
                             <div key={imageIndex} className="flex flex-col items-center">
                               <Input
                                 type="file"
@@ -1173,9 +1173,9 @@ export default function ContentManager() {
                                 accept="image/*"
                                 className="mb-2"
                               />
-                              {imageUrl && (
+                              {(typeof image === "string" ? image : (image as { imageUrl: string }).imageUrl) && (
                                 <img
-                                  src={imageUrl || "/placeholder.svg"}
+                                  src={typeof image === "string" ? image : (image as { imageUrl: string }).imageUrl}
                                   alt={`About Us image ${imageIndex + 1}`}
                                   className="w-24 h-24 object-cover mb-2"
                                 />

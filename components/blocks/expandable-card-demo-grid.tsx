@@ -129,12 +129,26 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
 
               <div className="p-6 flex flex-col h-full">
                 <div className="flex flex-row justify-between items-center">
-                  <motion.h3
-                    layoutId={`title-${active.id}-${id}`}
-                    className="font-medium text-2xl text-neutral-700 dark:text-neutral-200"
-                  >
-                    {active.Title}
-                  </motion.h3>
+                    {/* <div className="mt-4 flex flex-row justify-between"> */}
+                      <motion.h3
+                        layoutId={`title-${active.id}-${id}`}
+                        className="font-medium text-card-foreground text-lg"
+                      >
+                        {active.Title}
+                      </motion.h3>
+                      <motion.div 
+                        layoutId={`logo-${active.id}-${id}`} 
+                        className="relative w-16 h-16 ml-4 flex-shrink-0"
+                      >
+                        <Image 
+                          src={active.Logo || "/placeholder.svg"} 
+                          alt={`${active.Title} logo`} 
+                          className="object-contain"
+                          width={64}
+                          height={64}
+                        />
+                      </motion.div>
+                    {/* </div> */}
                   
                   {active.URL && (
                     <motion.a
@@ -189,7 +203,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             key={website.id}
             onMouseEnter={() => handleMouseEnter(website)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-[450px] w-[400px] md:h-[400px] md:w[250px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-[400px] w-[350px] md:h-[350px] md:w[200px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
             style={{
               zIndex: hoveredWebsite === website ? 20 : 1,
             }}
