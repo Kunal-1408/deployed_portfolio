@@ -1,28 +1,28 @@
 "use client"
 
 import Image from "next/image"
-import React, { useEffect, useId, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { X } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight } from "lucide-react"
 
 interface Website {
-  id: string;
-  Title: string;
-  Description: string;
-  Status: string;
-  URL: string | null;
-  Tags: string[];
-  Backup_Date: string | null;
-  Content_Update_Date: string | null;
-  archive: boolean;
-  highlighted: boolean;
-  Images: string | null;
-  Logo: string | null;
+  id: string
+  Title: string
+  Description: string
+  Status: string
+  URL: string | null
+  Tags: string[]
+  Backup_Date: string | null
+  Content_Update_Date: string | null
+  archive: boolean
+  highlighted: boolean
+  Images: string | null
+  Logo: string | null
 }
 
 interface ExpandableCardDemoProps {
-  websites: Website[];
-  filterTags?: string[];
+  websites: Website[]
+  filterTags?: string[]
 }
 
 export default function ExpandableCardDemo({ websites, filterTags = [] }: ExpandableCardDemoProps) {
@@ -32,14 +32,16 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
   const ref = useRef<HTMLDivElement>(null)
 
   const filteredWebsites = filterTags.length
-    ? websites.filter((website) => filterTags.every((tag) => website.Tags.includes(tag)))
-    : websites
+    ? websites.filter((website) => !website.archive && filterTags.every((tag) => website.Tags.includes(tag)))
+    : websites.filter((website) => !website.archive)
 
-  const sortedWebsites = [...filteredWebsites].sort((a, b) => {
-    if (a.highlighted && !b.highlighted) return -1
-    if (!a.highlighted && b.highlighted) return 1
-    return 0 
-  })
+  const sortedWebsites = [...filteredWebsites]
+    .filter((website) => !website.archive)
+    .sort((a, b) => {
+      if (a.highlighted && !b.highlighted) return -1
+      if (!a.highlighted && b.highlighted) return 1
+      return 0
+    })
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -69,6 +71,20 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
     setActive(website)
   }
 
+  const currentIndex = sortedWebsites.findIndex((website) => website.id === active?.id)
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setActive(sortedWebsites[currentIndex - 1])
+    }
+  }
+
+  const handleNext = () => {
+    if (currentIndex < sortedWebsites.length - 1) {
+      setActive(sortedWebsites[currentIndex + 1])
+    }
+  }
+
   return (
     <>
       <AnimatePresence>
@@ -77,44 +93,47 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm h-full w-full z-10"
           />
         )}
       </AnimatePresence>
       <AnimatePresence>
         {active && (
           <div className="fixed inset-0 grid place-items-center z-[100]">
-            <motion.button
-              key={`button-${active.id}-${id}`}
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: 0.05 } }}
-              className="flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6"
-              onClick={() => setActive(null)}
-            >
-              <X className="h-4 w-4" />
-            </motion.button>
             <motion.div
               layoutId={`card-${active.id}-${id}`}
               ref={ref}
-              className="w-full max-w-[800px] h-[800px] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden"
+              className="w-full max-w-[800px] h-[800px] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
             >
+              <motion.button
+                key={`button-${active.id}-${id}`}
+                layout
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.05 } }}
+                className="flex absolute top-4 right-4 items-center justify-center bg-gray-400 rounded-full h-10 w-10 z-10"
+                onClick={() => setActive(null)}
+              >
+                <X className="h-6 w-6 text-white" />
+              </motion.button>
               <div className="m-4">
-                <motion.div layoutId={`image-${active.id}-${id}`} className="relative h-[400px] overflow-hidden rounded-xl">
+                <motion.div
+                  layoutId={`image-${active.id}-${id}`}
+                  className="relative h-[400px] overflow-hidden rounded-xl"
+                >
                   <motion.div
                     animate={{
-                      y: ["0%", "-62.5%", "-62.5%", "0%"],
+                      y: ["0%", "-50%", "-50%", "0%"],
                     }}
                     transition={{
                       y: {
                         duration: 20,
-                        repeat: Infinity,
+                        repeat: Number.POSITIVE_INFINITY,
                         ease: "linear",
                       },
                     }}
                     className="absolute inset-0 w-full"
-                    style={{ height: "268.75%" }}  
+                    style={{ height: "200%" }}
                   >
                     <Image
                       priority
@@ -129,43 +148,22 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
 
               <div className="p-6 flex flex-col h-full">
                 <div className="flex flex-row justify-between items-center">
-                    {/* <div className="mt-4 flex flex-row justify-between"> */}
-                      <motion.h3
-                        layoutId={`title-${active.id}-${id}`}
-                        className="font-medium text-card-foreground text-lg"
-                      >
-                        {active.Title}
-                      </motion.h3>
-                      <motion.div 
-                        layoutId={`logo-${active.id}-${id}`} 
-                        className="relative w-16 h-16 ml-4 flex-shrink-0"
-                      >
-                        <Image 
-                          src={active.Logo || "/placeholder.svg"} 
-                          alt={`${active.Title} logo`} 
-                          className="object-contain"
-                          width={64}
-                          height={64}
-                        />
-                      </motion.div>
-                    {/* </div> */}
-                  
-                  {active.URL && (
-                    <motion.a
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      href={active.URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 text-base rounded-full font-bold text-white bg-orange-400 hover:bg-orange-500 text-primary-foreground"
-                    >
-                      Visit Website
-                    </motion.a>
-                  )}
+                  <motion.h3 layoutId={`title-${active.id}-${id}`} className="font-medium text-card-foreground text-lg">
+                    {active.Title}
+                  </motion.h3>
+                  <motion.div
+                    layoutId={`logo-${active.id}-${id}`}
+                    className="relative w-16 h-16 ml-4 flex-shrink-0 rounded-full overflow-hidden"
+                  >
+                    <Image
+                      src={active.Logo || "/placeholder.svg"}
+                      alt={`${active.Title} logo`}
+                      className="object-contain"
+                      fill
+                    />
+                  </motion.div>
                 </div>
-                
+
                 <div className="mt-6 flex-grow flex flex-col">
                   <div className="flex flex-wrap gap-1 mb-4">
                     {active.Tags.map((tag, index) => (
@@ -175,25 +173,50 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         transition={{
-                          duration: 0.05,   
-                          ease: "easeInOut"  
+                          duration: 0.05,
+                          ease: "easeInOut",
                         }}
                       >
                         {tag}
                       </motion.span>
                     ))}
                   </div>
-                  <motion.div
-                    layoutId={`description-${active.id}-${id}`}
-                    className="flex-grow overflow-y-auto pr-2"
-                  >
-                    <p className="text-neutral-600 text-base lg:text-lg dark:text-neutral-400">
-                      {active.Description}
-                    </p>
+                  <motion.div layoutId={`description-${active.id}-${id}`} className="flex-grow overflow-y-auto pr-2">
+                    <p className="text-neutral-600 text-base lg:text-lg dark:text-neutral-400">{active.Description}</p>
                   </motion.div>
                 </div>
               </div>
+              <div className="absolute left-4 bottom-4">
+                {active.URL && (
+                  <motion.a
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    href={active.URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-6 py-3 text-base rounded-full font-bold text-white bg-orange-400 hover:bg-orange-500 text-primary-foreground"
+                  >
+                    Visit Website
+                  </motion.a>
+                )}
+              </div>
             </motion.div>
+            <button
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              <ChevronLeft className="w-8 h-8 text-white" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentIndex === sortedWebsites.length - 1}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              <ChevronRight className="w-8 h-8 text-white" />
+            </button>
           </div>
         )}
       </AnimatePresence>
@@ -208,8 +231,8 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               zIndex: hoveredWebsite === website ? 20 : 1,
             }}
           >
-            <motion.div 
-              layoutId={`image-${website.id}-${id}`} 
+            <motion.div
+              layoutId={`image-${website.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
                 height: hoveredWebsite === website ? 300 : 192,
@@ -218,17 +241,17 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             >
               <motion.div
                 animate={{
-                  y: hoveredWebsite === website ? ["0%", "-62.5%", "-62.5%", "0%"] : "0%",
+                  y: hoveredWebsite === website ? ["0%", "-50%", "-50%", "0%"] : "0%",
                 }}
                 transition={{
                   y: {
                     duration: hoveredWebsite === website ? 20 : 0,
-                    repeat: Infinity,
+                    repeat: Number.POSITIVE_INFINITY,
                     ease: "linear",
                   },
                 }}
                 className="absolute inset-0 w-full"
-                style={{ height: "268.75%" }}
+                style={{ height: "200%" }}
               >
                 <Image
                   fill
@@ -239,22 +262,18 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               </motion.div>
             </motion.div>
             <div className="mt-4 flex justify-between items-center">
-              <motion.h3
-                layoutId={`title-${website.id}-${id}`}
-                className="font-medium text-card-foreground text-lg"
-              >
+              <motion.h3 layoutId={`title-${website.id}-${id}`} className="font-medium text-card-foreground text-lg">
                 {website.Title}
               </motion.h3>
-              <motion.div 
-                layoutId={`logo-${website.id}-${id}`} 
-                className="relative w-16 h-16 ml-4 flex-shrink-0"
+              <motion.div
+                layoutId={`logo-${website.id}-${id}`}
+                className="relative w-16 h-16 ml-4 flex-shrink-0 rounded-full overflow-hidden"
               >
-                <Image 
-                  src={website.Logo || "/placeholder.svg"} 
-                  alt={`${website.Title} logo`} 
+                <Image
+                  src={website.Logo || "/placeholder.svg"}
+                  alt={`${website.Title} logo`}
                   className="object-contain"
-                  width={64}
-                  height={64}
+                  fill
                 />
               </motion.div>
             </div>
@@ -272,8 +291,8 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{
-                    duration: 0.05,   
-                    ease: "easeInOut"  
+                    duration: 0.05,
+                    ease: "easeInOut",
                   }}
                 >
                   {tag}
