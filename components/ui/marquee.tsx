@@ -137,6 +137,7 @@ export const Marquee = ({
                   e.currentTarget.src = "/placeholder.svg"
                 }}
               />
+      
             </li>
           ))}
         </ul>
@@ -173,6 +174,7 @@ export const Marquee = ({
                   e.currentTarget.src = "/placeholder.svg"
                 }}
               />
+
             </li>
           ))}
         </ul>
@@ -180,4 +182,3 @@ export const Marquee = ({
     </div>
   )
 }
-

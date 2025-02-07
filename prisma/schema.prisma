@@ -238,6 +238,7 @@ model social {
   archive             Boolean  @default(false)
   highlighted         Boolean  @default(false)
   tags        String[]
+  URL         String
 }
 
 model texts {

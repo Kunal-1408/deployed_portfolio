@@ -76,13 +76,21 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setActive(sortedWebsites[currentIndex - 1])
+    } else {
+      setActive(null) // Close the modal if we're at the first item
     }
   }
 
   const handleNext = () => {
     if (currentIndex < sortedWebsites.length - 1) {
       setActive(sortedWebsites[currentIndex + 1])
+    } else {
+      setActive(null) // Close the modal if we're at the last item
     }
+  }
+
+  const handleClose = () => {
+    setActive(null)
   }
 
   return (
@@ -94,6 +102,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/20 backdrop-blur-sm h-full w-full z-10"
+            onClick={handleClose}
           />
         )}
       </AnimatePresence>
@@ -104,6 +113,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               layoutId={`card-${active.id}-${id}`}
               ref={ref}
               className="w-full max-w-[800px] h-[800px] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the card
             >
               <motion.button
                 key={`button-${active.id}-${id}`}
@@ -112,7 +122,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.05 } }}
                 className="flex absolute top-4 right-4 items-center justify-center bg-gray-400 rounded-full h-10 w-10 z-10"
-                onClick={() => setActive(null)}
+                onClick={handleClose}
               >
                 <X className="h-6 w-6 text-white" />
               </motion.button>
@@ -205,15 +215,13 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             </motion.div>
             <button
               onClick={handlePrevious}
-              disabled={currentIndex === 0}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 flex items-center justify-center"
             >
               <ChevronLeft className="w-8 h-8 text-white" />
             </button>
             <button
               onClick={handleNext}
-              disabled={currentIndex === sortedWebsites.length - 1}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 rounded-full bg-gray-400 hover:bg-gray-500 transition-colors duration-200 flex items-center justify-center"
             >
               <ChevronRight className="w-8 h-8 text-white" />
             </button>

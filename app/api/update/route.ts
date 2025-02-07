@@ -121,36 +121,36 @@ export async function POST(req: NextRequest) {
           });
         }
         break;
-      case 'social':
-        if (data.id && data.id !== '') {
-          // Update existing record
-          result = await prisma.social.update({
-            where: { id: data.id },
-            data: {
-              Brand: data.Brand,
-              Description: data.Description,
-              Logo: data.Logo,
-              Stats: data.Stats,
-              banner: data.banner,
-              highlighted: data.highlighted,
-              tags: data.tags || [],
-            },
-          });
-        } else {
-          // Create new record
-          result = await prisma.social.create({
-            data: {
-              Brand: data.Brand,
-              Description: data.Description,
-              Logo: data.Logo,
-              Stats: data.Stats,
-              banner: data.banner,
-              highlighted: data.highlighted,
-              tags: data.tags || [],
-            },
-          });
-        }
-        break;
+        case "social":
+          if (data.id && data.id !== "") {
+            // Update existing record
+            result = await prisma.social.update({
+              where: { id: data.id },
+              data: {
+                Brand: data.Brand,
+                Description: data.Description,
+                Logo: data.Logo,
+                Stats: data.Stats,
+                banner: data.banner,
+                highlighted: data.highlighted === "true",
+                tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
+              },
+            })
+          } else {
+            // Create new record
+            result = await prisma.social.create({
+              data: {
+                Brand: data.Brand,
+                Description: data.Description,
+                Logo: data.Logo,
+                Stats: data.Stats,
+                banner: data.banner,
+                highlighted: data.highlighted === "true",
+                tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
+              },
+            })
+          }
+          break
       case 'design':
         // Collect all tags from form data
         const tags = Array.from(formData.entries())
