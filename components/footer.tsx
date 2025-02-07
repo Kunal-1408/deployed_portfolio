@@ -2,6 +2,7 @@ import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa"
+import { RotatingText } from "./ui/rotating-text"
 
 export const Footer: React.FC = () => {
   return (
@@ -17,7 +18,8 @@ export const Footerimpli: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 px-4 py-8 mx-auto max-w-6xl">
         <div className="flex flex-col items-center md:items-start">
           <Link href={"https://quitegood.co"}>
-            <Image src={"/icon.png"} alt="logo" height={110} width={140} />
+            <RotatingText/>
+            {/* <Image src={"/icon.png"} alt="logo" height={110} width={140} /> */}
           </Link>
         </div>
 
@@ -82,7 +84,7 @@ export const Footerimpli: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-center py-4 px-4 text-center">
-        <span className="text-sm text-slate-400">© 2025 Quite Good</span>
+        <span className="text-sm text-slate-400">© 2016-2025 <br />Adsversify Marketing Private ltd.</span>
       </div>
     </div>
   )

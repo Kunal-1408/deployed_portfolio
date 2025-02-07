@@ -85,10 +85,10 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
       <div className="hidden md:flex items-center space-x-2 mr-8">
         <Menu setActive={setActive} isLandingPage={isLandingPage} isSolid={isSolid}>
           <div className="flex space-x-8">
-            <Item title="Website works" href="/works/web" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="Branding works" href="/works/brands" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="Design works" href="/works/design" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="Social Media works" href="/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Website Portfolio" href="/works/web" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Branding Portfolio" href="/works/brands" isLandingPage={isLandingPage} isSolid={isSolid} />
+            {/* <Item title="Design" href="/works/design" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
+            <Item title="Social Media Portfolio" href="/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
             <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
           </div>
         </Menu>

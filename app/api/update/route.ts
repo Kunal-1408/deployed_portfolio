@@ -34,10 +34,9 @@ export async function POST(req: NextRequest) {
         await writeFile(filePath, buffer);
         data[key] = `/uploads/${filename}`;
       } else if (key !== 'type') {
-        if (key.startsWith('Stats.')) {
-          const statKey = key.split('.')[1];
-          if (!data.Stats) data.Stats = {};
-          data.Stats[statKey] = value;
+        if (key === "URL") {
+          // Parse URL string into an array
+          data[key] = JSON.parse(value as string)
         } else if (value === 'true') {
           data[key] = true;
         } else if (value === 'false') {
@@ -122,35 +121,37 @@ export async function POST(req: NextRequest) {
         }
         break;
         case "social":
-          if (data.id && data.id !== "") {
-            // Update existing record
-            result = await prisma.social.update({
-              where: { id: data.id },
-              data: {
-                Brand: data.Brand,
-                Description: data.Description,
-                Logo: data.Logo,
-                Stats: data.Stats,
-                banner: data.banner,
-                highlighted: data.highlighted === "true",
-                tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
-              },
-            })
-          } else {
-            // Create new record
-            result = await prisma.social.create({
-              data: {
-                Brand: data.Brand,
-                Description: data.Description,
-                Logo: data.Logo,
-                Stats: data.Stats,
-                banner: data.banner,
-                highlighted: data.highlighted === "true",
-                tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
-              },
-            })
-          }
-          break
+        if (data.id && data.id !== "") {
+          // Update existing record
+          result = await prisma.social.update({
+            where: { id: data.id },
+            data: {
+              Brand: data.Brand,
+              Description: data.Description,
+              Logo: data.Logo,
+              URL: data.URL,
+              banner: data.banner,
+              highlighted: data.highlighted === "true",
+              tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
+              archive: data.archive === "true",
+            },
+          })
+        } else {
+          // Create new record
+          result = await prisma.social.create({
+            data: {
+              Brand: data.Brand,
+              Description: data.Description,
+              Logo: data.Logo,
+              URL: data.URL,
+              banner: data.banner,
+              highlighted: data.highlighted === "true",
+              tags: Array.isArray(data.tags) ? data.tags : JSON.parse(data.tags || "[]"),
+              archive: false,
+            },
+          })
+        }
+        break
       case 'design':
         // Collect all tags from form data
         const tags = Array.from(formData.entries())

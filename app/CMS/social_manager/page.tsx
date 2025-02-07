@@ -46,11 +46,7 @@ interface Social {
   Brand: string
   Description: string
   Logo: string
-  Stats?: {
-    impression?: string
-    interactions?: string
-    reach?: string
-  }
+  URL?: string[]
   banner: string
   archive: boolean
   highlighted: boolean
@@ -107,11 +103,7 @@ export default function Dashboard() {
     Brand: "",
     Description: "",
     Logo: "",
-    Stats: {
-      impression: "",
-      interactions: "",
-      reach: "",
-    },
+    URL: [],
     banner: "",
     archive: false,
     highlighted: false,
@@ -200,14 +192,10 @@ export default function Dashboard() {
     field: keyof Social | string,
   ) => {
     if (editedSocial) {
-      if (field.startsWith("Stats.")) {
-        const statField = field.split(".")[1] as keyof Social["Stats"]
+      if (field === "URL") {
         setEditedSocial({
           ...editedSocial,
-          Stats: {
-            ...editedSocial.Stats,
-            [statField]: e.target.value,
-          },
+          URL: (e.target.value as string).split(",").map((url) => url.trim()),
         })
       } else {
         setEditedSocial({
@@ -216,14 +204,10 @@ export default function Dashboard() {
         })
       }
     } else if (isAddingSocial) {
-      if (field.startsWith("Stats.")) {
-        const statField = field.split(".")[1] as keyof Social["Stats"]
+      if (field === "URL") {
         setNewSocial({
           ...newSocial,
-          Stats: {
-            ...newSocial.Stats,
-            [statField]: e.target.value,
-          },
+          URL: (e.target.value as string).split(",").map((url) => url.trim()),
         })
       } else {
         setNewSocial({
@@ -312,12 +296,10 @@ export default function Dashboard() {
         const formData = new FormData()
         formData.append("type", "social")
         Object.entries(editedSocial).forEach(([key, value]) => {
-          if (key === "Stats" && typeof value === "object") {
-            Object.entries(value).forEach(([statKey, statValue]) => {
-              formData.append(`Stats.${statKey}`, statValue as string)
-            })
-          } else if (key === "tags" && Array.isArray(editedSocial.tags)) {
+          if (key === "tags" && Array.isArray(editedSocial.tags)) {
             formData.append("tags", JSON.stringify(editedSocial.tags || []))
+          } else if (key === "URL" && Array.isArray(editedSocial.URL)) {
+            formData.append("URL", JSON.stringify(editedSocial.URL))
           } else if (value !== null && value !== undefined) {
             formData.append(key, value.toString())
           }
@@ -367,12 +349,10 @@ export default function Dashboard() {
       const formData = new FormData()
       formData.append("type", "social")
       Object.entries(newSocial).forEach(([key, value]) => {
-        if (key === "Stats" && typeof value === "object") {
-          Object.entries(value).forEach(([statKey, statValue]) => {
-            formData.append(`Stats.${statKey}`, statValue as string)
-          })
-        } else if (key === "tags" && Array.isArray(newSocial.tags)) {
+        if (key === "tags" && Array.isArray(newSocial.tags)) {
           formData.append("tags", JSON.stringify(newSocial.tags || []))
+        } else if (key === "URL" && Array.isArray(newSocial.URL)) {
+          formData.append("URL", JSON.stringify(newSocial.URL))
         } else if (value !== null && value !== undefined) {
           formData.append(key, value.toString())
         }
@@ -560,11 +540,11 @@ export default function Dashboard() {
   const exportSocials = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      "ID,Brand,Description,Logo,Impression,Interactions,Reach,Banner,Highlighted,Archived,Tags\n" +
+      "ID,Brand,Description,Logo,URL,Banner,Highlighted,Archived,Tags\n" +
       filteredSocials
         .map(
           (social) =>
-            `${social.id},"${social.Brand}","${social.Description}","${social.Logo}","${social.Stats?.impression || ""}","${social.Stats?.interactions || ""}","${social.Stats?.reach || ""}","${social.banner}",${social.highlighted},${social.archive},"${social.tags.join(", ")}"`,
+            `${social.id},"${social.Brand}","${social.Description}","${social.Logo}","${social.URL?.join(",") || ""}","${social.banner}",${social.highlighted},${social.archive},"${social.tags.join(", ")}"`,
         )
         .join("\n")
 
@@ -653,7 +633,7 @@ export default function Dashboard() {
                     <TableHead>Description</TableHead>
                     <TableHead>Logo</TableHead>
                     <TableHead>Banner</TableHead>
-                    <TableHead>Stats</TableHead>
+                    <TableHead>URLs</TableHead>
                     <TableHead>Tags</TableHead>
                     <TableHead>Active</TableHead>
                     <TableHead>
@@ -702,9 +682,11 @@ export default function Dashboard() {
                         </TableCell>
                         <TableCell>
                           <div className="text-xs">
-                            <p>Impression: {social.Stats?.impression || "N/A"}</p>
-                            <p>Interactions: {social.Stats?.interactions || "N/A"}</p>
-                            <p>Reach: {social.Stats?.reach || "N/A"}</p>
+                            {social.URL && social.URL.length > 0 ? (
+                              social.URL.map((url, index) => <p key={index}>{url}</p>)
+                            ) : (
+                              <p>No URLs</p>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -858,29 +840,16 @@ export default function Dashboard() {
                 />
               </div>
               <div>
-                <label htmlFor="stats" className="block text-md font-semibold text-gray-700">
-                  Stats
+                <label htmlFor="url" className="block text-md font-semibold text-gray-700">
+                  URLs (comma-separated)
                 </label>
-                <div className="grid grid-cols-3 gap-4 mt-1">
-                  <Input
-                    id="impression"
-                    placeholder="Impression"
-                    value={isAddingSocial ? newSocial.Stats?.impression : (editedSocial?.Stats?.impression ?? "")}
-                    onChange={(e) => handleInputChange(e, "Stats.impression")}
-                  />
-                  <Input
-                    id="interactions"
-                    placeholder="Interactions"
-                    value={isAddingSocial ? newSocial.Stats?.interactions : (editedSocial?.Stats?.interactions ?? "")}
-                    onChange={(e) => handleInputChange(e, "Stats.interactions")}
-                  />
-                  <Input
-                    id="reach"
-                    placeholder="Reach"
-                    value={isAddingSocial ? newSocial.Stats?.reach : (editedSocial?.Stats?.reach ?? "")}
-                    onChange={(e) => handleInputChange(e, "Stats.reach")}
-                  />
-                </div>
+                <Input
+                  id="url"
+                  placeholder="Enter URLs separated bycommas"
+                  value={isAddingSocial ? newSocial.URL?.join(", ") : (editedSocial?.URL?.join(", ") ?? "")}
+                  onChange={(e) => handleInputChange(e, "URL")}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <label htmlFor="tags" className="block text-md font-semibold text-gray-700">
