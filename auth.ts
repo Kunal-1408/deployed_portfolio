@@ -36,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       if (isCMSRoute) {
         if (isLoggedIn) return true
-        return false // Redirect unauthenticated users to login page
+        return false 
       }
       return true
     },

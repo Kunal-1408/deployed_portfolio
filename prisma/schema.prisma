@@ -253,6 +253,8 @@ model texts {
 }
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
+  avatar   String
   email    String @unique
   password String
 }
+
