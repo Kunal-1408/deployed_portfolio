@@ -258,3 +258,27 @@ model User {
   password String
 }
 
+model Settings {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  metaTitle        String
+  metaKeyword      String
+  metaDesc         String
+  phone1           String
+  phone2           String?
+  email1           String
+  email2           String?
+  address          String?
+  footerCopyright  String
+  contactText      String
+  maps             String?
+  facebook         String?
+  instagram        String?
+  skype            String?
+  linkedin         String?
+  twitter          String?
+  youtube          String?
+  whatsapp         String?
+  websiteLogoPath  String?
+  footerLogoPath   String?
+  faviconPath      String?
+}
