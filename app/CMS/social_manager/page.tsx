@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import Link from "next/link"
 
 const getImageUrl = (path: string | null) => {
   if (!path) return "/placeholder.svg?height=50&width=50"
@@ -683,7 +684,10 @@ export default function Dashboard() {
                         <TableCell>
                           <div className="text-xs">
                             {social.URL && social.URL.length > 0 ? (
-                              social.URL.map((url, index) => <p key={index}>{url}</p>)
+                              social.URL.map((url, index) => <p key={index}>
+                                <Link href={url}> {url}</Link>
+                                
+                                </p>)
                             ) : (
                               <p>No URLs</p>
                             )}

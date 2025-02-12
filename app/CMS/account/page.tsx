@@ -169,7 +169,7 @@ export default function AccountForm() {
           </div>
         </div>
       )}
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="w-full max-w-md mx-auto mt-20">
         <CardHeader>
           <CardTitle>Update Account</CardTitle>
         </CardHeader>

@@ -94,10 +94,14 @@ export default function SidebarDemo() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>
+                    <Link href={"/CMS/account"}>
+                    My Account
+                    </Link>
+                    </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link href={"/CMS/account"}>
+                    <Link href={"/CMS/website"}>
                       Settings
                     </Link>
                     
