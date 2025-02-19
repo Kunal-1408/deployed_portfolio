@@ -110,7 +110,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               <motion.div
                 layoutId={`card-${active.id}-${id}`}
                 ref={ref}
-                className="w-full max-w-[800px] h-[800px] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
+                className=" w-[45vw] h-[85vh] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.button
@@ -254,7 +254,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
             key={website.id}
             onMouseEnter={() => handleMouseEnter(website)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-[350px] w-[350px] md:h-[300px] md:w[200px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-[45vh] w-[20vw] md:h-[36vh] md:w[20vw] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
             style={{
               zIndex: hoveredWebsite === website ? 20 : 1,
             }}

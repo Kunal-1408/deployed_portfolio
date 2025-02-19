@@ -128,7 +128,7 @@ export default function SidebarDemo() {
                       <AccordionTrigger className="hover:bg-slate-200 rounded p-4">
                         <span className="flex items-center">
                           <Cog className="h-5 w-5 mr-2" />
-                          Content Manager
+                          Project Manager
                         </span>
                       </AccordionTrigger>
                       <AccordionContent>
@@ -153,15 +153,71 @@ export default function SidebarDemo() {
                             <Link href="/CMS/branding_manager">
                               <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
                                 <Palette className='h-5 w-5'/>
-                                <span className='px-2'>Branding Manager</span>
+                                <span className='px-2'>Branding & Design Manager</span>
                               </button>
                             </Link>
                           </li>
-                          <li>
+                          {/* <li>
                             <Link href="/CMS/design_manager">
                               <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
                                 <Brush className='h-5 w-5'/>
                                 <span className='px-2'>Design Manager</span>
+                              </button>
+                            </Link>
+                          </li> */}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </li>
+                {/* <li className='text-sm font-medium text-neutral-500 mx-auto'>
+                  <Link href="/CMS/Customers">
+                    <button className='flex flex-row p-4 rounded w-full hover:bg-slate-200'>
+                      <User className='h-5 w-5'/>
+                      <span className='px-2'>Clients</span>
+                    </button>
+                  </Link>
+                </li> */}
+                <li className='text-sm font-medium text-neutral-500 mx-auto'>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                      <AccordionTrigger className="hover:bg-slate-200 rounded p-4">
+                        <span className="flex items-center">
+                          <Cog className="h-5 w-5 mr-2" />
+                          Website Content
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="pl-6 space-y-2">
+                          <li>
+                            <Link href="/CMS/Website_content/landing">
+                              <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
+                                <Cog className='h-5 w-5'/>
+                                <span className='px-2'>Landing Page</span>
+                              </button>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/CMS/Website_content/service">
+                              <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
+                                <Cog className='h-5 w-5'/>
+                                <span className='px-2'>Service Page</span>
+                              </button>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/CMS/Website_content/about">
+                              <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
+                                <Cog className='h-5 w-5'/>
+                                <span className='px-2'>About Us</span>
+                              </button>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/CMS/Website_content/contact">
+                              <button className='flex flex-row p-2 rounded w-full hover:bg-slate-200'>
+                                <Cog className='h-5 w-5'/>
+                                <span className='px-2'>Contact Us</span>
                               </button>
                             </Link>
                           </li>
@@ -169,14 +225,6 @@ export default function SidebarDemo() {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
-                </li>
-                <li className='text-sm font-medium text-neutral-500 mx-auto'>
-                  <Link href="/CMS/Customers">
-                    <button className='flex flex-row p-4 rounded w-full hover:bg-slate-200'>
-                      <User className='h-5 w-5'/>
-                      <span className='px-2'>Clients</span>
-                    </button>
-                  </Link>
                 </li>
                 <li className='text-sm font-medium text-neutral-500 mx-auto'>
                   <Link href="/CMS/Queries">
