@@ -14,7 +14,7 @@ const ClientSideMenu = dynamic(() => import('./ClientSideMenu'), { ssr: false })
 
 export const Navbarimpli: React.FC = () => {
   const pathname = usePathname()
-  const isLandingPage = pathname === '/main' || pathname === '/main/contact'
+  const isLandingPage = pathname === '/' || pathname === '/contact'
 
   return (
     <div className="relative w-full flex items-center justify-center">
@@ -33,17 +33,17 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
     "fixed top-0 w-full mx-auto z-50 transition-colors duration-300 flex items-center justify-between px-6",
     className,
     {
-      'bg-transparent': !isSolid && (isLandingPage || pathname === '/main/contact'),
-      'bg-white shadow-md': isSolid || (!isLandingPage && pathname !== '/main/contact'),
+      'bg-transparent': !isSolid && (isLandingPage || pathname === '/contact'),
+      'bg-white shadow-md': isSolid || (!isLandingPage && pathname !== '/contact'),
     }
   )
 
   const logoClass = cn({
-    '/Logo-02.png': !isSecond && (isLandingPage || pathname === '/main/contact'),
-    '/Logo-01.png': isSecond || (!isLandingPage && pathname !== '/main/contact'),
+    '/Logo-02.png': !isSecond && (isLandingPage || pathname === '/contact'),
+    '/Logo-01.png': isSecond || (!isLandingPage && pathname !== '/contact'),
   })
 
-  const textColorClass = (isLandingPage || pathname === '/main/contact')
+  const textColorClass = (isLandingPage || pathname === '/contact')
     ? isSolid
       ? 'text-black'
       : 'text-neutral-300'
@@ -88,11 +88,11 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
       <div className="hidden md:flex items-center space-x-2 mr-8">
         <Menu setActive={setActive} isLandingPage={isLandingPage} isSolid={isSolid}>
           <div className="flex space-x-8">
-            <Item title="Website Portfolio" href="/main/works/web" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="Branding Portfolio" href="/main/works/brands" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Website Portfolio" href="/works/web" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Branding Portfolio" href="/works/brands" isLandingPage={isLandingPage} isSolid={isSolid} />
             {/* <Item title="Design" href="/works/design" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
-            <Item title="Social Media Portfolio" href="/main/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="About" href="/main/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Social Media Portfolio" href="/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
           </div>
         </Menu>
         <Link href="/contact">

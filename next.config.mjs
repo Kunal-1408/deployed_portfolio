@@ -24,6 +24,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.ibb.co',
       },
+      {
+        protocol: "https",
+        hostname: `${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`,
+        pathname: "/**",
+      },
     ],
   },
   eslint: {

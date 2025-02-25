@@ -1,6 +1,9 @@
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Navbarimpli } from "@/components/Nav-Final";
+import {  Footerimpli } from "@/components/footer";
 
 
 
@@ -18,14 +21,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const pathname = usePathname()
-  // const isDashboard = pathname.startsWith('/CMS')
-  // console.log('Current pathname:', pathname);
 
   return (
     <html lang="en">
       <body className={inter.className}>
+      <Navbarimpli/>
+      <main>
       {children}
+      </main>
+        <Footerimpli />
         </body>
     </html>
   );
