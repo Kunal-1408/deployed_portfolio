@@ -12,11 +12,11 @@ export const Marquee = ({
   className,
 }: {
   logos: {
-    logoUrl: string // Updated to match the actual property name
+    logoUrl: string
     alt?: string
   }[]
   direction?: "left" | "right"
-  speed?: "fast" | "normal" | "slow"
+  speed?: "fast" | "normal" | "slow" | "superslow"
   pauseOnHover?: boolean
   className?: string
 }) => {
@@ -79,14 +79,21 @@ export const Marquee = ({
   }
 
   const getSpeed = () => {
-    if (containerRef.current) {
+    if (containerRef.current && containerRef1.current) {
+      let duration = "240s" // Default to slow
+
       if (speed === "fast") {
-        containerRef.current.style.setProperty("--animation-duration", "60s")
+        duration = "60s"
       } else if (speed === "normal") {
-        containerRef.current.style.setProperty("--animation-duration", "120s")
-      } else {
-        containerRef.current.style.setProperty("--animation-duration", "240s")
+        duration = "120s"
+      } else if (speed === "slow") {
+        duration = "240s"
+      } else if (speed === "superslow") {
+        duration = "320s"
       }
+
+      containerRef.current.style.setProperty("--animation-duration", duration)
+      containerRef1.current.style.setProperty("--animation-duration", duration)
     }
   }
 
@@ -116,29 +123,30 @@ export const Marquee = ({
         <ul
           ref={scrollerRef}
           className={cn(
-            "flex min-w-full shrink-0 py-4 w-max flex-nowrap",
+            "flex min-w-full shrink-0 py-4 w-max flex-nowrap gap-8",
             start && "animate-scroll",
             pauseOnHover && "hover:[animation-play-state:paused]",
             direction === "left" ? "animate-scroll-left" : "animate-scroll-right",
-            speed === "slow"
+            speed === "slow" || speed === "superslow",
           )}
         >
           {logos.map((item, idx) => (
             <li
-              className="w-[200px] h-[100px] max-w-full relative flex-shrink-0 md:w-[250px] md:h-[125px] overflow-hidden"
+              className="w-[200px] h-[100px] max-w-full relative flex-shrink-0 md:w-[250px] md:h-[125px] overflow-hidden p-2"
               key={idx}
             >
-              <Image
-                src={getImageUrl(item.logoUrl) || "/placeholder.svg"}
-                alt={item.alt || "Logo"}
-                fill={true}
-                className="transition-all duration-300 object-contain"
-                onError={(e) => {
-                  console.error(`Error loading image: ${item.logoUrl}`)
-                  e.currentTarget.src = "/placeholder.svg"
-                }}
-              />
-      
+              <div className="w-full h-full relative">
+                <Image
+                  src={getImageUrl(item.logoUrl) || "/placeholder.svg"}
+                  alt={item.alt || "Logo"}
+                  fill={true}
+                  className="transition-all duration-300 object-contain"
+                  onError={(e) => {
+                    console.error(`Error loading image: ${item.logoUrl}`)
+                    e.currentTarget.src = "/placeholder.svg"
+                  }}
+                />
+              </div>
             </li>
           ))}
         </ul>
@@ -153,29 +161,30 @@ export const Marquee = ({
         <ul
           ref={scrollerRef1}
           className={cn(
-            "flex min-w-full shrink-0  w-max flex-nowrap",
+            "flex min-w-full shrink-0 w-max flex-nowrap gap-8",
             starter && "animate-scroll",
             pauseOnHover && "hover:[animation-play-state:paused]",
             direction === "left" ? "animate-scroll-right" : "animate-scroll-left",
-            speed === "slow",
+            speed === "slow" || speed === "superslow",
           )}
         >
           {logos.map((item, idx) => (
             <li
-              className="w-[200px] h-[100px] max-w-full relative flex-shrink-0 md:w-[250px] md:h-[125px] overflow-hidden"
+              className="w-[200px] h-[100px] max-w-full relative flex-shrink-0 md:w-[250px] md:h-[125px] overflow-hidden p-2"
               key={idx}
             >
-              <Image
-                src={getImageUrl(item.logoUrl) || "/placeholder.svg"}
-                alt={item.alt || "Logo"}
-                fill={true}
-                className="transition-all duration-300 object-contain"
-                onError={(e) => {
-                  console.error(`Error loading image: ${item.logoUrl}`)
-                  e.currentTarget.src = "/placeholder.svg"
-                }}
-              />
-
+              <div className="w-full h-full relative">
+                <Image
+                  src={getImageUrl(item.logoUrl) || "/placeholder.svg"}
+                  alt={item.alt || "Logo"}
+                  fill={true}
+                  className="transition-all duration-300 object-contain"
+                  onError={(e) => {
+                    console.error(`Error loading image: ${item.logoUrl}`)
+                    e.currentTarget.src = "/placeholder.svg"
+                  }}
+                />
+              </div>
             </li>
           ))}
         </ul>
@@ -183,3 +192,4 @@ export const Marquee = ({
     </div>
   )
 }
+

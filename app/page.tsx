@@ -6,7 +6,7 @@ import Infor from "@/components/info"
 import Choose from "@/components/choose"
 import Cards from "@/components/service_cards"
 import ClientLogos from "@/components/client-logos"
-import ContactForm from "@/components/contact-form"
+import ContactPage from "@/components/contact-form"
 
 export default function Home() {
   const [content, setContent] = useState<any>(null)
@@ -52,8 +52,8 @@ export default function Home() {
         </Suspense>
       </div>
 
-      <div className="bg-white border-4 border-slate-100 py-12">
-        <div className="container mx-auto px-4">
+      <div className="bg-white border-4 border-slate-100 pt-12">
+        {/* <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
             <div className="w-full lg:w-1/2 order-2 lg:order-1">
               <h1 className="font-bold text-4xl sm:text-5xl text-orange-500 dark:text-neutral-200 mb-4 order-1">
@@ -76,7 +76,8 @@ export default function Home() {
               <ContactForm />
             </div>
           </div>
-        </div>
+        </div> */}
+        <ContactPage/>
       </div>
     </main>
   )

@@ -107,7 +107,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
   }
 
   return (
-    <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 py-10">
+    <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 py-10">
       {sortedProjects.map((project) => {
         const { title, description, logo, banner, tags } = getDisplayValues(project)
 
@@ -125,7 +125,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
               layoutId={`image-${project.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
-                height: hoveredProject === project ? 300 : 192,
+                height: hoveredProject === project ? 300 : 200,
               }}
               transition={{ duration: 0.3 }}
             >
