@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import Image from "next/image"
 import { useEffect, useId, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
@@ -106,11 +108,14 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
               onClick={handleClose}
             />
-            <motion.div className="fixed inset-0 flex items-center justify-center z-[60]" onClick={handleClose}>
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center z-[60] p-2 sm:p-4"
+              onClick={handleClose}
+            >
               <motion.div
                 layoutId={`card-${active.id}-${id}`}
                 ref={ref}
-                className=" w-[45vw] h-[85vh] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
+                className="w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-[45vw] max-h-[95vh] flex flex-col bg-white dark:bg-neutral-900 rounded-xl sm:rounded-3xl overflow-hidden relative border-4 border-gray-200 dark:border-gray-700"
                 onClick={(e) => e.stopPropagation()}
               >
                 <motion.button
@@ -118,10 +123,10 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute top-4 right-4 z-50 bg-gray-400 rounded-full p-2"
+                  className="absolute top-2 sm:top-4 right-2 sm:right-4 z-50 bg-gray-400 rounded-full p-1.5 sm:p-2"
                   onClick={handleClose}
                 >
-                  <X className="h-6 w-6 text-white" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </motion.button>
                 {currentIndex > 0 && (
                   <motion.button
@@ -132,9 +137,9 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                       e.stopPropagation()
                       handlePrevious(e)
                     }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-50 bg-white rounded-full p-1 sm:p-2 shadow-lg hover:bg-gray-50 transition-colors h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
                   >
-                    <ChevronLeft className="h-6 w-6" />
+                    <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                   </motion.button>
                 )}
                 {currentIndex < sortedWebsites.length - 1 && (
@@ -146,16 +151,16 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                       e.stopPropagation()
                       handleNext(e)
                     }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors"
+                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-50 bg-white rounded-full p-1 sm:p-2 shadow-lg hover:bg-gray-50 transition-colors h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
                   >
-                    <ChevronRight className="h-6 w-6" />
+                    <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
                   </motion.button>
                 )}
-                <div className="h-full overflow-y-auto">
-                  <div className="m-4">
+                <div className="overflow-y-auto flex-grow">
+                  <div className="p-2 sm:p-4">
                     <motion.div
                       layoutId={`image-${active.id}-${id}`}
-                      className="relative h-[400px] overflow-hidden rounded-xl"
+                      className="relative h-[200px] sm:h-[250px] md:h-[350px] overflow-hidden rounded-xl"
                     >
                       <motion.div
                         animate={{
@@ -180,81 +185,82 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                         />
                       </motion.div>
                     </motion.div>
-                    <div className="p-6 flex flex-col h-full">
-                      <div className="flex flex-row justify-between items-center">
-                        <motion.h3
-                          layoutId={`title-${active.id}-${id}`}
-                          className="font-medium text-card-foreground text-lg"
-                        >
-                          {active.Title}
-                        </motion.h3>
-                        <motion.div
-                          layoutId={`logo-${active.id}-${id}`}
-                          className="relative w-16 h-16 ml-4 flex-shrink-0 rounded-full overflow-hidden"
-                        >
-                          <Image
-                            src={active.Logo || "/placeholder.svg"}
-                            alt={`${active.Title} logo`}
-                            className="object-contain"
-                            fill
-                          />
-                        </motion.div>
-                      </div>
-
-                      <div className="mt-6 flex-grow flex flex-col">
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {active.Tags.map((tag, index) => (
-                            <motion.span
-                              key={`${tag}-${index}-${id}`}
-                              className="bg-white/0.2 text-gray-800 text-sm font-medium px-3 py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                              transition={{
-                                duration: 0.05,
-                                ease: "easeInOut",
-                              }}
-                            >
-                              {tag}
-                            </motion.span>
-                          ))}
-                        </div>
-                        <motion.div className="flex-grow overflow-y-auto pr-2">
-                          <p className="text-neutral-600 text-base lg:text-lg dark:text-neutral-400">
-                            {active.Description}
-                          </p>
-                        </motion.div>
-                      </div>
+                  </div>
+                  <div className="p-3 sm:p-4 md:p-6">
+                    <div className="flex flex-row justify-between items-center">
+                      <motion.h3
+                        layoutId={`title-${active.id}-${id}`}
+                        className="font-medium text-card-foreground text-base sm:text-lg"
+                      >
+                        {active.Title}
+                      </motion.h3>
+                      <motion.div
+                        layoutId={`logo-${active.id}-${id}`}
+                        className="relative w-12 h-12 sm:w-16 sm:h-16 ml-4 flex-shrink-0 rounded-full overflow-hidden"
+                      >
+                        <Image
+                          src={active.Logo || "/placeholder.svg"}
+                          alt={`${active.Title} logo`}
+                          className="object-contain"
+                          fill
+                        />
+                      </motion.div>
                     </div>
-                    <div className="absolute left-4 bottom-4">
-                      {active.URL && (
-                        <motion.a
-                          layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          href={active.URL}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block px-6 py-3 text-base rounded-full font-bold text-white bg-orange-400 hover:bg-orange-500 text-primary-foreground"
-                        >
-                          Visit Website
-                        </motion.a>
-                      )}
+
+                    <div className="mt-4 flex flex-col">
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {active.Tags.map((tag, index) => (
+                          <motion.span
+                            key={`${tag}-${index}-${id}`}
+                            className="bg-white/0.2 text-gray-800 text-xs sm:text-sm font-medium px-2 py-0.5 sm:px-3 sm:py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            transition={{
+                              duration: 0.05,
+                              ease: "easeInOut",
+                            }}
+                          >
+                            {tag}
+                          </motion.span>
+                        ))}
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-neutral-600 text-sm sm:text-base lg:text-lg dark:text-neutral-400">
+                          {active.Description}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  {active.URL && (
+                    <div className="p-3 sm:p-4 md:p-6 pt-0">
+                      <motion.a
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        href={active.URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full font-bold text-white bg-orange-400 hover:bg-orange-500 text-primary-foreground"
+                      >
+                        Visit Website
+                      </motion.a>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+      {/* Optimized grid for smaller viewports - Changed from fixed grid-cols to responsive grid */}
       <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 py-10">
         {sortedWebsites.map((website) => (
           <motion.div
             key={website.id}
             onMouseEnter={() => handleMouseEnter(website)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-[45vh] w-[20vw] md:h-[36vh] md:w[20vw] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-auto w-full bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
             style={{
               zIndex: hoveredWebsite === website ? 20 : 1,
             }}
@@ -263,7 +269,8 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               layoutId={`image-${website.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
-                height: hoveredWebsite === website ? 300 : 200,
+                // Increased banner image size in closed card format from 192px to 220px
+                height: hoveredWebsite === website ? 300 : 220,
               }}
               transition={{ duration: 0.3 }}
             >

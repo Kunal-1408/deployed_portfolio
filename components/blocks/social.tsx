@@ -119,12 +119,12 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 grid place-items-center z-[100]"
+            className="fixed inset-0 grid place-items-center z-[100] p-2 sm:p-4"
           >
             <motion.div
               layoutId={`card-${active.id}-${id}`}
               ref={ref}
-              className="w-[45vw] h-[85vh] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden shadow-lg border-4 border-gray-200 dark:border-gray-700 relative"
+              className="w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-[45vw] max-h-[95vh] flex flex-col bg-white dark:bg-neutral-900 rounded-xl sm:rounded-3xl overflow-hidden shadow-lg border-4 border-gray-200 dark:border-gray-700 relative"
             >
               <motion.button
                 key={`button-${active.id}-${id}`}
@@ -132,7 +132,7 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, transition: { duration: 0.05 } }}
-                className="flex absolute top-4 right-4 items-center justify-center bg-white dark:bg-neutral-800 rounded-full h-8 w-8 shadow-md z-20"
+                className="flex absolute top-2 right-2 sm:top-4 sm:right-4 items-center justify-center bg-white dark:bg-neutral-800 rounded-full h-8 w-8 shadow-md z-20"
                 onClick={() => {
                   setActive(null)
                   setActiveIndex(-1)
@@ -140,111 +140,120 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               >
                 <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </motion.button>
-              <div className="m-4">
-                <motion.div
-                  layoutId={`image-${active.id}-${id}`}
-                  className="relative h-[400px] overflow-hidden rounded-xl"
-                >
-                  {active.banner ? (
-                    <motion.div
-                      animate={{
-                        y: ["0%", "-62.5%", "-62.5%", "0%"],
-                      }}
-                      transition={{
-                        y: {
-                          duration: 20,
-                          repeat: Number.POSITIVE_INFINITY,
-                          ease: "linear",
-                        },
-                      }}
-                      className="absolute inset-0 w-full"
-                      style={{ height: "268.75%" }}
-                    >
-                      <Image
-                        priority
-                        fill
-                        src={active.banner || "/placeholder.svg"}
-                        alt={`${active.Brand} - Full Image`}
-                        className="object-cover object-top"
-                      />
-                    </motion.div>
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-400">No Image</span>
-                    </div>
-                  )}
-                </motion.div>
-              </div>
 
-              <div className="p-6 flex flex-col h-full">
-                <div className="flex flex-row justify-between items-center">
-                  <motion.h3
-                    layoutId={`title-${active.id}-${id}`}
-                    className="font-medium text-2xl text-neutral-700 dark:text-neutral-200"
+              <div className="overflow-y-auto flex-grow">
+                <div className="p-2 sm:p-4">
+                  <motion.div
+                    layoutId={`image-${active.id}-${id}`}
+                    className="relative h-[200px] sm:h-[250px] md:h-[350px] overflow-hidden rounded-xl"
                   >
-                    {active.Brand}
-                  </motion.h3>
-                  {active.Logo && (
-                    <motion.div layoutId={`logo-${active.id}-${id}`} className="relative w-16 h-16 ml-4 flex-shrink-0">
-                      <Image
-                        src={active.Logo || "/placeholder.svg"}
-                        alt={`${active.Brand} logo`}
-                        className="object-contain"
-                        width={64}
-                        height={64}
-                      />
-                    </motion.div>
-                  )}
+                    {active.banner ? (
+                      <motion.div
+                        animate={{
+                          y: ["0%", "-62.5%", "-62.5%", "0%"],
+                        }}
+                        transition={{
+                          y: {
+                            duration: 20,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "linear",
+                          },
+                        }}
+                        className="absolute inset-0 w-full"
+                        style={{ height: "268.75%" }}
+                      >
+                        <Image
+                          priority
+                          fill
+                          src={active.banner || "/placeholder.svg"}
+                          alt={`${active.Brand} - Full Image`}
+                          className="object-cover object-top"
+                        />
+                      </motion.div>
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No Image</span>
+                      </div>
+                    )}
+                  </motion.div>
                 </div>
 
-                <div className="mt-6 flex-grow flex flex-col">
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {active.tags.map((tag, index) => (
-                      <motion.span
-                        key={`${tag}-${index}-${id}`}
-                        className="bg-white/0.2 text-gray-800 text-sm font-medium px-3 py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{
-                          duration: 0.05,
-                          ease: "easeInOut",
-                        }}
+                <div className="p-3 sm:p-4 md:p-6">
+                  <div className="flex flex-row justify-between items-center">
+                    <motion.h3
+                      layoutId={`title-${active.id}-${id}`}
+                      className="font-medium text-xl sm:text-2xl text-neutral-700 dark:text-neutral-200"
+                    >
+                      {active.Brand}
+                    </motion.h3>
+                    {active.Logo && (
+                      <motion.div
+                        layoutId={`logo-${active.id}-${id}`}
+                        className="relative w-12 h-12 sm:w-16 sm:h-16 ml-4 flex-shrink-0"
                       >
-                        {tag}
-                      </motion.span>
-                    ))}
+                        <Image
+                          src={active.Logo || "/placeholder.svg"}
+                          alt={`${active.Brand} logo`}
+                          className="object-contain"
+                          width={64}
+                          height={64}
+                        />
+                      </motion.div>
+                    )}
                   </div>
-                  <motion.div layoutId={`description-${active.id}-${id}`} className="flex-grow overflow-y-auto pr-2">
-                    <p className="text-neutral-600 text-base lg:text-lg dark:text-neutral-400">{active.Description}</p>
-                  </motion.div>
-                  <div className="mt-4 flex justify-center gap-4">
-                    {active.URL?.map((url, index) => (
-                      <a
-                        key={index}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-gray-200"
-                      >
-                        {getSocialIcon(url)}
-                      </a>
-                    ))}
+
+                  <div className="mt-4 flex flex-col">
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {active.tags.map((tag, index) => (
+                        <motion.span
+                          key={`${tag}-${index}-${id}`}
+                          className="bg-white/0.2 text-gray-800 text-xs sm:text-sm font-medium px-2 py-0.5 sm:px-3 sm:py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{
+                            duration: 0.05,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          {tag}
+                        </motion.span>
+                      ))}
+                    </div>
+                    <motion.div layoutId={`description-${active.id}-${id}`} className="mb-4">
+                      <p className="text-neutral-600 text-sm sm:text-base lg:text-lg dark:text-neutral-400">
+                        {active.Description}
+                      </p>
+                    </motion.div>
+                    <div className="mt-2 flex justify-center gap-4">
+                      {active.URL?.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                          {getSocialIcon(url)}
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+
               <button
                 onClick={handlePrevious}
                 disabled={activeIndex === 0}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-2 shadow-md disabled:opacity-50 h-12 w-12 flex items-center justify-center"
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-1 sm:p-2 shadow-md disabled:opacity-50 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
               >
-                <ChevronLeft className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" />
               </button>
               <button
                 onClick={handleNext}
                 disabled={activeIndex === sortedProjects.length - 1}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-2 shadow-md disabled:opacity-50 h-12 w-12 flex items-center justify-center"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-1 sm:p-2 shadow-md disabled:opacity-50 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
               >
-                <ChevronRight className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" />
               </button>
             </motion.div>
           </motion.div>
@@ -256,7 +265,7 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
             key={project.id}
             onMouseEnter={() => handleMouseEnter(project)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col  h-[45vh] w-[20vw] md:h-[36vh] md:w[20vw] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-auto w-full bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
             style={{
               zIndex: hoveredProject === project ? 20 : 1,
             }}
@@ -265,7 +274,7 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               layoutId={`image-${project.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
-                height: hoveredProject === project ? 300 : 200,
+                height: hoveredProject === project ? 300 : 220,
               }}
               transition={{ duration: 0.3 }}
             >
