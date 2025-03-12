@@ -98,6 +98,52 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
 
   return (
     <>
+      <style jsx global>{`
+        @keyframes scrollImage {
+          0% { transform: translateY(0); }
+          45% { transform: translateY(calc(-100% + 350px)); }
+          55% { transform: translateY(calc(-100% + 350px)); }
+          100% { transform: translateY(0); }
+        }
+        
+        @keyframes scrollImageMobile {
+          0% { transform: translateY(0); }
+          45% { transform: translateY(calc(-100% + 200px)); }
+          55% { transform: translateY(calc(-100% + 200px)); }
+          100% { transform: translateY(0); }
+        }
+        
+        @keyframes scrollImageTablet {
+          0% { transform: translateY(0); }
+          45% { transform: translateY(calc(-100% + 250px)); }
+          55% { transform: translateY(calc(-100% + 250px)); }
+          100% { transform: translateY(0); }
+        }
+        
+        .modal-image-scroll {
+          animation: scrollImageMobile 30s infinite linear;
+        }
+        
+        @media (min-width: 640px) {
+          .modal-image-scroll {
+            animation: scrollImageTablet 30s infinite linear;
+          }
+        }
+        
+        @media (min-width: 768px) {
+          .modal-image-scroll {
+            animation: scrollImage 30s infinite linear;
+          }
+        }
+        
+        .card-image-scroll {
+          animation: none;
+        }
+        
+        .card-image-scroll.hovered {
+          animation: scrollImage 20s infinite linear;
+        }
+      `}</style>
       <AnimatePresence mode="wait">
         {active && (
           <>
@@ -162,28 +208,16 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                       layoutId={`image-${active.id}-${id}`}
                       className="relative h-[200px] sm:h-[250px] md:h-[350px] overflow-hidden rounded-xl"
                     >
-                      <motion.div
-                        animate={{
-                          y: ["0%", "-50%", "-50%", "0%"],
-                        }}
-                        transition={{
-                          y: {
-                            duration: 20,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "linear",
-                          },
-                        }}
-                        className="absolute inset-0 w-full"
-                        style={{ height: "200%" }}
-                      >
+                      <div className="modal-image-scroll w-full absolute">
                         <Image
                           priority
-                          fill
+                          width={1200}
+                          height={2400}
                           src={active.Images || "/placeholder.svg"}
                           alt={`${active.Title} - Full Image`}
-                          className="object-cover object-top"
+                          className="w-full object-cover object-top"
                         />
-                      </motion.div>
+                      </div>
                     </motion.div>
                   </div>
                   <div className="p-3 sm:p-4 md:p-6">
@@ -269,32 +303,19 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
               layoutId={`image-${website.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
-                // Increased banner image size in closed card format from 192px to 220px
                 height: hoveredWebsite === website ? 300 : 220,
               }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div
-                animate={{
-                  y: hoveredWebsite === website ? ["0%", "-50%", "-50%", "0%"] : "0%",
-                }}
-                transition={{
-                  y: {
-                    duration: hoveredWebsite === website ? 20 : 0,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "linear",
-                  },
-                }}
-                className="absolute inset-0 w-full"
-                style={{ height: "200%" }}
-              >
+              <div className={`card-image-scroll w-full absolute ${hoveredWebsite === website ? "hovered" : ""}`}>
                 <Image
-                  fill
+                  width={800}
+                  height={1600}
                   src={website.Images || "/placeholder.svg"}
                   alt={website.Title}
-                  className="object-cover object-top"
+                  className="w-full object-cover object-top"
                 />
-              </motion.div>
+              </div>
             </motion.div>
             <div className="mt-4 flex justify-between items-center">
               <motion.h3 layoutId={`title-${website.id}-${id}`} className="font-medium text-card-foreground text-lg">

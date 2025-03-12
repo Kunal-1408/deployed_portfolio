@@ -17,7 +17,7 @@ export default function Loading() {
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Loading overlay that slides up */}
+      
       <div
         className={`absolute inset-0 bg-white flex items-center justify-center transition-opacity duration-1000 ease-in-out ${
           isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -34,12 +34,6 @@ export default function Loading() {
         </div>
       </div>
 
-      {/* Animated progress bar */}
-      {/* <div
-        className={`absolute bottom-0 left-0 h-1 bg-orange-500 transition-all duration-2000 ease-in-out ${
-          isLoading ? "w-0" : "w-full"
-        }`}
-      /> */}
     </div>
   )
 }
