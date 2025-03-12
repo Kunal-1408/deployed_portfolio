@@ -100,7 +100,7 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
             Contact Us
           </button>
         </Link>
-        <Link href="/contact">
+        <Link href="https://quitegood.co/">
           <button className={buttonClass1}>
             Main Website
           </button>

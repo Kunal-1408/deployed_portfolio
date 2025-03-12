@@ -1,6 +1,7 @@
 "use client"
 
 import { Marquee } from "@/components/ui/marquee"
+import Clients from "./client-section"
 
 interface ClientLogosProps {
   content: Array<{ src: string; alt: string }> | null
@@ -17,6 +18,6 @@ export default function ClientLogos({ content, error }: ClientLogosProps) {
     return null
   }
 
-  return <Marquee logos={content} />
+  return <Clients clients={content} rowSize={5} rotationInterval={5000} />
 }
 

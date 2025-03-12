@@ -2,26 +2,19 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 
-interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-}
-
 interface ApiResponse {
-  [key: string]: PaginatedResponse<any> | any
+  [key: string]: any[]
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get("id")
   const type = searchParams.get("type")
-  const currentPage = Number.parseInt(searchParams.get("page") || "1")
-  const itemsPerPage = Number.parseInt(searchParams.get("limit") || "10")
   const search = searchParams.get("search") || ""
   const dataTypes = searchParams.get("types")?.split(",") || ["websites"]
 
   console.log("API route hit")
-  console.log("Search params:", { id, type, currentPage, itemsPerPage, search, dataTypes })
+  console.log("Search params:", { id, type, search, dataTypes })
 
   try {
     // Handle single record fetch for internal page
@@ -70,7 +63,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // Handle paginated list fetch (existing functionality)
+    // Handle list fetch (without pagination)
     const response: ApiResponse = {}
 
     for (const type of dataTypes) {
@@ -118,8 +111,6 @@ export async function GET(request: Request) {
 
         const data = await model.findMany({
           where: whereClause,
-          skip: (currentPage - 1) * itemsPerPage,
-          take: itemsPerPage,
         })
 
         console.log(`Raw data fetched:`, JSON.stringify(data, null, 2))
@@ -130,22 +121,16 @@ export async function GET(request: Request) {
           return 0
         })
 
-        const total = await model.count({ where: whereClause })
-
         console.log(`Fetched ${data.length} records for ${type}`)
-        console.log(`Total records: ${total}`)
 
-        response[type] = {
-          data: sortedData.map((item: any) => ({
-            ...item,
-            Tags: Array.isArray(item.Tags) ? item.Tags : [],
-            tags: Array.isArray(item.tags) ? item.tags : [],
-            Status: item.Status || "Unknown",
-            Images: item.Images ? item.Images : null,
-            Logo: item.Logo ? item.Logo : null,
-          })),
-          total,
-        }
+        response[type] = sortedData.map((item: any) => ({
+          ...item,
+          Tags: Array.isArray(item.Tags) ? item.Tags : [],
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          Status: item.Status || "Unknown",
+          Images: item.Images ? item.Images : null,
+          Logo: item.Logo ? item.Logo : null,
+        }))
       } catch (modelError) {
         console.error(
           `Error fetching data for ${type}:`,
@@ -154,7 +139,7 @@ export async function GET(request: Request) {
         if (modelError instanceof Error) {
           console.error(`Error details:`, modelError.stack)
         }
-        response[type] = { data: [], total: 0 }
+        response[type] = []
       }
     }
 
@@ -190,4 +175,3 @@ export async function GET(request: Request) {
     )
   }
 }
-

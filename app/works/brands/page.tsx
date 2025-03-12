@@ -6,7 +6,6 @@ import BrandingProjects from "@/components/blocks/Branding"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import DynamicCheckbox from "@/components/ui/checkbox-test"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface LogoSection {
   logo: string
@@ -75,27 +74,20 @@ const LabelInputContainer = ({
 }
 
 export default function Works() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [total, setTotal] = useState(0)
   const [brandings, setBrandings] = useState<Branding[]>([])
-  const [highlightedCount, setHighlightedCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState("")
+  const [active, setActive] = useState<string[]>([])
 
-  const brandingsPerPage = 9
-
-  const fetchBrandings = async (page: number, search: string) => {
+  const fetchBrandings = async (search: string) => {
     try {
-      const response = await fetch(
-        `/api/fetch?page=${page}&limit=${brandingsPerPage}&types=branding&search=${encodeURIComponent(search)}`,
-        {
-          method: "GET",
-        },
-      )
+      const response = await fetch(`/api/fetch?types=branding&search=${encodeURIComponent(search)}`, {
+        method: "GET",
+      })
       const data = await response.json()
       console.log("API Response:", data)
-      if (data.branding && Array.isArray(data.branding.data)) {
+      if (data.branding && Array.isArray(data.branding)) {
         // Transform data to ensure compatibility
-        const transformedData = data.branding.data.map((item: Branding) => {
+        const transformedData = data.branding.map((item: Branding) => {
           // For new branding structure
           if (item.title) {
             return {
@@ -119,31 +111,19 @@ export default function Works() {
         })
 
         setBrandings(transformedData)
-        setTotal(data.branding.total || data.branding.data.length)
-        setHighlightedCount(transformedData.filter((branding: Branding) => branding.highlighted).length)
       } else {
         console.error("Unexpected API response structure:", data)
         setBrandings([])
-        setTotal(0)
-        setHighlightedCount(0)
       }
     } catch (error) {
       console.error("Error fetching brandings:", error)
       setBrandings([])
-      setTotal(0)
-      setHighlightedCount(0)
     }
   }
 
   useEffect(() => {
-    fetchBrandings(currentPage, searchTerm)
-  }, [currentPage, searchTerm]) // Added searchTerm to dependencies
-
-  const totalPages = Math.ceil((total - highlightedCount) / brandingsPerPage)
-  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
-
-  const [active, setActive] = useState<string[]>([])
+    fetchBrandings(searchTerm)
+  }, [searchTerm])
 
   const handleIsactive = (items: string[]) => {
     setActive(items)
@@ -151,62 +131,54 @@ export default function Works() {
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
-    setCurrentPage(1) // Reset to first page when searching
   }
 
   return (
-    <div className="bg-white min-h-screen relative pb-20">
-      <div className="mx-16 md:mx-4">
-        <div className="max-w-7xl pt-20 md:pt-40 pb-10 px-4 w-full top-0 border-b-2 border-orange-100">
-          <h1 className="text-xl md:text-7xl font-bold dark:text-white">
-            Here's a peek at our <span className="text-orange-400">works</span>
-          </h1>
-        </div>
-        <div className="grid grid-cols-5">
-          <div className="col-span-1 py-10 mx-5 flex flex-col">
-            <LabelInputContainer>
-              <Input
-                id="Search"
-                placeholder="Search"
-                type="text"
-                className="rounded"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </LabelInputContainer>
-            <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
+    <div className="bg-white min-h-screen flex flex-col">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-10 bg-white">
+        <div className="mx-4 md:mx-16">
+          <div className="max-w-7xl pt-10 md:pt-16 lg:pt-36 pb-6 md:pb-10 px-4 w-full border-b-2 border-orange-100">
+            <h1 className="text-xl md:text-5xl lg:text-7xl font-bold dark:text-white">
+              Here's a peek at our <span className="text-orange-400">works</span>
+            </h1>
           </div>
-          <div className="col-span-4 flex flex-col">
-            <div className="flex flex-1 col-span-4">
-              <div className="inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
+        </div>
+      </div>
+
+      {/* Main Content - Flexible Height */}
+      <div className="flex-1 flex flex-col md:flex-row mx-4 md:mx-16 relative">
+        {/* Sidebar - Sticky */}
+        <div className="w-full md:w-1/5 py-4 md:py-10 md:mx-5 md:sticky md:top-[200px] self-start">
+          <LabelInputContainer>
+            <Input
+              id="Search"
+              placeholder="Search"
+              type="text"
+              className="rounded"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </LabelInputContainer>
+          <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
+        </div>
+
+        {/* Content - Scrollable */}
+        <div className="w-full md:w-4/5 flex flex-col">
+          <div className="flex flex-1">
+            <div className="hidden md:inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
+            <div className="w-full overflow-y-auto max-h-[calc(100vh-300px)] md:max-h-[calc(100vh-350px)]">
               <BrandingProjects projects={brandings} filterTags={active} />
             </div>
           </div>
         </div>
-        <div className="absolute bottom-4 right-4 flex flex-col items-end space-y-2">
-          <div className="flex items-center space-x-2">
-            <button
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-orange-400 text-neutral-200 hover:bg-accent hover:text-accent-foreground h-8 px-4"
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-            </button>
-            <button
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-orange-400 text-neutral-200 hover:bg-accent hover:text-accent-foreground h-8 px-4"
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </button>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Showing{" "}
-            <strong>
-              {highlightedCount + (currentPage - 1) * brandingsPerPage + 1}-
-              {Math.min(highlightedCount + currentPage * brandingsPerPage, total)}
-            </strong>{" "}
-            of <strong>{total}</strong> brands
+      </div>
+
+      {/* Footer - Sticky */}
+      <div className="sticky bottom-0 bg-white py-4 border-t border-gray-100 z-10">
+        <div className="mx-4 md:mx-16 flex justify-end">
+          <div className="text-sm text-muted-foreground text-right">
+            Showing <strong>{brandings.length}</strong> brands
           </div>
         </div>
       </div>

@@ -61,7 +61,7 @@ export default function ContactPage() {
                 <Textarea
                   id="project"
                   placeholder="Describe Your Project"
-                  className="min-h-[150px] rounded-md border-gray-300 text-base py-3"
+                  className="min-h-[150px] rounded-md border-gray-300 bg-slate-50 text-base py-3"
                 />
               </div>
             </div>

@@ -6,7 +6,6 @@ import SocialProjects from "@/components/blocks/social"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import DynamicCheckbox from "@/components/ui/checkbox-test"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface SocialProject {
   id: string
@@ -35,107 +34,86 @@ const LabelInputContainer = ({
 }
 
 export default function Works() {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [total, setTotal] = useState(0)
   const [brands, setBrands] = useState<SocialProject[]>([])
-  const [highlightedCount, setHighlightedCount] = useState(0)
   const [searchTerm, setSearchTerm] = useState("")
+  const [active, setActive] = useState<string[]>([])
 
-  const websitesPerPage = 9
-
-  const fetchWebsites = async (page: number, search: string) => {
+  const fetchSocialProjects = async (search: string) => {
     try {
-      const response = await fetch(
-        `/api/fetch?page=${page}&limit=${websitesPerPage}&types=social&search=${encodeURIComponent(search)}`,
-        {
-          method: "GET",
-        },
-      )
+      const response = await fetch(`/api/fetch?types=social&search=${encodeURIComponent(search)}`, {
+        method: "GET",
+      })
       const data = await response.json()
-      if (data && data.social && data.social.data) {
-        setBrands(data.social.data)
-        setTotal(data.social.total || 0)
-        setHighlightedCount(data.social.data.filter((project: SocialProject) => project.highlighted).length)
+      if (data && data.social && Array.isArray(data.social)) {
+        setBrands(data.social)
       } else {
         console.error("Unexpected API response structure:", data)
+        setBrands([])
       }
     } catch (error) {
-      console.error("Error fetching websites:", error)
+      console.error("Error fetching social projects:", error)
+      setBrands([])
     }
   }
 
   useEffect(() => {
-    fetchWebsites(currentPage, searchTerm)
-  }, [currentPage, searchTerm])
-
-  const totalPages = Math.ceil((total - highlightedCount) / websitesPerPage)
-  const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1))
-
-  const [active, Isactive] = useState<string[]>([])
+    fetchSocialProjects(searchTerm)
+  }, [searchTerm])
 
   const handleIsactive = (items: string[]) => {
-    Isactive(items)
+    setActive(items)
   }
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
-    setCurrentPage(1) // Reset to first page when searching
   }
 
   return (
-    <div className="bg-white min-h-screen relative pb-20">
-      <div className="mx-4 sm:mx-8 md:mx-16">
-        <div className="max-w-7xl pt-10 sm:pt-20 md:pt-40 pb-6 sm:pb-10 px-4 w-full top-0 border-b-2 border-orange-100">
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold dark:text-white">
-            Here's a peek at our <span className="text-orange-400">works</span>
-          </h1>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="md:col-span-1 py-4 sm:py-6 md:py-10 flex flex-col space-y-4">
-            <LabelInputContainer>
-              <Input
-                id="Search"
-                placeholder="Search"
-                type="text"
-                className="rounded"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </LabelInputContainer>
-            <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
+    <div className="bg-white min-h-screen flex flex-col">
+      {/* Header - Sticky */}
+      <div className="sticky top-0 z-10 bg-white">
+        <div className="mx-4 md:mx-16">
+          <div className="max-w-7xl pt-10 md:pt-16 lg:pt-36 pb-6 md:pb-10 px-4 w-full border-b-2 border-orange-100">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold dark:text-white">
+              Here's a peek at our <span className="text-orange-400">works</span>
+            </h1>
           </div>
-          <div className="md:col-span-4 flex flex-col">
-            <div className="flex flex-1">
-              <div className="hidden md:inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4 mr-4"></div>
+        </div>
+      </div>
+
+      {/* Main Content - Flexible Height */}
+      <div className="flex-1 flex flex-col md:flex-row mx-4 md:mx-16 relative">
+        {/* Sidebar - Sticky */}
+        <div className="w-full md:w-1/5 py-4 md:py-10 md:mx-5 md:sticky md:top-[200px] self-start">
+          <LabelInputContainer>
+            <Input
+              id="Search"
+              placeholder="Search"
+              type="text"
+              className="rounded"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </LabelInputContainer>
+          <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
+        </div>
+
+        {/* Content - Scrollable */}
+        <div className="w-full md:w-4/5 flex flex-col">
+          <div className="flex flex-1">
+            <div className="hidden md:inline-block h-full min-h-[1em] w-0.5 self-stretch bg-neutral-100 dark:bg-white/10 my-4"></div>
+            <div className="w-full overflow-y-auto max-h-[calc(100vh-300px)] md:max-h-[calc(100vh-350px)]">
               <SocialProjects projects={brands} filterTags={active} />
             </div>
           </div>
         </div>
-        <div className="mt-8 flex flex-col items-center md:items-end space-y-2">
-          <div className="flex items-center space-x-2">
-            <button
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-orange-400 text-neutral-200 hover:bg-accent hover:text-accent-foreground h-8 px-4"
-              onClick={prevPage}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-            </button>
-            <button
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-orange-400 text-neutral-200 hover:bg-accent hover:text-accent-foreground h-8 px-4"
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </button>
-          </div>
-          <div className="text-sm text-muted-foreground text-center md:text-right">
-            Showing{" "}
-            <strong>
-              {highlightedCount + (currentPage - 1) * websitesPerPage + 1}-
-              {Math.min(highlightedCount + currentPage * websitesPerPage, total)}
-            </strong>{" "}
-            of <strong>{total}</strong> websites
+      </div>
+
+      {/* Footer - Sticky */}
+      <div className="sticky bottom-0 bg-white py-4 border-t border-gray-100 z-10">
+        <div className="mx-4 md:mx-16 flex justify-end">
+          <div className="text-sm text-muted-foreground text-right">
+            Showing <strong>{brands.length}</strong> social projects
           </div>
         </div>
       </div>
