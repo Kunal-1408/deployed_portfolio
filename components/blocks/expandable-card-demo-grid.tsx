@@ -121,18 +121,18 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
         }
         
         .modal-image-scroll {
-          animation: scrollImageMobile 30s infinite linear;
+          animation: scrollImageMobile 60s infinite linear;
         }
         
         @media (min-width: 640px) {
           .modal-image-scroll {
-            animation: scrollImageTablet 30s infinite linear;
+            animation: scrollImageTablet 60s infinite linear;
           }
         }
         
         @media (min-width: 768px) {
           .modal-image-scroll {
-            animation: scrollImage 30s infinite linear;
+            animation: scrollImage 60s infinite linear;
           }
         }
         
@@ -141,7 +141,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
         }
         
         .card-image-scroll.hovered {
-          animation: scrollImage 20s infinite linear;
+          animation: scrollImage 40s infinite linear;
         }
       `}</style>
       <AnimatePresence mode="wait">
