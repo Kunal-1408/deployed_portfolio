@@ -54,9 +54,25 @@ export default function Home() {
         </Suspense>
       </div>
 
-      <div className="bg-white border-4 border-slate-100 pt-12">
+      {/* <div className="bg-white border-4 border-slate-100 pt-12">
         <ContactPage/>
+      </div> */}
+      <h2 className="text-5xl font-bold ml-16 mb-4 ">
+        Locate <span className="text-orange-500">Us!</span>
+      </h2>
+    <div className="w-full mx-auto px-16 py-8">
+    
+      <div className="w-full rounded-xl shadow-xl overflow-hidden border border-gray-200">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13997.190483309128!2d77.178936!3d28.7106503!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0354091c469d%3A0x6f369bf3f44dcee0!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1729075828599!5m2!1sen!2sin"
+          className="w-full h-full min-h-[600px]"
+          loading="lazy"
+          title="Google Maps"
+          allowFullScreen
+        ></iframe>
       </div>
+    </div>
+
     </main>
   )
 }
