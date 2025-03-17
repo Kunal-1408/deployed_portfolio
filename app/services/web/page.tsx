@@ -1,13 +1,23 @@
+"use client"
 import { fetchContent } from "@/lib/content-fetch";
 import ServicePage from "@/components/Servicepages";
 import { notFound } from 'next/navigation';
+import { useEffect, useState } from "react";
 
 export default async function Web() {
-  const content = await fetchContent();
+const [content, setContent] = useState<any>(null)
 
-  if (content.error) {
-    console.error('Error fetching content:', content.message);
-    notFound(); // This will render the closest error.tsx or not-found.tsx file
+  useEffect(() => {
+    async function loadContent() {
+      const fetchedContent = await fetchContent()
+      
+      setContent(fetchedContent)
+    }
+    loadContent()
+  }, [])
+
+  if (!content) {
+    return <div>Loading...</div>
   }
 
   const webDevelopmentData = content.servicePages?.webDevelopment;

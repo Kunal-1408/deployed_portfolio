@@ -172,6 +172,7 @@ export default function ExpandableCardDemo({ websites, filterTags = [] }: Expand
                   className="absolute top-2 sm:top-4 right-2 sm:right-4 z-50 bg-gray-400 rounded-full p-1.5 sm:p-2"
                   onClick={handleClose}
                 >
+                  
                   <X className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </motion.button>
                 {currentIndex > 0 && (

@@ -1,9 +1,23 @@
-import React from "react";
+"use client"
+import React, { useEffect, useState } from "react";
 import { Timeline } from "@/components/ui/timeline";
 import { fetchContent } from "@/lib/content-fetch";
 
 export default async function Timelined() {
-  const content = await fetchContent();
+  const [content, setContent] = useState<any>(null)
+  
+    useEffect(() => {
+      async function loadContent() {
+        const fetchedContent = await fetchContent()
+        
+        setContent(fetchedContent)
+      }
+      loadContent()
+    }, [])
+  
+    if (!content) {
+      return <div>Loading...</div>
+    }
 
   if ('error' in content && content.error) {
     return (

@@ -15,7 +15,7 @@ export default function NotFound() {
           Oops! It seems our gears got stuck. The page you're looking for doesn't exist.
         </p>
         <Link
-          href="/main"
+          href="/"
           className="px-6 py-3 bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-lg hover:from-orange-500 hover:to-orange-700 transition-all duration-300 ease-in-out transform hover:scale-105"
         >
           Return Home

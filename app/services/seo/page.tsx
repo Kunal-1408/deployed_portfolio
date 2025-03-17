@@ -1,14 +1,24 @@
+"use client"
 import { fetchContent } from "@/lib/content-fetch";
 import ServicePage from "@/components/Servicepages";
 import { notFound } from 'next/navigation';
+import { useState, useEffect } from "react";
 
 export default async function Social() {
-  const content = await fetchContent();
-
-  if (content.error) {
-    console.error('Error fetching content:', content.message);
-    notFound();
-  }
+  const [content, setContent] = useState<any>(null)
+  
+    useEffect(() => {
+      async function loadContent() {
+        const fetchedContent = await fetchContent()
+        
+        setContent(fetchedContent)
+      }
+      loadContent()
+    }, [])
+  
+    if (!content) {
+      return <div>Loading...</div>
+    }
 
   const socialData = content.servicePages?.seo;
 
