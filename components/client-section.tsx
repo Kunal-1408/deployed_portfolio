@@ -19,9 +19,9 @@ export default function Clients({ clients = [], className }: ClientLogosProps) {
   const safeClients = clients.length > 0 ? clients : [{ logoUrl: "/placeholder.svg", alt: "Placeholder" }]
 
   // Fixed grid dimensions
-  const rowSize = 5
+  const rowSize = 6
   const totalRows = 6
-  const totalLogos = rowSize * totalRows // 30 logos total
+  const totalLogos = rowSize * totalRows // 36 logos total
 
   // Generate the grid of logos
   const logoGrid = useMemo(() => {
@@ -48,7 +48,7 @@ export default function Clients({ clients = [], className }: ClientLogosProps) {
           {rows.map((row, rowIndex) => (
             <div
               key={`row-${rowIndex}`}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 md:gap-8 items-center justify-items-center"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 md:gap-8 items-center justify-items-center"
             >
               {row.map((client, colIndex) => (
                 <div

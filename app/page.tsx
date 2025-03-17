@@ -69,7 +69,7 @@ export default function Home() {
           <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
             <h3 className="font-semibold text-xl">Gurugram </h3>
           </div>
-          <div className="h-[350px] md:h-[400px]">
+          <div className="h-[250px] md:h-[300px]">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.6782728865123!2d77.0796161!3d28.459113299999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1936c0a4d589%3A0x7b9e835659e61f07!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1741853404250!5m2!1sen!2sin"
               className="w-full h-full"
@@ -80,7 +80,7 @@ export default function Home() {
               title="Gurugram Office"
             ></iframe>
           </div>
-          <div className="p-5 border-t border-gray-100">
+          {/* <div className="p-5 border-t border-gray-100">
             <div className="flex items-start mb-3">
               <MapPin className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
               <div className="ml-3">
@@ -103,7 +103,7 @@ export default function Home() {
               <Mail className="h-4 w-4 text-gray-500" />
               <span className="ml-3 text-sm text-gray-600">gurugram@adsversify.com</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Vertical Ruler 1 */}
@@ -119,7 +119,7 @@ export default function Home() {
           <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
             <h3 className="font-semibold text-xl">Delhi </h3>
           </div>
-          <div className="h-[350px] md:h-[400px]">
+          <div className="h-[250px] md:h-[300px]">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13997.190483309128!2d77.178936!3d28.7106503!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0354091c469d%3A0x6f369bf3f44dcee0!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1729075828599!5m2!1sen!2sin"
               className="w-full h-full"
@@ -130,7 +130,7 @@ export default function Home() {
               title="Delhi Office"
             ></iframe>
           </div>
-          <div className="p-5 border-t border-gray-100">
+          {/* <div className="p-5 border-t border-gray-100">
             <div className="flex items-start mb-3">
               <MapPin className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
               <div className="ml-3">
@@ -153,7 +153,7 @@ export default function Home() {
               <Mail className="h-4 w-4 text-gray-500" />
               <span className="ml-3 text-sm text-gray-600">delhi@adsversify.com</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Vertical Ruler 2 */}
@@ -169,7 +169,7 @@ export default function Home() {
           <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
             <h3 className="font-semibold text-xl">Toronto </h3>
           </div>
-          <div className="h-[350px] md:h-[400px]">
+          <div className="h-[250px] md:h-[300px]">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2880.6537675554323!2d-79.3444545!3d43.7800455!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d4d3cecc2b3519%3A0xc20d88ffbd49749a!2sAdsversify%20Marketing!5e0!3m2!1sen!2sin!4v1741854078464!5m2!1sen!2sin"
               className="w-full h-full"
@@ -180,7 +180,7 @@ export default function Home() {
               title="Toronto Office"
             ></iframe>
           </div>
-          <div className="p-5 border-t border-gray-100">
+          {/* <div className="p-5 border-t border-gray-100">
             <div className="flex items-start mb-3">
               <MapPin className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
               <div className="ml-3">
@@ -203,7 +203,7 @@ export default function Home() {
               <Mail className="h-4 w-4 text-gray-500" />
               <span className="ml-3 text-sm text-gray-600">toronto@adsversify.com</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

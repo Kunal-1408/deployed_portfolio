@@ -25,7 +25,7 @@ export default function Loading() {
       >
         <div className="relative w-64 h-24 md:w-80 md:h-32">
           <Image
-            src="/logo-01.png"
+            src="https://quitegood.s3.eu-north-1.amazonaws.com/Logo-01.png"
             alt="Quite Good Portfolio Logo"
             fill
             priority

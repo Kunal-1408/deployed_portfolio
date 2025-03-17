@@ -154,7 +154,7 @@ export const Footerimpli: React.FC = () => {
           <div className="text-center mt-2">
             <span className="text-xs text-slate-400">
               © 2016-2025 <br />
-              Adsversify Marketing Private ltd.
+              Adsversify Marketing Private limited.
             </span>
           </div>
         </div>
