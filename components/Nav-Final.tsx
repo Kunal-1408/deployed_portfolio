@@ -73,7 +73,7 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
 
   return (
     <div className={navbarClass}>
-      <div className="flex-shrink-0 w-48 h-24 flex items-center ml-12">
+      <div className="flex-shrink-0 w-48 h-20 flex items-center ml-12">
         <Link href="/">
           <Image 
             src={logoClass} 

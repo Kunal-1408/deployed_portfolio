@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <main className="bg-white dark:bg-neutral-900 items-center">
-      <Loading/>
+      {/* <Loading/> */}
       <Hero />
       <Infor hero={content.hero} />
 

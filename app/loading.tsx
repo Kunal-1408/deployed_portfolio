@@ -4,36 +4,69 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 
 export default function Loading() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [animationComplete, setAnimationComplete] = useState(false)
+
+  // Minimum display time for the loader (in milliseconds)
+  const minimumLoadingTime = 4000
 
   useEffect(() => {
-    // Simulate content loading
+    // Timer to ensure minimum display time
     const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
+      setLoading(false)
+    }, minimumLoadingTime)
 
-    return () => clearTimeout(timer)
+    // Cleanup function
+    return () => {
+      clearTimeout(timer)
+    }
   }, [])
 
+  // Handle animation completion
+  useEffect(() => {
+    if (!loading) {
+      // Add a delay before completely removing the loader
+      const animationTimer = setTimeout(() => {
+        setAnimationComplete(true)
+      }, 4000) // This should match the duration of your fade-out animation
+
+      return () => {
+        clearTimeout(animationTimer)
+      }
+    }
+  }, [loading])
+
+  // If animation is complete, don't render anything
+  if (animationComplete) {
+    return null
+  }
+
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      
+    <div
+      className={`fixed inset-0 flex items-center justify-center bg-white z-50 transition-opacity duration-500 ${
+        loading ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div
-        className={`absolute inset-0 bg-white flex items-center justify-center transition-opacity duration-1000 ease-in-out ${
-          isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
+        className={`relative transition-all duration-1000 ease-in-out ${
+          loading ? "scale-100 opacity-100" : "scale-150 opacity-0"
         }`}
       >
-        <div className="relative w-64 h-24 md:w-80 md:h-32">
+        <div className="relative">
+          {/* Logo with shimmer effect */}
           <Image
             src="https://quitegood.s3.eu-north-1.amazonaws.com/Logo-01.png"
             alt="Quite Good Portfolio Logo"
-            fill
+            width={500}
+            height={250}
             priority
-            className="object-contain"
+            className={`relative z-10 ${loading ? "animate-shimmer" : ""}`}
           />
+
+          {/* Shimmer overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent shimmer-effect"></div>
         </div>
       </div>
-
     </div>
   )
 }
