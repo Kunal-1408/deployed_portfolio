@@ -7,10 +7,10 @@ import Choose from "@/components/choose"
 import Cards from "@/components/service_cards"
 import ClientLogos from "@/components/client-logos"
 import ContactPage from "@/components/contact-form"
-import Loading from "./loading"
-import { Mail, MapPin, Phone } from "lucide-react"
+import AnimatedLoader from "@/components/animated-loader"
 
 export default function Home() {
+  const [showLoader, setShowLoader] = useState(true)
   const [content, setContent] = useState<any>(null)
 
   useEffect(() => {
@@ -25,11 +25,23 @@ export default function Home() {
   if (!content) {
     return <div>Loading...</div>
   }
-  // console.log(content.clients)
+  
 
   return (
     <main className="bg-white dark:bg-neutral-900 items-center">
+
       {/* <Loading/> */}
+
+      {/* {showLoader && (
+        <AnimatedLoader
+          duration={3000} // Duration for the animation
+          autoRemove={true}
+          onComplete={() => {
+            console.log("Loader animation complete, removing loader")
+            setShowLoader(false)
+          }}
+        />
+      )} */}
       <Hero />
       <Infor hero={content.hero} />
 

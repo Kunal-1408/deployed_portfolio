@@ -93,13 +93,14 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
             {/* <Item title="Design" href="/works/design" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
             <Item title="Social Media Portfolio" href="/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
             <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Contact Us" href="/contact" isLandingPage={isLandingPage} isSolid={isSolid} />
           </div>
         </Menu>
-        <Link href="/contact">
+        {/* <Link href="/contact">
           <button className={buttonClass}>
             Contact Us
           </button>
-        </Link>
+        </Link> */}
         <Link href="https://quitegood.co/">
           <button className={buttonClass1}>
             Main Website

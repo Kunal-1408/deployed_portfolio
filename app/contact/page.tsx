@@ -24,7 +24,7 @@ export default function ContactUs() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative h-[600px]">
+      <section className="relative h-[600px] hero-section">
         <Image
           src="/web.jpg"
           alt="Construction worker"

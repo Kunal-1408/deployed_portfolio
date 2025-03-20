@@ -1,8 +1,9 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import Image from "next/image";
+"use client"
+import type React from "react"
+import { useEffect, useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
+import Image from "next/image"
 
 const transition = {
   type: "spring",
@@ -11,51 +12,88 @@ const transition = {
   stiffness: 100,
   restDelta: 0.001,
   restSpeed: 0.001,
-};
+}
 
 export const useNavbarBackground = () => {
-  const [isSolid, setIsSolid] = useState(false);
+  const [isSolid, setIsSolid] = useState(false)
 
   useEffect(() => {
+    // Function to get the hero section height
+    const getHeroSectionHeight = () => {
+      // Look for an element with the hero-section class
+      const heroSection = document.querySelector(".hero-section")
+
+      // If hero section exists, use its height, otherwise fallback to viewport height
+      return heroSection ? heroSection.getBoundingClientRect().height : window.innerHeight
+    }
+
     const handleScroll = () => {
-      const heroSectionHeight = window.innerHeight;
+      const heroHeight = getHeroSectionHeight()
 
-      if (window.scrollY > heroSectionHeight) {
-        setIsSolid(true);
+      if (window.scrollY > heroHeight - 100) {
+        // subtract navbar height or use a small offset
+        setIsSolid(true)
       } else {
-        setIsSolid(false);
+        setIsSolid(false)
       }
-    };
+    }
 
-    window.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll()
+
+    window.addEventListener("scroll", handleScroll)
+
+    // Also listen for resize events in case the hero height changes
+    window.addEventListener("resize", handleScroll)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+    }
+  }, [])
 
-  return isSolid;
-};
+  return isSolid
+}
 
 export const ActiveLogo = () => {
-  const [isSecond, setSecond] = useState(false);
+  const [isSecond, setSecond] = useState(false)
 
   useEffect(() => {
-    const handleLogo = () => {
-      const height = window.innerHeight;
-      if (window.scrollY > height) {
-        setSecond(true);
-      } else {
-        setSecond(false);
-      }
-    };
+    // Function to get the hero section height
+    const getHeroSectionHeight = () => {
+      // Look for an element with the hero-section class
+      const heroSection = document.querySelector(".hero-section")
 
-    window.addEventListener('scroll', handleLogo);
+      // If hero section exists, use its height, otherwise fallback to viewport height
+      return heroSection ? heroSection.getBoundingClientRect().height : window.innerHeight
+    }
+
+    const handleLogo = () => {
+      const heroHeight = getHeroSectionHeight()
+
+      if (window.scrollY > heroHeight - 100) {
+        // subtract navbar height or use a small offset
+        setSecond(true)
+      } else {
+        setSecond(false)
+      }
+    }
+
+    // Initial check
+    handleLogo()
+
+    window.addEventListener("scroll", handleLogo)
+
+    // Also listen for resize events in case the hero height changes
+    window.addEventListener("resize", handleLogo)
+
     return () => {
-      window.removeEventListener('scroll', handleLogo);
-    };
-  }, []);
-  return isSecond;
+      window.removeEventListener("scroll", handleLogo)
+      window.removeEventListener("resize", handleLogo)
+    }
+  }, [])
+
+  return isSecond
 }
 
 export const MenuItem = ({
@@ -66,24 +104,20 @@ export const MenuItem = ({
   isLandingPage,
   isSolid,
 }: {
-  setActive: (item: string) => void;
-  active: string | null;
-  item: string;
-  children?: React.ReactNode;
-  isLandingPage: boolean;
-  isSolid: boolean;
+  setActive: (item: string) => void
+  active: string | null
+  item: string
+  children?: React.ReactNode
+  isLandingPage: boolean
+  isSolid: boolean
 }) => {
-  const textColorClass = isLandingPage
-    ? isSolid
-      ? 'text-black'
-      : 'text-neutral-300'
-    : 'text-black';
+  const textColorClass = isLandingPage ? (isSolid ? "text-black" : "text-neutral-300") : "text-black"
 
   return (
     <div onMouseEnter={() => setActive(item)} className="relative ">
       <motion.p
         transition={{ duration: 0.3 }}
-        className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColorClass}`} 
+        className={`font-semibold text-md cursor-pointer hover:opacity-[0.9] ${textColorClass}`}
       >
         {item}
       </motion.p>
@@ -101,10 +135,7 @@ export const MenuItem = ({
               layoutId="active"
               className="bg-white dark:bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-black/[0.2] dark:border-white/[0.2] shadow-xl"
             >
-              <motion.div
-                layout
-                className="w-max h-full p-4"
-              >
+              <motion.div layout className="w-max h-full p-4">
                 {children}
               </motion.div>
             </motion.div>
@@ -112,8 +143,8 @@ export const MenuItem = ({
         )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
 export const Menu = ({
   setActive,
@@ -121,22 +152,22 @@ export const Menu = ({
   isLandingPage,
   isSolid,
 }: {
-  setActive: (item: string | null) => void;
-  children: React.ReactNode;
-  isLandingPage: boolean;
-  isSolid: boolean;
+  setActive: (item: string | null) => void
+  children: React.ReactNode
+  isLandingPage: boolean
+  isSolid: boolean
 }) => {
   return (
     <nav
       onMouseLeave={() => setActive(null)}
       className={`relative border border-transparent ${
-        isLandingPage && !isSolid ? 'dark:bg-transparent' : 'dark:bg-black'
+        isLandingPage && !isSolid ? "dark:bg-transparent" : "dark:bg-black"
       } dark:border-white/[0.2] shadow-input flex justify-center space-x-4 px-8 py-6`}
     >
       {children}
     </nav>
-  );
-};
+  )
+}
 
 export const ProductItem = ({
   title,
@@ -144,42 +175,35 @@ export const ProductItem = ({
   href,
   src,
 }: {
-  title: string;
-  description: string;
-  href: string;
-  src: string;
+  title: string
+  description: string
+  href: string
+  src: string
 }) => {
   return (
     <Link href={href} className="flex space-x-2">
       <Image
-        src={src}
+        src={src || "/placeholder.svg"}
         width={140}
         height={70}
         alt={title}
         className="flex-shrink-0 rounded-md shadow-2xl"
       />
       <div>
-        <h4 className="text-xl font-bold mb-1 text-black dark:text-white">
-          {title}
-        </h4>
-        <p className="text-neutral-700 text-sm max-w-[10rem] dark:text-neutral-300">
-          {description}
-        </p>
+        <h4 className="text-xl font-bold mb-1 text-black dark:text-white">{title}</h4>
+        <p className="text-neutral-700 text-sm max-w-[10rem] dark:text-neutral-300">{description}</p>
       </div>
     </Link>
-  );
-};
+  )
+}
 
 export const HoveredLink = ({ children, ...rest }: any) => {
   return (
-    <Link
-      {...rest}
-      className="text-neutral-700 dark:text-neutral-200 hover:text-black"
-    >
+    <Link {...rest} className="text-neutral-700 dark:text-neutral-200 hover:text-black">
       {children}
     </Link>
-  );
-};
+  )
+}
 
 export const Item = ({
   title,
@@ -187,22 +211,18 @@ export const Item = ({
   isLandingPage,
   isSolid,
 }: {
-  title: string;
-  href: string;
-  isLandingPage: boolean;
-  isSolid: boolean;
+  title: string
+  href: string
+  isLandingPage: boolean
+  isSolid: boolean
 }) => {
   const [isMounted, setIsMounted] = useState(false)
-  
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const textColor = isLandingPage
-    ? isSolid
-      ? 'text-black'
-      : 'text-neutral-300'
-    : 'text-black';
+  const textColor = isLandingPage ? (isSolid ? "text-black" : "text-neutral-300") : "text-black"
 
   if (!isMounted) {
     return (
@@ -217,10 +237,7 @@ export const Item = ({
   }
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
+    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
       <Link
         href={href}
         scroll={false}
@@ -229,6 +246,6 @@ export const Item = ({
         {title}
       </Link>
     </motion.div>
-  );
-};
+  )
+}
 
