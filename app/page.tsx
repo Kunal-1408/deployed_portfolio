@@ -6,7 +6,7 @@ import Infor from "@/components/info"
 import Choose from "@/components/choose"
 import Cards from "@/components/service_cards"
 import ClientLogos from "@/components/client-logos"
-import ContactPage from "@/components/contact-form"
+
 import AnimatedLoader from "@/components/animated-loader"
 
 export default function Home() {
