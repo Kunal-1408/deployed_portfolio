@@ -4,14 +4,13 @@ import { FaInstagram, FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa"
 import { RotatingText } from "./ui/rotating-text"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { Phone, Mail } from "lucide-react"
 
 export const Footerimpli: React.FC = () => {
   return (
-    <div className="relative w-full mx-auto bg-white border-t border-gray-200 py-4">
+    <div className="relative w-full mx-auto bg-white border-t border-gray-200 py-6 md:py-4">
       <div className="max-w-6xl mx-auto px-3">
         {/* Main footer content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 mb-4">
           {/* Logo and social icons column */}
           <div className="flex flex-col items-center md:items-start">
             {/* <Link href={"https://quitegood.co"}> */}
@@ -30,7 +29,7 @@ export const Footerimpli: React.FC = () => {
           </div>
 
           {/* Middle columns with links */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:pr-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-3 md:pr-6">
             {/* Account section */}
             <div>
               <h3 className="text-base font-medium mb-2">QUICK LINKS</h3>
@@ -59,7 +58,7 @@ export const Footerimpli: React.FC = () => {
               <ul className="space-y-1 text-sm">
                 <li>
                   <p className="text-gray-600 ">
-                    Phone: <br /> <span className="hover:text-orange-500">+91 9999197095</span> 
+                    Phone: <br /> <span className="hover:text-orange-500">+91-9999197095</span>
                   </p>
                 </li>
                 <li>
@@ -137,7 +136,7 @@ export const Footerimpli: React.FC = () => {
         <hr className="w-48 h-0.5 mx-auto my-2 bg-neutral-300 border-0 rounded dark:bg-gray-700" />
 
         {/* Bottom navigation */}
-        <div className="pt-2">
+        <div className="pt-4 md:pt-2">
           <div className="flex flex-wrap justify-center pb-2 text-neutral-400 space-x-3">
             <Link href="#">
               <FaFacebook className="h-6 w-6" />
@@ -153,7 +152,7 @@ export const Footerimpli: React.FC = () => {
             </Link>
           </div>
 
-          <div className="text-center mt-2">
+          <div className="text-center mt-4 md:mt-2">
             <span className="text-xs text-slate-400">
               © 2016-2025 <br />
               Adsversify Marketing Private Limited

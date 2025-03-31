@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { BarChart, Bell, ChevronLeftIcon, ChevronRightIcon, CircleUser, Cog, FormInputIcon, Globe2, Home, LineChartIcon, Package, ShoppingCart, User, Users, Palette, Brush, Share2 } from "lucide-react"
+import { BarChart, Bell, ChevronLeftIcon, ChevronRightIcon, CircleUser, Cog, FormInputIcon, Globe2, Home, Package,  Palette, Share2 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
 import Link from 'next/link'

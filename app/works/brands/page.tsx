@@ -63,6 +63,12 @@ interface Branding {
   Images?: string | null
 }
 
+interface TagGroup {
+  title: string
+  tags: string[]
+  color: string
+}
+
 const LabelInputContainer = ({
   children,
   className,
@@ -73,10 +79,17 @@ const LabelInputContainer = ({
   return <div className={cn("flex flex-col space-y-2 w-full", className)}>{children}</div>
 }
 
+// Fallback tags in case API fails
+const fallbackTags = [
+  { title: "Type", tags: ["Visiting Card", "Letterhead", "Logo", "Goodies"], color: "hsl(221, 83%, 53%)" },
+]
+
 export default function Works() {
   const [brandings, setBrandings] = useState<Branding[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [active, setActive] = useState<string[]>([])
+  const [tags, setTags] = useState<TagGroup[]>(fallbackTags)
+  const [isLoadingTags, setIsLoadingTags] = useState(true)
 
   // Scroll to top on component mount
   useEffect(() => {
@@ -87,6 +100,31 @@ export default function Works() {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [active])
+
+  // Fetch tags from the API for the "Branding" project type
+  useEffect(() => {
+    const fetchTags = async () => {
+      setIsLoadingTags(true)
+      try {
+        const response = await fetch("/api/tags?projectType=Branding")
+        const data = await response.json()
+
+        if (data.tags && Array.isArray(data.tags)) {
+          setTags(data.tags)
+        } else {
+          console.error("Unexpected API response structure:", data)
+          // Keep fallback tags if API fails
+        }
+      } catch (error) {
+        console.error("Error fetching tags:", error)
+        // Keep fallback tags if API fails
+      } finally {
+        setIsLoadingTags(false)
+      }
+    }
+
+    fetchTags()
+  }, [])
 
   const fetchBrandings = async (search: string) => {
     try {
@@ -170,7 +208,23 @@ export default function Works() {
               onChange={handleSearch}
             />
           </LabelInputContainer>
-          <DynamicCheckbox onIsActive={handleIsactive} tags={allTags} />
+
+          {isLoadingTags ? (
+            <div className="mt-4 space-y-4 animate-pulse">
+              {[1, 2].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4].map((j) => (
+                      <div key={j} className="h-4 bg-gray-100 rounded w-3/4"></div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <DynamicCheckbox onIsActive={handleIsactive} tags={tags} />
+          )}
         </div>
 
         {/* Content - Scrollable */}
@@ -186,10 +240,4 @@ export default function Works() {
     </div>
   )
 }
-
-const allTags = [
-  { title: "Type", tags: ["Visiting Card", "Letterhead", "Logo", "Goodies"], color: "hsl(221, 83%, 53%)" },
-  // { title: "Industry", tags: ["Agriculture", "Healthcare", "Manufacturing", "Fashion", "Cosmetic"], color: "hsl(140, 71%, 45%)" },
-  // { title: "Country", tags: ["India", "Dubai", "Sri-Lanka"], color: "hsl(291, 64%, 42%)" }
-]
 

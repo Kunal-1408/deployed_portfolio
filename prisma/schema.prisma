@@ -339,3 +339,33 @@ enum ProjectStatus {
   COMPLETED
   ARCHIVED
 }
+
+model ProjectType {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  tagTypes TagType[]
+
+  @@map("project_types")
+}
+
+model TagType {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  color        String
+  tags         Tag[]
+  projectType  ProjectType @relation(fields: [projectTypeId], references: [id], onDelete: Cascade)
+  projectTypeId String      @db.ObjectId
+
+  @@map("tag_types")
+}
+
+model Tag {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  color     String?
+  tagType   TagType @relation(fields: [tagTypeId], references: [id], onDelete: Cascade)
+  tagTypeId String  @db.ObjectId
+
+  @@map("tags")
+}
+

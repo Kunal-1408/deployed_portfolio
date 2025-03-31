@@ -56,10 +56,18 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
       'bg-transparent text-black border border-black hover:bg-black hover:text-white': isSolid || (!isLandingPage && pathname !== '/contact'),
     }
   )
+
   const buttonClass1 = cn(
     "px-4 py-2 rounded-md transition-colors duration-300",
-    "bg-transparent text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white",
+    {
+      'bg-transparent text-neutral-300 border border-neutral-300 hover:bg-white hover:text-black': !isSolid && (isLandingPage || pathname === '/contact'),
+      'bg-transparent text-orange-500 border border-orange hover:bg-orange hover:text-white': isSolid || (!isLandingPage && pathname !== '/contact'),
+    }
   )
+  // const buttonClass1 = cn(
+  //   "px-4 py-2 rounded-md transition-colors duration-300",
+  //   "bg-transparent text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white",
+  // )
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) {
@@ -92,15 +100,20 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
             <Item title="Branding Portfolio" href="/works/brands" isLandingPage={isLandingPage} isSolid={isSolid} />
             {/* <Item title="Design" href="/works/design" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
             <Item title="Social Media Portfolio" href="/works/social" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
-            <Item title="Contact Us" href="/contact" isLandingPage={isLandingPage} isSolid={isSolid} />
+            {/* <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={isSolid} />
+            <Item title="Contact Us" href="/contact" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
           </div>
         </Menu>
-        {/* <Link href="/contact">
+        <Link href="/About Us">
+          <button className={buttonClass}>
+            About Us
+          </button>
+        </Link>
+        <Link href="/contact">
           <button className={buttonClass}>
             Contact Us
           </button>
-        </Link> */}
+        </Link>
         <Link href="https://quitegood.co/">
           <button className={buttonClass1}>
             Main Website
