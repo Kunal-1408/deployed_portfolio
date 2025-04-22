@@ -233,7 +233,7 @@ export default function AnimatedLoader({ duration = 2000, autoRemove = true, onC
               animate={logoVisible ? "visible" : "hidden"}
               exit="exit"
             >
-              <Image src="https://quitegood.s3.eu-north-1.amazonaws.com/Logo+(1).png" width={400} height={100} alt="Quite Good Logo" priority />
+              <Image src="/Logo (1).png" width={400} height={100} alt="Quite Good Logo" priority />
             </motion.div>
           </div>
         </motion.div>

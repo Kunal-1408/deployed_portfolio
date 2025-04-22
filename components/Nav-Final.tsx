@@ -57,17 +57,17 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
     }
   )
 
-  const buttonClass1 = cn(
-    "px-4 py-2 rounded-md transition-colors duration-300",
-    {
-      'bg-transparent text-neutral-300 border border-neutral-300 hover:bg-white hover:text-black': !isSolid && (isLandingPage || pathname === '/contact'),
-      'bg-transparent text-orange-500 border border-orange hover:bg-orange hover:text-white': isSolid || (!isLandingPage && pathname !== '/contact'),
-    }
-  )
   // const buttonClass1 = cn(
   //   "px-4 py-2 rounded-md transition-colors duration-300",
-  //   "bg-transparent text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white",
+  //   {
+  //     'bg-transparent text-neutral-300 border border-neutral-300 hover:bg-white hover:text-black': !isSolid && (isLandingPage || pathname === '/contact'),
+  //     'bg-transparent text-orange-500 border border-orange hover:bg-orange hover:text-white': isSolid || (!isLandingPage && pathname !== '/contact'),
+  //   }
   // )
+  const buttonClass1 = cn(
+    "px-4 py-2 rounded-md transition-colors duration-300",
+    "bg-transparent text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white",
+  )
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) {
@@ -104,7 +104,7 @@ function Navbar({ className, isLandingPage, pathname }: { className?: string; is
             <Item title="Contact Us" href="/contact" isLandingPage={isLandingPage} isSolid={isSolid} /> */}
           </div>
         </Menu>
-        <Link href="/About Us">
+        <Link href="/AboutUs">
           <button className={buttonClass}>
             About Us
           </button>

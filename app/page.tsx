@@ -6,6 +6,7 @@ import Infor from "@/components/info"
 import Choose from "@/components/choose"
 import Cards from "@/components/service_cards"
 import ClientLogos from "@/components/client-logos"
+import AnimatedLoader from "@/components/animated-loader"
 
 export default function Home() {
   const [showLoader, setShowLoader] = useState(true)
@@ -26,9 +27,8 @@ export default function Home() {
 
   return (
     <main className="bg-white dark:bg-neutral-900 items-center">
-      {/* <Loading/> */}
-
-      {/* {showLoader && (
+      <Hero />
+      {showLoader && (
         <AnimatedLoader
           duration={3000} // Duration for the animation
           autoRemove={true}
@@ -37,11 +37,13 @@ export default function Home() {
             setShowLoader(false)
           }}
         />
-      )} */}
-      <Hero />
+      )}
+
       <Infor hero={content.hero} />
 
-      <h1 className="text-slate-900 font-bold text-3xl md:text-4xl lg:text-5xl mx-4 md:ml-28">Why Choose  <span className="text-orange-500">us?</span></h1>
+      <h1 className="text-slate-900 font-bold text-3xl md:text-4xl lg:text-5xl mx-4 md:ml-28">
+        Why Choose <span className="text-orange-500">us?</span>
+      </h1>
       <div className="pt-8 flex flex-col items-center">
         <Choose whyChooseUs={content.whyChooseUs} />
       </div>
@@ -54,8 +56,10 @@ export default function Home() {
       </div>
       <Cards services={content.services} />
 
-      <div className="flex flex-col bg mx-4 md:ml-16 mt-16 pb-6">
-        <h2 className="text-slate-900 font-extrabold text-3xl md:text-4xl lg:text-5xl">Our <span className="text-orange-500">Clients</span> </h2>
+      <div className="flex flex-col bg text-center mt-16 pb-6">
+        <h2 className="text-slate-900 font-extrabold text-3xl md:text-4xl lg:text-5xl">
+          Our <span className="text-orange-500">Clients</span>{" "}
+        </h2>
       </div>
       <div className="w-full pb-12 pt-4">
         <Suspense fallback={<div>Loading clients...</div>}>
@@ -66,7 +70,7 @@ export default function Home() {
       {/* <div className="bg-white border-4 border-slate-100 pt-12">
         <ContactPage/>
       </div> */}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mx-4 md:ml-16 mb-4">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-4">
         Locate <span className="text-orange-500">Us!</span>
       </h2>
       <div className="w-full mx-auto px-4 md:px-16 py-8">
@@ -74,17 +78,17 @@ export default function Home() {
           {/* First Location */}
           <div className="flex-1 rounded-xl shadow-lg overflow-hidden border border-gray-100 bg-white hover:shadow-xl transition-all duration-300 mb-8 md:mb-0 transform hover:-translate-y-1">
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
-              <h3 className="font-semibold text-lg md:text-xl">Gurugram </h3>
+              <h3 className="font-semibold text-lg md:text-xl">Delhi </h3>
             </div>
             <div className="h-[250px] md:h-[300px]">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.6782728865123!2d77.0796161!3d28.459113299999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1936c0a4d589%3A0x7b9e835659e61f07!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1741853404250!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13997.190483309128!2d77.178936!3d28.7106503!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0354091c469d%3A0x6f369bf3f44dcee0!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1729075828599!5m2!1sen!2sin"
                 className="w-full h-full"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Gurugram Office"
+                title="Delhi Office"
               ></iframe>
             </div>
             {/* <div className="p-5 border-t border-gray-100">
@@ -124,17 +128,17 @@ export default function Home() {
           {/* Second Location */}
           <div className="flex-1 rounded-xl shadow-lg overflow-hidden border border-gray-100 bg-white hover:shadow-xl transition-all duration-300 mb-8 md:mb-0 transform hover:-translate-y-1">
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
-              <h3 className="font-semibold text-lg md:text-xl">Delhi </h3>
+              <h3 className="font-semibold text-lg md:text-xl">Gurugram </h3>
             </div>
             <div className="h-[250px] md:h-[300px]">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13997.190483309128!2d77.178936!3d28.7106503!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d0354091c469d%3A0x6f369bf3f44dcee0!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1729075828599!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.6782728865123!2d77.0796161!3d28.459113299999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1936c0a4d589%3A0x7b9e835659e61f07!2sQuite%20Good%20%7C%20Adsversify%20Marketing%20Pvt.%20Ltd.!5e0!3m2!1sen!2sin!4v1741853404250!5m2!1sen!2sin"
                 className="w-full h-full"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Delhi Office"
+                title="Gurugram Office"
               ></iframe>
             </div>
             {/* <div className="p-5 border-t border-gray-100">
@@ -174,7 +178,7 @@ export default function Home() {
           {/* Third Location */}
           <div className="flex-1 rounded-xl shadow-lg overflow-hidden border border-gray-100 bg-white hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
-              <h3 className="font-semibold text-lg md:text-xl">Toronto </h3>
+              <h3 className="font-semibold text-lg md:text-xl">Canada</h3>
             </div>
             <div className="h-[250px] md:h-[300px]">
               <iframe

@@ -49,6 +49,11 @@ export const Footerimpli: React.FC = () => {
                     Privacy Policy
                   </Link>
                 </li>
+                <li>
+                  <Link href="/Privacy" className="text-gray-600 hover:text-orange-500">
+                    Terms and Conditions
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -130,10 +135,10 @@ export const Footerimpli: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="text-center ">
+        {/* <div className="text-center ">
           <p className="text-gray-400 text-xs">Delhi | Gurugram | Canada</p>
-        </div>
-        <hr className="w-48 h-0.5 mx-auto my-2 bg-neutral-300 border-0 rounded dark:bg-gray-700" />
+        </div> */}
+        
 
         {/* Bottom navigation */}
         <div className="pt-4 md:pt-2">
@@ -151,6 +156,7 @@ export const Footerimpli: React.FC = () => {
               <FaLinkedin className="h-6 w-6" />
             </Link>
           </div>
+          <hr className="w-48 h-0.5 mx-auto my-2 bg-neutral-300 border-0 rounded dark:bg-gray-700" />
 
           <div className="text-center mt-4 md:mt-2">
             <span className="text-xs text-slate-400">

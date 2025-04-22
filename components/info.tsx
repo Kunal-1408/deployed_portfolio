@@ -54,9 +54,9 @@ export default function Component({ hero }: HeroProps) {
 
   const stats: Stat[] = [
     { number: 8, text: "Years Work Experience" },
-    { number: 149, text: "Clients Served" },
-    { number: 21, text: "Team Strength" },
-    { number: 2, text: "Offices" },
+    { number: 900, text: "Clients Served" },
+    { number: 1000, text: "Brands Catered" },
+    { number: 1100, text: "Websites Delivered" },
   ]
 
   useEffect(() => {

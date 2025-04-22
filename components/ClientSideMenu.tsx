@@ -27,7 +27,7 @@ const ClientSideMenu: React.FC<ClientSideMenuProps> = ({ isLandingPage, isSolid,
       <div className="flex flex-col space-y-4">
         <Item title="Website works" href="/works/web" isLandingPage={isLandingPage} isSolid={true} />
         <Item title="Branding works" href="/works/brands" isLandingPage={isLandingPage} isSolid={true} />
-        <Item title="Design works" href="/works/design" isLandingPage={isLandingPage} isSolid={true} />
+        {/* <Item title="Design works" href="/works/design" isLandingPage={isLandingPage} isSolid={true} /> */}
         <Item title="Social Media works" href="/works/social" isLandingPage={isLandingPage} isSolid={true} />
         <Item title="About" href="/AboutUs" isLandingPage={isLandingPage} isSolid={true} />
         <Link href="/contact">
