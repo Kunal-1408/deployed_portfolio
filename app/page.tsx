@@ -11,6 +11,7 @@ import AnimatedLoader from "@/components/animated-loader"
 export default function Home() {
   const [showLoader, setShowLoader] = useState(true)
   const [content, setContent] = useState<any>(null)
+  const [showGlobe, setShowGlobe] = useState(false);
 
   useEffect(() => {
     async function loadContent() {
@@ -30,13 +31,15 @@ export default function Home() {
       <Hero />
       {showLoader && (
         <AnimatedLoader
-          duration={3000} // Duration for the animation
-          autoRemove={true}
-          onComplete={() => {
-            console.log("Loader animation complete, removing loader")
-            setShowLoader(false)
-          }}
-        />
+        duration={3000}
+        autoRemove={true}
+        onComplete={() => {
+          console.log("Loader animation complete, removing loader");
+          setShowLoader(false);
+          // Add a small delay before showing the globe
+          setTimeout(() => setShowGlobe(true), 200);
+        }}
+      />
       )}
 
       <Infor hero={content.hero} />

@@ -228,17 +228,76 @@ model queries {
   Query      String
 }
 
-model social {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  Brand String
-  Description String
-  Logo        String
-  Stats       SocialStats?
-  banner      String
-  archive             Boolean  @default(false)
-  highlighted         Boolean  @default(false)
-  tags        String[]
-  URL         String[]
+type SocialMediaSection {
+  description String
+  platforms   SocialPlatform[]
+}
+
+type SocialPlatform {
+  name        String // e.g., "Instagram", "Twitter", "Facebook", "LinkedIn"
+  url         String
+  handle      String
+  followers   Int?
+  engagement  Float?
+  description String?
+}
+
+type AnalyticsSection {
+  description String
+  metrics     Metric[]
+}
+
+type Metric {
+  name        String // e.g., "Impressions", "Reach", "Engagement Rate"
+  value       String
+  change      Float? // Percentage change from previous period
+  period      String? // e.g., "Last 30 days", "Year to date"
+}
+
+type CampaignSection {
+  description String
+  campaigns   Campaign[]
+}
+
+type Campaign {
+  name        String
+  description String
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String // e.g., "Active", "Completed", "Planned"
+  results     String?
+  images      String[]
+}
+
+model Social {
+  id                String              @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Basic Information
+  title             String
+  description       String
+  clientName        String?
+  
+  // Sections using embedded types
+  logoSection       LogoSection
+  bannerSection     BannerSection
+  socialMediaSection SocialMediaSection
+  analyticsSection  AnalyticsSection?
+  campaignSection   CampaignSection?
+  
+  // Additional metadata
+  tags              String[]
+  archive           Boolean             @default(false)
+  highlighted       Boolean             @default(false)
+  
+  // Legacy fields for backward compatibility
+  Brand             String?
+  Description       String?
+  Logo              String?
+  URL               String[]
+  banner            String?
+  Tags              String[]
 }
 
 model texts {

@@ -1,20 +1,79 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useId, useRef, useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { X, Instagram, Twitter, Facebook, Linkedin, LinkIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { useId, useState } from "react"
+import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
+import { Instagram, Twitter, Facebook, Linkedin, LinkIcon } from "lucide-react"
+
+interface SocialPlatform {
+  name: string
+  url: string
+  handle: string
+  followers?: number
+  engagement?: number
+  description?: string
+}
+
+interface SocialMediaSection {
+  description: string
+  platforms: SocialPlatform[]
+}
+
+interface LogoSection {
+  logo: string
+  description: string
+}
+
+interface BannerSection {
+  description: string
+  banners: string[]
+}
+
+interface AnalyticsSection {
+  description: string
+  metrics: {
+    name: string
+    value: string
+    change?: number
+    period?: string
+  }[]
+}
+
+interface CampaignSection {
+  description: string
+  campaigns: {
+    name: string
+    description: string
+    startDate?: string
+    endDate?: string
+    status: string
+    results?: string
+    images: string[]
+  }[]
+}
 
 interface Social {
   id: string
-  Brand: string
-  Description: string
-  Logo: string
-  URL?: string[]
-  banner: string
+  title: string
+  description: string
+  clientName?: string
+  logoSection: LogoSection
+  bannerSection: BannerSection
+  socialMediaSection: SocialMediaSection
+  analyticsSection?: AnalyticsSection
+  campaignSection?: CampaignSection
+  tags: string[]
   archive: boolean
   highlighted: boolean
-  tags: string[]
+
+  // Legacy fields for compatibility
+  Brand?: string
+  Description?: string
+  Logo?: string | null
+  URL?: string[]
+  banner?: string
+  Tags?: string[]
 }
 
 interface SocialProjectsProps {
@@ -23,16 +82,28 @@ interface SocialProjectsProps {
 }
 
 export default function SocialProjects({ projects, filterTags = [] }: SocialProjectsProps) {
-  const [active, setActive] = useState<Social | null>(null)
-  const [activeIndex, setActiveIndex] = useState<number>(-1)
   const [hoveredProject, setHoveredProject] = useState<Social | null>(null)
   const id = useId()
-  const ref = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
-  const filteredProjects =
-    projects && filterTags.length
-      ? projects.filter((project) => filterTags.every((tag) => project.tags.includes(tag)))
-      : projects || []
+  // Helper function to get the appropriate display values
+  const getDisplayValues = (project: Social) => {
+    return {
+      title: project.title || project.Brand || "",
+      description: project.description || project.Description || "",
+      logo: project.logoSection?.logo || project.Logo || "/placeholder.svg",
+      banner: project.bannerSection?.banners?.[0] || project.banner || "/placeholder.svg",
+      tags: [...(project.tags || []), ...(project.Tags || [])],
+      urls: project.socialMediaSection?.platforms?.map((p) => p.url) || project.URL || [],
+    }
+  }
+
+  const filteredProjects = filterTags.length
+    ? projects.filter((project) => {
+        const allTags = [...(project.tags || []), ...(project.Tags || [])]
+        return filterTags.every((tag) => allTags.includes(tag))
+      })
+    : projects
 
   const sortedProjects = [...filteredProjects]
     .filter((project) => !project.archive)
@@ -42,23 +113,6 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
       return 0
     })
 
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setActive(null)
-        setActiveIndex(-1)
-      }
-    }
-
-    if (active) {
-      document.addEventListener("mousedown", handleOutsideClick)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick)
-    }
-  }, [active])
-
   const handleMouseEnter = (project: Social) => {
     setHoveredProject(project)
   }
@@ -67,29 +121,8 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
     setHoveredProject(null)
   }
 
-  const handleClick = (project: Social) => {
-    if (active && active.id === project.id) {
-      setActive(null)
-      setActiveIndex(-1)
-    } else {
-      const index = sortedProjects.findIndex((p) => p.id === project.id)
-      setActive(project)
-      setActiveIndex(index)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (activeIndex > 0) {
-      setActiveIndex(activeIndex - 1)
-      setActive(sortedProjects[activeIndex - 1])
-    }
-  }
-
-  const handleNext = () => {
-    if (activeIndex < sortedProjects.length - 1) {
-      setActiveIndex(activeIndex + 1)
-      setActive(sortedProjects[activeIndex + 1])
-    }
+  const handleViewDetails = (project: Social) => {
+    router.push(`/works/social/${project.id}`)
   }
 
   const getSocialIcon = (url: string) => {
@@ -101,171 +134,16 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
   }
 
   return (
-    <>
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 h-full w-full z-10"
-          />
-        )}
-      </AnimatePresence>
-      <AnimatePresence mode="wait">
-        {active && (
-          <motion.div
-            key={active.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 grid place-items-center z-[100] p-2 sm:p-4"
-          >
-            <motion.div
-              layoutId={`card-${active.id}-${id}`}
-              ref={ref}
-              className="w-full max-w-[95vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-[45vw] max-h-[95vh] flex flex-col bg-white dark:bg-neutral-900 rounded-xl sm:rounded-3xl overflow-hidden shadow-lg border-4 border-gray-200 dark:border-gray-700 relative"
-            >
-              <motion.button
-                key={`button-${active.id}-${id}`}
-                layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.05 } }}
-                className="flex absolute top-2 right-2 sm:top-4 sm:right-4 items-center justify-center bg-white dark:bg-neutral-800 rounded-full h-8 w-8 shadow-md z-20"
-                onClick={() => {
-                  setActive(null)
-                  setActiveIndex(-1)
-                }}
-              >
-                <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              </motion.button>
+    <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 py-10">
+      {sortedProjects.map((project) => {
+        const { title, description, logo, banner, tags, urls } = getDisplayValues(project)
 
-              <div className="overflow-y-auto flex-grow">
-                <div className="p-2 sm:p-4">
-                  <motion.div
-                    layoutId={`image-${active.id}-${id}`}
-                    className="relative h-[200px] sm:h-[250px] md:h-[350px] overflow-hidden rounded-xl"
-                  >
-                    {active.banner ? (
-                      <motion.div
-                        animate={{
-                          y: ["0%", "-62.5%", "-62.5%", "0%"],
-                        }}
-                        transition={{
-                          y: {
-                            duration: 20,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: "linear",
-                          },
-                        }}
-                        className="absolute inset-0 w-full"
-                        style={{ height: "268.75%" }}
-                      >
-                        <Image
-                          priority
-                          fill
-                          src={active.banner || "/placeholder.svg"}
-                          alt={`${active.Brand} - Full Image`}
-                          className="object-cover object-top"
-                        />
-                      </motion.div>
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-400">No Image</span>
-                      </div>
-                    )}
-                  </motion.div>
-                </div>
-
-                <div className="p-3 sm:p-4 md:p-6">
-                  <div className="flex flex-row justify-between items-center">
-                    <motion.h3
-                      layoutId={`title-${active.id}-${id}`}
-                      className="font-medium text-xl sm:text-2xl text-neutral-700 dark:text-neutral-200"
-                    >
-                      {active.Brand}
-                    </motion.h3>
-                    {active.Logo && (
-                      <motion.div
-                        layoutId={`logo-${active.id}-${id}`}
-                        className="relative w-12 h-12 sm:w-16 sm:h-16 ml-4 flex-shrink-0"
-                      >
-                        <Image
-                          src={active.Logo || "/placeholder.svg"}
-                          alt={`${active.Brand} logo`}
-                          className="object-contain"
-                          width={64}
-                          height={64}
-                        />
-                      </motion.div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex flex-col">
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {active.tags.map((tag, index) => (
-                        <motion.span
-                          key={`${tag}-${index}-${id}`}
-                          className="bg-white/0.2 text-gray-800 text-xs sm:text-sm font-medium px-2 py-0.5 sm:px-3 sm:py-1 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{
-                            duration: 0.05,
-                            ease: "easeInOut",
-                          }}
-                        >
-                          {tag}
-                        </motion.span>
-                      ))}
-                    </div>
-                    <motion.div layoutId={`description-${active.id}-${id}`} className="mb-4">
-                      <p className="text-neutral-600 text-sm sm:text-base lg:text-lg dark:text-neutral-400">
-                        {active.Description}
-                      </p>
-                    </motion.div>
-                    <div className="mt-2 flex justify-center gap-4">
-                      {active.URL?.map((url, index) => (
-                        <a
-                          key={index}
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                          {getSocialIcon(url)}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handlePrevious}
-                disabled={activeIndex === 0}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-1 sm:p-2 shadow-md disabled:opacity-50 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
-              >
-                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" />
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={activeIndex === sortedProjects.length - 1}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white dark:bg-neutral-800 rounded-full p-1 sm:p-2 shadow-md disabled:opacity-50 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center"
-              >
-                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" />
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <ul className="max-w-7xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-10 py-10">
-        {sortedProjects.map((project) => (
+        return (
           <motion.div
             key={project.id}
             onMouseEnter={() => handleMouseEnter(project)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-auto w-full bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-auto w-full bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm transition-shadow duration-200"
             style={{
               zIndex: hoveredProject === project ? 20 : 1,
             }}
@@ -274,31 +152,13 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               layoutId={`image-${project.id}-${id}`}
               className="relative overflow-hidden rounded-xl"
               animate={{
-                height: hoveredProject === project ? 300 : 220,
+                height: hoveredProject === project ? 300 : 200,
               }}
               transition={{ duration: 0.3 }}
             >
-              {project.banner ? (
-                <motion.div
-                  animate={{
-                    y: hoveredProject === project ? ["0%", "-62.5%", "-62.5%", "0%"] : "0%",
-                  }}
-                  transition={{
-                    y: {
-                      duration: hoveredProject === project ? 20 : 0,
-                      repeat: Number.POSITIVE_INFINITY,
-                      ease: "linear",
-                    },
-                  }}
-                  className="absolute inset-0 w-full"
-                  style={{ height: "268.75%" }}
-                >
-                  <Image
-                    fill
-                    src={project.banner || "/placeholder.svg"}
-                    alt={project.Brand}
-                    className="object-cover object-top"
-                  />
+              {banner ? (
+                <motion.div className="absolute inset-0 w-full" style={{ height: "268.75%" }}>
+                  <Image fill src={banner || "/placeholder.svg"} alt={title} className="object-cover object-top" />
                 </motion.div>
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -308,13 +168,13 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
             </motion.div>
             <div className="mt-4 flex justify-between items-center">
               <motion.h3 layoutId={`title-${project.id}-${id}`} className="font-medium text-card-foreground text-lg">
-                {project.Brand}
+                {title}
               </motion.h3>
-              {project.Logo && (
+              {logo && (
                 <motion.div layoutId={`logo-${project.id}-${id}`} className="relative w-16 h-16 ml-4 flex-shrink-0">
                   <Image
-                    src={project.Logo || "/placeholder.svg"}
-                    alt={`${project.Brand} logo`}
+                    src={logo || "/placeholder.svg"}
+                    alt={`${title} logo`}
                     className="object-contain"
                     width={64}
                     height={64}
@@ -322,8 +182,14 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
                 </motion.div>
               )}
             </div>
+            <motion.p
+              layoutId={`description-${project.id}-${id}`}
+              className="text-muted-foreground text-sm mt-2 line-clamp-2 h-10 overflow-hidden"
+            >
+              {description}
+            </motion.p>
             <div className="mt-3 flex flex-wrap gap-1">
-              {project.tags.slice(0, 3).map((tag, index) => (
+              {tags.slice(0, 3).map((tag, index) => (
                 <motion.span
                   key={`${tag}-${index}-${id}`}
                   className="bg-white/0.2 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
@@ -337,25 +203,24 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
                   {tag}
                 </motion.span>
               ))}
-              {project.tags.length > 3 && (
-                <span className="text-muted-foreground text-xs">+{project.tags.length - 3} more</span>
-              )}
+              {tags.length > 3 && <span className="text-muted-foreground text-xs">+{tags.length - 3} more</span>}
             </div>
             <div className="mt-4 flex justify-between items-center">
               <button
-                onClick={() => handleClick(project)}
+                onClick={() => handleViewDetails(project)}
                 className="px-4 py-2 text-sm rounded-full font-bold text-white bg-black hover:bg-gray-800 transition-colors duration-200"
               >
                 View Details
               </button>
               <div className="flex gap-2">
-                {project.URL?.slice(0, 3).map((url, index) => (
+                {urls.slice(0, 3).map((url, index) => (
                   <a
                     key={index}
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-600 hover:text-orange-500 dark:text-gray-400 dark:hover:text-gray-200"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {getSocialIcon(url)}
                   </a>
@@ -363,9 +228,8 @@ export default function SocialProjects({ projects, filterTags = [] }: SocialProj
               </div>
             </div>
           </motion.div>
-        ))}
-      </ul>
-    </>
+        )
+      })}
+    </ul>
   )
 }
-

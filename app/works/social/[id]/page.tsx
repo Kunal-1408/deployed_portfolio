@@ -8,7 +8,7 @@ import { useInView } from "framer-motion"
 import Image from "next/image"
 import { ImageLightbox } from "@/components/image-lightbox"
 import { useParams, useRouter } from "next/navigation"
-import { ChevronLeft, ExternalLink, Users, BarChart3, Calendar } from "lucide-react"
+import { ChevronLeft, Instagram, Twitter, Facebook, Linkedin, LinkIcon, BarChart, Calendar } from "lucide-react"
 
 interface SocialPlatform {
   name: string
@@ -59,8 +59,6 @@ interface CampaignSection {
 
 interface Social {
   id: string
-  createdAt: string
-  updatedAt: string
   title: string
   description: string
   clientName?: string
@@ -146,13 +144,9 @@ export default function SocialDetails() {
             })
           }
 
-          // Add campaign images
-          if (
-            data.social.campaignSection &&
-            data.social.campaignSection.campaigns &&
-            data.social.campaignSection.campaigns.length > 0
-          ) {
-            data.social.campaignSection.campaigns.forEach((campaign) => {
+          // Add campaign images if available
+          if (data.social.campaignSection && data.social.campaignSection.campaigns) {
+            data.social.campaignSection.campaigns.forEach((campaign: any) => {
               if (campaign.images && campaign.images.length > 0) {
                 campaign.images.forEach((image: string, idx: number) => {
                   images.push({
@@ -166,7 +160,7 @@ export default function SocialDetails() {
 
           setAllImages(images)
         } else {
-          setError("Social media content not found")
+          setError("Social project not found")
         }
       } catch (err) {
         console.error("Error fetching social details:", err)
@@ -196,9 +190,13 @@ export default function SocialDetails() {
     router.back()
   }
 
-  const formatNumber = (num?: number) => {
-    if (num === undefined) return "N/A"
-    return new Intl.NumberFormat().format(num)
+  const getSocialIcon = (platform: string) => {
+    const platformLower = platform.toLowerCase()
+    if (platformLower.includes("instagram")) return <Instagram className="h-6 w-6" />
+    if (platformLower.includes("twitter") || platformLower.includes("x")) return <Twitter className="h-6 w-6" />
+    if (platformLower.includes("facebook")) return <Facebook className="h-6 w-6" />
+    if (platformLower.includes("linkedin")) return <Linkedin className="h-6 w-6" />
+    return <LinkIcon className="h-6 w-6" />
   }
 
   if (loading) {
@@ -212,7 +210,7 @@ export default function SocialDetails() {
   if (error || !social) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-red-500">{error || "Social media content not found"}</div>
+        <div className="text-xl text-red-500">{error || "Social project not found"}</div>
       </div>
     )
   }
@@ -222,23 +220,40 @@ export default function SocialDetails() {
   const description = social.description || social.Description || ""
   const clientName = social.clientName || ""
   const tags = [...(social.tags || []), ...(social.Tags || [])]
+  const platforms =
+    social.socialMediaSection?.platforms ||
+    (social.URL
+      ? social.URL.map((url) => ({
+          name: url.includes("instagram")
+            ? "Instagram"
+            : url.includes("twitter")
+              ? "Twitter"
+              : url.includes("facebook")
+                ? "Facebook"
+                : url.includes("linkedin")
+                  ? "LinkedIn"
+                  : "Website",
+          url,
+          handle: "",
+        }))
+      : [])
 
   return (
     <div className="min-h-screen bg-white pt-16 relative">
       {/* Sticky Back Button */}
       <motion.button
-        className={`fixed top-28 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-full shadow-md transition-all ${
-          scrolled ? "bg-brand-teal text-black" : "bg-white text-brand-teal border border-brand-teal"
-        }`}
-        onClick={handleBack}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <ChevronLeft className="h-5 w-5" />
-        <span className="font-medium">Back</span>
-      </motion.button>
+              className={`fixed top-28 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-full shadow-md transition-all ${
+                scrolled ? "bg-brand-teal text-black" : "bg-white text-brand-teal border border-brand-teal"
+              }`}
+              onClick={handleBack}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ChevronLeft className="h-5 w-5" />
+              <span className="font-medium">Back</span>
+            </motion.button>
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         {/* Header Section */}
@@ -283,7 +298,7 @@ export default function SocialDetails() {
           {social.logoSection && social.logoSection.logo && (
             <GallerySection
               title="Brand Identity"
-              description={social.logoSection.description || "Brand identity through distinctive logo design."}
+              description={social.logoSection.description || "Social media presence with distinctive brand identity."}
             >
               <div className="space-y-6">
                 <div className="relative w-96 h-96 mx-auto perspective-1000">
@@ -314,95 +329,59 @@ export default function SocialDetails() {
           )}
 
           {/* Social Media Platforms Section */}
-          {social.socialMediaSection &&
-            social.socialMediaSection.platforms &&
-            social.socialMediaSection.platforms.length > 0 && (
-              <GallerySection
-                title="Social Media Presence"
-                description={
-                  social.socialMediaSection.description || "Building brand awareness across multiple social platforms."
-                }
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {social.socialMediaSection.platforms.map((platform, idx) => (
-                    <motion.div
-                      key={idx}
-                      className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: idx * 0.1 }}
-                      whileHover={{
-                        y: -10,
-                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                      }}
-                    >
-                      <div className="p-6 space-y-4">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-xl font-bold text-brand-teal">{platform.name}</h3>
-                          <motion.a
-                            href={platform.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className="text-brand-gold"
-                          >
-                            <ExternalLink className="h-5 w-5" />
-                          </motion.a>
-                        </div>
-
-                        <p className="text-gray-600 font-medium">@{platform.handle}</p>
-
-                        {platform.description && <p className="text-gray-500 text-sm">{platform.description}</p>}
-
-                        <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
-                          {platform.followers !== undefined && (
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <p className="text-sm text-gray-500">Followers</p>
-                                <p className="font-semibold">{formatNumber(platform.followers)}</p>
-                              </div>
-                            </div>
-                          )}
-
-                          {platform.engagement !== undefined && (
-                            <div className="flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <p className="text-sm text-gray-500">Engagement</p>
-                                <p className="font-semibold">{platform.engagement}%</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </GallerySection>
-            )}
+          {platforms && platforms.length > 0 && (
+            <GallerySection
+              title="Social Media Platforms"
+              description={social.socialMediaSection?.description || "Connect with us across these social platforms."}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {platforms.map((platform, idx) => (
+                  <motion.a
+                    key={idx}
+                    href={platform.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200"
+                    whileHover={{ y: -5 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="text-brand-teal mb-4">{getSocialIcon(platform.name)}</div>
+                    <h3 className="text-xl font-bold mb-2">{platform.name}</h3>
+                    {platform.handle && <p className="text-gray-600 mb-2">{platform.handle}</p>}
+                    {platform.followers && (
+                      <p className="text-gray-700">
+                        <span className="font-semibold">{platform.followers.toLocaleString()}</span> followers
+                      </p>
+                    )}
+                    {platform.description && (
+                      <p className="text-gray-600 text-sm mt-2 text-center">{platform.description}</p>
+                    )}
+                  </motion.a>
+                ))}
+              </div>
+            </GallerySection>
+          )}
 
           {/* Banner Section */}
           {social.bannerSection && social.bannerSection.banners && social.bannerSection.banners.length > 0 && (
             <GallerySection
-              title="Social Media Banners"
-              description={social.bannerSection.description || "Consistent visual identity across social platforms."}
+              title="Social Media Content"
+              description={
+                social.bannerSection.description || "Engaging visual content that resonates with our audience."
+              }
             >
               <div className="flex flex-col space-y-12">
                 {social.bannerSection.banners.map((banner, idx) => (
                   <motion.div
                     key={idx}
                     className="relative aspect-[21/9] w-full cursor-pointer overflow-hidden rounded-lg shadow-lg"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: idx * 0.2 }}
                     whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
                     onClick={() => openLightbox(social.logoSection?.logo ? idx + 1 : idx)}
                   >
                     <Image
                       src={banner || "/placeholder.svg"}
-                      alt={`${title} Banner ${idx + 1}`}
+                      alt={`${title} Content ${idx + 1}`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 1200px) 100vw"
@@ -417,34 +396,29 @@ export default function SocialDetails() {
           {social.analyticsSection && social.analyticsSection.metrics && social.analyticsSection.metrics.length > 0 && (
             <GallerySection
               title="Performance Analytics"
-              description={social.analyticsSection.description || "Measuring impact and engagement across platforms."}
+              description={
+                social.analyticsSection.description || "Key metrics showcasing our social media performance."
+              }
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {social.analyticsSection.metrics.map((metric, idx) => (
                   <motion.div
                     key={idx}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 p-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    whileHover={{
-                      y: -5,
-                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                    }}
+                    className="bg-white p-6 rounded-xl shadow-md"
+                    whileHover={{ y: -5 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <h3 className="text-lg font-medium text-gray-500 mb-2">{metric.name}</h3>
-                    <div className="flex items-end gap-3">
-                      <p className="text-3xl font-bold text-brand-teal">{metric.value}</p>
-                      {metric.change !== undefined && (
-                        <div
-                          className={`text-sm font-medium ${metric.change >= 0 ? "text-green-500" : "text-red-500"}`}
-                        >
-                          {metric.change >= 0 ? "+" : ""}
-                          {metric.change}%
-                        </div>
-                      )}
+                    <div className="flex items-center mb-4">
+                      <BarChart className="h-6 w-6 text-brand-teal mr-2" />
+                      <h3 className="text-lg font-semibold">{metric.name}</h3>
                     </div>
-                    {metric.period && <p className="text-xs text-gray-400 mt-1">{metric.period}</p>}
+                    <p className="text-3xl font-bold text-brand-teal mb-2">{metric.value}</p>
+                    {metric.change !== undefined && (
+                      <p className={`text-sm ${metric.change >= 0 ? "text-green-500" : "text-red-500"}`}>
+                        {metric.change >= 0 ? "↑" : "↓"} {Math.abs(metric.change).toFixed(1)}%
+                        {metric.period && <span className="text-gray-500 ml-1">({metric.period})</span>}
+                      </p>
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -458,96 +432,70 @@ export default function SocialDetails() {
               <GallerySection
                 title="Social Media Campaigns"
                 description={
-                  social.campaignSection.description || "Strategic campaigns designed to engage and convert."
+                  social.campaignSection.description || "Strategic campaigns designed to engage and grow our audience."
                 }
               >
-                <div className="space-y-16">
-                  {social.campaignSection.campaigns.map((campaign, campaignIdx) => (
+                <div className="space-y-12">
+                  {social.campaignSection.campaigns.map((campaign, idx) => (
                     <motion.div
-                      key={campaignIdx}
-                      className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: campaignIdx * 0.2 }}
+                      key={idx}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden"
+                      initial={{ opacity: 0, y: 50 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      viewport={{ once: true }}
                     >
-                      <div className="p-8">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                          <div>
-                            <h3 className="text-2xl font-bold text-brand-teal">{campaign.name}</h3>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span
-                                className={`px-3 py-1 text-xs font-medium rounded-full ${
-                                  campaign.status === "Active"
-                                    ? "bg-green-100 text-green-800"
-                                    : campaign.status === "Completed"
-                                      ? "bg-blue-100 text-blue-800"
-                                      : campaign.status === "Planned"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-gray-100 text-gray-800"
-                                }`}
-                              >
-                                {campaign.status}
-                              </span>
-
-                              {campaign.startDate && (
-                                <div className="flex items-center text-sm text-gray-500">
-                                  <Calendar className="h-3 w-3 mr-1" />
-                                  {campaign.startDate}
-                                  {campaign.endDate && ` - ${campaign.endDate}`}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {campaign.results && (
-                            <div className="bg-brand-teal/10 px-4 py-2 rounded-lg">
-                              <p className="text-sm font-medium text-brand-teal">{campaign.results}</p>
-                            </div>
-                          )}
-                        </div>
-
-                        <p className="text-gray-600 mb-8">{campaign.description}</p>
-
+                      <div className="md:flex">
                         {campaign.images && campaign.images.length > 0 && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {campaign.images.map((image, imageIdx) => {
-                              // Calculate the correct index for the lightbox
-                              const logoOffset = social.logoSection?.logo ? 1 : 0
-                              const bannerOffset = social.bannerSection?.banners?.length || 0
-
-                              // Calculate the offset for previous campaign images
-                              let previousCampaignImagesCount = 0
-                              for (let i = 0; i < campaignIdx; i++) {
-                                previousCampaignImagesCount += social.campaignSection?.campaigns[i].images?.length || 0
+                          <div className="md:w-1/3 relative h-64 md:h-auto">
+                            <Image
+                              src={campaign.images[0] || "/placeholder.svg"}
+                              alt={`${campaign.name} Campaign Image`}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw"
+                            />
+                            <div
+                              className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4"
+                              onClick={() =>
+                                openLightbox(
+                                  (social.logoSection?.logo ? 1 : 0) +
+                                    (social.bannerSection?.banners?.length || 0) +
+                                    social.campaignSection.campaigns
+                                      .slice(0, idx)
+                                      .reduce((acc, camp) => acc + (camp.images?.length || 0), 0),
+                                )
                               }
-
-                              const lightboxIndex = logoOffset + bannerOffset + previousCampaignImagesCount + imageIdx
-
-                              return (
-                                <motion.div
-                                  key={imageIdx}
-                                  className="relative aspect-square cursor-pointer overflow-hidden rounded-lg shadow-md"
-                                  whileHover={{
-                                    scale: 1.05,
-                                    rotateX: 5,
-                                    rotateY: 5,
-                                    z: 20,
-                                  }}
-                                  transition={{ duration: 0.2 }}
-                                  onClick={() => openLightbox(lightboxIndex)}
-                                >
-                                  <Image
-                                    src={image || "/placeholder.svg"}
-                                    alt={`${campaign.name} Campaign Image ${imageIdx + 1}`}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                  />
-                                </motion.div>
-                              )
-                            })}
+                            >
+                              <span className="text-white text-sm font-medium">View Gallery</span>
+                            </div>
                           </div>
                         )}
+                        <div className="p-6 md:w-2/3">
+                          <div className="flex items-center mb-2">
+                            <Calendar className="h-5 w-5 text-brand-teal mr-2" />
+                            <span className="text-sm text-gray-500">
+                              {campaign.startDate && new Date(campaign.startDate).toLocaleDateString()}
+                              {campaign.endDate && ` - ${new Date(campaign.endDate).toLocaleDateString()}`}
+                            </span>
+                          </div>
+                          <h3 className="text-xl font-bold mb-2">{campaign.name}</h3>
+                          <p className="text-gray-700 mb-4">{campaign.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                campaign.status === "Active"
+                                  ? "bg-green-100 text-green-800"
+                                  : campaign.status === "Completed"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {campaign.status}
+                            </span>
+                            {campaign.results && <span className="text-sm text-gray-600">{campaign.results}</span>}
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   ))}

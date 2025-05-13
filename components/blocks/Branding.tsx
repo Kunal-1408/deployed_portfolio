@@ -116,7 +116,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
             key={project.id}
             onMouseEnter={() => handleMouseEnter(project)}
             onMouseLeave={handleMouseLeave}
-            className="p-4 flex flex-col h-[400px] w-[350px] md:h-[350px] md:w[200px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="p-4 flex flex-col h-[400px] w-[350px] md:h-[350px] md:w[200px] bg-card hover:bg-card/90 rounded-xl bg-neutral-100 cursor-pointer shadow-sm transition-shadow duration-200"
             style={{
               zIndex: hoveredProject === project ? 20 : 1,
             }}
@@ -129,20 +129,7 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
               }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div
-                animate={{
-                  y: hoveredProject === project ? ["0%", "-62.5%", "-62.5%", "0%"] : "0%",
-                }}
-                transition={{
-                  y: {
-                    duration: hoveredProject === project ? 20 : 0,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "linear",
-                  },
-                }}
-                className="absolute inset-0 w-full"
-                style={{ height: "268.75%" }}
-              >
+              <motion.div className="absolute inset-0 w-full" style={{ height: "268.75%" }}>
                 <Image fill src={banner || "/placeholder.svg"} alt={title} className="object-cover object-top" />
               </motion.div>
             </motion.div>
@@ -197,4 +184,3 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
     </ul>
   )
 }
-

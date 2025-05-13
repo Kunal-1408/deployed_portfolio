@@ -69,20 +69,9 @@ export default function AnimatedLoader({ duration = 2000, autoRemove = true, onC
       safeSetTimeout(() => {
         console.log("Setting isVisible to false to trigger exit animations")
         setIsVisible(false)
-      }, 100)
+      }, 200) // Increased from 100 to 200ms for more stability
     }
   }, [isAnimationComplete])
-
-  // Handle final cleanup after exit animations complete
-  useEffect(() => {
-    if (!isVisible && onComplete) {
-      // Wait for exit animations to complete before calling onComplete
-      safeSetTimeout(() => {
-        console.log("Exit animations complete, calling onComplete")
-        onComplete()
-      }, 500) // Reduced from 800 to 500 for faster completion
-    }
-  }, [isVisible, onComplete])
 
   // Clean up all timeouts when component unmounts
   useEffect(() => {
@@ -176,6 +165,13 @@ export default function AnimatedLoader({ duration = 2000, autoRemove = true, onC
       onExitComplete={() => {
         console.log("AnimatePresence exit complete")
         clearAllTimeouts()
+        // Add a longer delay before calling onComplete to ensure DOM is fully settled
+        setTimeout(() => {
+          if (onComplete) {
+            console.log("Calling onComplete after ensuring DOM is settled")
+            onComplete()
+          }
+        }, 300) // Increased delay to 300ms
       }}
     >
       {isVisible && (
@@ -185,6 +181,7 @@ export default function AnimatedLoader({ duration = 2000, autoRemove = true, onC
           exit="exit"
           variants={containerVariants}
           key="loader-container"
+          style={{ position: "fixed", pointerEvents: "none" }}
         >
           {/* Positioning container with relative positioning */}
           <div className="relative">
@@ -241,4 +238,3 @@ export default function AnimatedLoader({ duration = 2000, autoRemove = true, onC
     </AnimatePresence>
   )
 }
-

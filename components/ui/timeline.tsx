@@ -34,7 +34,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
     <div className="w-full bg-white dark:bg-neutral-950 font-sans md:px-10" ref={containerRef}>
       <div className="max-w-7xl  pt-20 px-4 md:px-8 lg:px-10">
         <h2 className="text-slate-700 font-extrabold text-5xl pt-10 ">
-          Becoming <span className="text-orange-400 ">Quite Good</span>
+        Our Journey: 8+ Years of Doing Things <span className="text-orange-400 ">Quite Good</span>
         </h2>
         <p className="text-md font-semibold sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-3xl pt-5">
           We&apos;ve been a leading pioneer in the industry for the past 8+ years.
@@ -51,7 +51,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-white dark:bg-black flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 p-2" />
               </div>
-              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500 dark:text-neutral-500 ">
+              <h3 className="hidden md:block text-lg md:pl-20 md:text-5xl font-bold text-neutral-500 dark:text-neutral-500 ">
                 {item.title}
               </h3>
             </div>
@@ -69,7 +69,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
                         key={imgIndex}
                         src={image.imageUrl || "/placeholder.svg"}
                         alt={`Timeline image ${imgIndex + 1}`}
-                        className="w-24 h-24 object-cover rounded-md"
+                        className="w-64 h-64 object-cover rounded-md"
                       />
                     ))}
                   </div>

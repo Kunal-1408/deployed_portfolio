@@ -33,15 +33,15 @@ export const Footerimpli: React.FC = () => {
             {/* Account section */}
             <div>
               <h3 className="text-base font-medium mb-2">QUICK LINKS</h3>
-              <ul className="space-y-1 text-sm">
-                <li>
+              <ul className="space-y-4 text-sm">
+                {/* <li>
                   <Link href="/" className="text-gray-600 hover:text-orange-500">
                     Works
                   </Link>
-                </li>
+                </li> */}
                 <li>
-                  <Link href="/About" className="text-gray-600 hover:text-orange-500">
-                    About
+                  <Link href="/AboutUs" className="text-gray-600 hover:text-orange-500">
+                    About Us
                   </Link>
                 </li>
                 <li>
@@ -50,7 +50,7 @@ export const Footerimpli: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/Privacy" className="text-gray-600 hover:text-orange-500">
+                  <Link href="/TnC" className="text-gray-600 hover:text-orange-500">
                     Terms and Conditions
                   </Link>
                 </li>
@@ -62,9 +62,9 @@ export const Footerimpli: React.FC = () => {
               <h3 className="text-base font-medium mb-2">CONTACT</h3>
               <ul className="space-y-1 text-sm">
                 <li>
-                  <p className="text-gray-600 ">
+                  <Link href="tel:+91-9999197095" className="text-gray-600 ">
                     Phone: <br /> <span className="hover:text-orange-500">+91-9999197095</span>
-                  </p>
+                  </Link>
                 </li>
                 <li>
                   <Link href="mailto:hello@quitegood.co" className="text-gray-600 ">
