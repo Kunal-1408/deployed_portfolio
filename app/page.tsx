@@ -78,7 +78,6 @@ export default function Home() {
       </h2>
       <div className="w-full mx-auto px-4 md:px-16 py-8">
         <div className="flex flex-col md:flex-row md:items-stretch relative mb-12">
-          {/* First Location */}
           <div className="flex-1 rounded-xl shadow-lg overflow-hidden border border-gray-100 bg-white hover:shadow-xl transition-all duration-300 mb-8 md:mb-0 transform hover:-translate-y-1">
             <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100 text-center">
               <h3 className="font-semibold text-lg md:text-xl">Delhi </h3>

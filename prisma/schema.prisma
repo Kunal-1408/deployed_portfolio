@@ -13,11 +13,7 @@ type BrandStats {
   reach        String?
 }
 
-type SocialStats{
-  impression    String?
-  interactions  String?
-  reach         String? 
-}
+
 
 type TextsClients {
   logoUrl String
@@ -270,34 +266,38 @@ type Campaign {
 }
 
 model Social {
-  id                String              @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String?
+  clientName  String?
   
-  // Basic Information
-  title             String
-  description       String
-  clientName        String?
+  // New flexible sections structure (stored as JSON)
+  sections    Json?    @default("[]")
   
-  // Sections using embedded types
-  logoSection       LogoSection
-  bannerSection     BannerSection
-  socialMediaSection SocialMediaSection
-  analyticsSection  AnalyticsSection?
-  campaignSection   CampaignSection?
+  // Tags for filtering and categorization
+  tags        String[] @default([])
   
-  // Additional metadata
-  tags              String[]
-  archive           Boolean             @default(false)
-  highlighted       Boolean             @default(false)
+  // Status flags
+  archive     Boolean  @default(false)
+  highlighted Boolean  @default(false)
   
   // Legacy fields for backward compatibility
-  Brand             String?
-  Description       String?
-  Logo              String?
-  URL               String[]
-  banner            String?
-  Tags              String[]
+  Brand       String?
+  Description String?
+  Logo        String?
+  URL         String[] @default([])
+  banner      String?
+  
+  // Legacy section fields (can be gradually phased out)
+  logoSection       Json? @default("{}")
+  bannerSection     Json? @default("{}")
+  socialMediaSection Json? @default("{}")
+  analyticsSection  Json? @default("{}")
+  campaignSection   Json? @default("{}")
+  
+  @@map("social")
 }
 
 model texts {
@@ -369,28 +369,18 @@ type GoodiesSection {
 }
 
 model Branding {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  
-  // Basic Information
-  title         String
-  description   String
-  clientName    String?
-  status        ProjectStatus  @default(DRAFT)
-  
-  // Sections using embedded types
-  logoSection   LogoSection
-  bannerSection BannerSection
-  standeeSection StandeeSection?
-  cardSection   CardSection?
-  goodiesSection GoodiesSection?
-  
-  // Additional metadata
-  tags          String[]
-  archive       Boolean        @default(false)
-  highlighted   Boolean        @default(false)
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  clientName  String?
+  sections    Json      // Store sections as a JSON field
+  tags        String[]
+  archive     Boolean   @default(false)
+  highlighted Boolean   @default(false)
+  createdAt   String
+  updatedAt   String
 }
+
 
 enum ProjectStatus {
   DRAFT

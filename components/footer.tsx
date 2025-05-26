@@ -54,6 +54,11 @@ export const Footerimpli: React.FC = () => {
                     Terms and Conditions
                   </Link>
                 </li>
+                <li>
+                  <Link href="/VideoPortfolio" className="text-gray-600 hover:text-orange-500">
+                    Video Portfolio
+                  </Link>
+                </li>
               </ul>
             </div>
 

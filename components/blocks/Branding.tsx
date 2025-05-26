@@ -5,29 +5,20 @@ import { useId, useState } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 
-interface LogoSection {
-  logo: string
-  description: string
+// Updated interface for dynamic sections
+interface Asset {
+  id: string
+  url: string
+  name: string
+  type: string
 }
 
-interface BannerSection {
+interface Section {
+  id: string
+  type: string
+  title: string
   description: string
-  banners: string[]
-}
-
-interface StandeeSection {
-  description: string
-  standees: string[]
-}
-
-interface CardSection {
-  description: string
-  card: string[] // Will contain exactly 2 strings [front, back]
-}
-
-interface GoodiesSection {
-  description: string
-  goodies: string[]
+  assets: Asset[]
 }
 
 interface BrandingProject {
@@ -35,11 +26,7 @@ interface BrandingProject {
   title?: string
   description?: string
   clientName?: string
-  logoSection?: LogoSection
-  bannerSection?: BannerSection
-  standeeSection?: StandeeSection
-  cardSection?: CardSection
-  goodiesSection?: GoodiesSection
+  sections?: Section[]
   tags: string[]
   archive?: boolean
   highlighted: boolean
@@ -57,11 +44,54 @@ interface BrandingProject {
   Tags?: string[]
   Status?: string
   Images?: string | null
+
+  // Legacy section fields for backward compatibility
+  logoSection?: {
+    logo: string
+    description: string
+  }
+  bannerSection?: {
+    description: string
+    banners: string[]
+  }
+  standeeSection?: {
+    description: string
+    standees: string[]
+  }
+  cardSection?: {
+    description: string
+    card: string[]
+  }
+  goodiesSection?: {
+    description: string
+    goodies: string[]
+  }
 }
 
 interface BrandingProjectsProps {
   projects: BrandingProject[]
   filterTags?: string[]
+}
+
+// Helper function to get image URL from asset or legacy fields
+const getImageUrl = (project: BrandingProject, type: "logo" | "banner"): string => {
+  // Try to get from new sections structure first
+  if (project.sections && Array.isArray(project.sections)) {
+    const section = project.sections.find((s) => s.type === (type === "logo" ? "logo" : "banner"))
+    if (section && section.assets && section.assets.length > 0) {
+      const imageAsset = section.assets.find(
+        (asset) => asset.type === "image" || asset.url.match(/\.(jpeg|jpg|gif|png|svg)$/i),
+      )
+      if (imageAsset) return imageAsset.url
+    }
+  }
+
+  // Fall back to legacy fields
+  if (type === "logo") {
+    return project.logoSection?.logo || project.Logo || "/placeholder.svg"
+  } else {
+    return project.bannerSection?.banners?.[0] || project.banner || project.Images || "/placeholder.svg"
+  }
 }
 
 export default function BrandingProjects({ projects, filterTags = [] }: BrandingProjectsProps) {
@@ -74,8 +104,8 @@ export default function BrandingProjects({ projects, filterTags = [] }: Branding
     return {
       title: project.title || project.Brand || "",
       description: project.description || project.Description || "",
-      logo: project.logoSection?.logo || project.Logo || "/placeholder.svg",
-      banner: project.bannerSection?.banners?.[0] || project.banner || project.Images || "/placeholder.svg",
+      logo: getImageUrl(project, "logo"),
+      banner: getImageUrl(project, "banner"),
       tags: [...(project.tags || []), ...(project.Tags || [])],
       stats: project.Stats || { impression: "N/A", interactions: "N/A", reach: "N/A" },
     }
